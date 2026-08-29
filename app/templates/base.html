@@ -1,0 +1,63 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ManiaGeek — Arte & Produtos Autorais Geek</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <link rel="icon" href="logo.png" type="image/png">
+</head>
+<body>
+
+  <!-- BARRA DE ANÚNCIO SUPERIOR -->
+  <div class="top-bar">
+    <span>Arte geek autoral & exclusiva &bull; embalagem especial para todo o Brasil | <strong>Frete grátis acima de R$ 199</strong></span>
+  </div>
+
+  <!-- NAVEGAÇÃO -->
+  <nav>
+    <a href="index.html" class="nav-brand">
+      <img src="gato geek.webp" alt="ManiaGeek Logo" class="logo" onerror="this.style.display='none'">
+    </a>
+    <ul>
+      <li><a href="index.html" class="nav-active">Início</a></li>
+      <li><a href="produtos.html">Produtos</a></li>
+      <li><a href="contato.html">Contato</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-cart" onclick="abrirCarrinho()" aria-label="Abrir Carrinho">
+        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span>Carrinho</span>
+        <span class="cart-badge" id="cart-count">0</span>
+      </button>
+    </div>
+  </nav>
+
+{% block content %}
+{% endblock content %}
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-content">
+      <div class="footer-info">
+        <p>&copy; 2026 ManiaGeek. Todos os direitos reservados.</p>
+      </div>
+      <div class="social-links">
+        <a href="https://www.instagram.com/maniageek.br/" target="_blank">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          <span>@maniageek.br</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

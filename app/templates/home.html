@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  <!-- BANNER / CARROSSEL HERO -->
+  <div class="hero-carousel-container" id="hero-carousel">
+    <div class="carousel">
+      <button class="carousel-btn prev" id="btn-prev" aria-label="Slide anterior">
+        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="carousel-btn next" id="btn-next" aria-label="Próximo slide">
+        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+
+      <div class="carousel-slides" id="carousel-slides">
+
+        <!-- Slide 1 -->
+        <div class="slide">
+          <div class="slide-content">
+            <span class="eyebrow">Coleção autoral em destaque</span>
+            <h1 class="slide-title">Coleção Frankenstein, por <em>Livia Forasteiro</em></h1>
+            <p class="slide-desc">Uma releitura artística em homenagem a Mary Shelley. Canecas e colecionáveis com ilustrações autorais únicas, feitas para durar.</p>
+            <div class="slide-btns">
+              <a href="produtos.html" class="btn-primary">Explorar coleção</a>
+              <a href="produtos.html" class="btn-outline">Ver detalhes</a>
+            </div>
+          </div>
+          <div class="slide-media">
+            <div class="stamp-frame">
+              <span class="stamp-edition">Edição Nº 01</span>
+              <img src="can1.png" alt="Caneca Frankenstein">
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+          <div class="slide-content">
+            <span class="eyebrow">Homenagem cinematográfica</span>
+            <h1 class="slide-title">Coleção <em>Mães Icônicas</em> do audiovisual</h1>
+            <p class="slide-desc">Estampas e peças com design autoral homenageando as figuras mais memoráveis da cultura pop.</p>
+            <div class="slide-btns">
+              <a href="produtos.html" class="btn-primary">Ver produtos</a>
+            </div>
+          </div>
+          <div class="slide-media">
+            <div class="stamp-frame">
+              <span class="stamp-edition">Edição Nº 02</span>
+              <img src="can4.png" alt="Coleção Mães">
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+          <div class="slide-content">
+            <span class="eyebrow">Oferta especial</span>
+            <h1 class="slide-title">Frete grátis para <em>todo o Brasil</em></h1>
+            <p class="slide-desc">Aproveite as condições de envio para renovar sua coleção de canecas e itens autorais neste mês.</p>
+            <div class="slide-btns">
+              <a href="produtos.html" class="btn-primary">Aproveitar agora</a>
+            </div>
+          </div>
+          <div class="slide-media">
+            <div class="stamp-frame">
+              <span class="stamp-edition">Frete grátis</span>
+              <img src="gato geek.webp" alt="Produtos Geek">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="carousel-dots" id="carousel-dots">
+        <span class="dot active" data-slide="0"></span>
+        <span class="dot" data-slide="1"></span>
+        <span class="dot" data-slide="2"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- POR QUE A MANIA GEEK -->
+  <section class="section-padding">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 0-10 10c0 5.523 4.477 10 10 10a2.5 2.5 0 0 0 2.5-2.5c0-.62-.23-1.19-.61-1.63a2.49 2.49 0 0 1-.64-1.62c0-1.38 1.12-2.5 2.5-2.5h1.75C19.53 13.75 22 11.28 22 8.25A6.25 6.25 0 0 0 15.75 2H12z"/><circle cx="7.5" cy="8.5" r="1.5"/><circle cx="11.5" cy="6.5" r="1.5"/><circle cx="15.5" cy="8.5" r="1.5"/><circle cx="7.5" cy="13.5" r="1.5"/></svg>
+          </div>
+          <h3>Ilustrações 100% autorais</h3>
+          <p>Artes criadas por artistas independentes, sem clichês ou estampas genéricas.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Acabamento premium</h3>
+          <p>Materiais de altíssima durabilidade e cuidado artesanal em cada detalhe.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <h3>Embalagem para colecionadores</h3>
+          <p>Envio seguro e preparado como um presente especial direto para sua casa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESTAQUES DA LOJA -->
+  <section class="section-padding" style="padding-top: 0;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-header-text">
+          <span class="eyebrow">Catálogo</span>
+          <h2>Coleções autorais em alta</h2>
+          <p>Peças exclusivas ilustradas com foco em cultura pop, literatura e cinema.</p>
+        </div>
+        <a href="produtos.html" class="section-link">Ver catálogo completo &rarr;</a>
+      </div>
+
+      <div class="products-grid">
+        <div class="product-card" onclick="window.location.href='produtos.html'">
+          <div class="product-thumb">
+            <span class="product-badge">Coleção Frankenstein</span>
+            <img src="can1.png" alt="Caneca Frankenstein">
+          </div>
+          <div class="product-info">
+            <h3 class="product-title">Caneca Ilustrada Frankenstein</h3>
+            <span class="product-author">Arte por Livia Forasteiro</span>
+            <div class="product-footer">
+              <span class="product-price">R$ 59,90</span>
+              <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('Caneca Frankenstein', 59.90)">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card" onclick="window.location.href='produtos.html'">
+          <div class="product-thumb">
+            <span class="product-badge">Edição especial</span>
+            <img src="can2.png" alt="Caneca Mary Shelley">
+          </div>
+          <div class="product-info">
+            <h3 class="product-title">Caneca Elementos</h3>
+            <span class="product-author">Arte por Livia Forasteiro</span>
+            <div class="product-footer">
+              <span class="product-price">R$ 59,90</span>
+              <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('Caneca Mary Shelley', 59.90)">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card" onclick="window.location.href='produtos.html'">
+          <div class="product-thumb">
+            <span class="product-badge">Dia das Mães</span>
+            <img src="can5.png" alt="Caneca Mães Audiovisual">
+          </div>
+          <div class="product-info">
+            <h3 class="product-title">Caneca Morticia Addams</h3>
+            <span class="product-author">Arte por Livia Forasteiro</span>
+            <div class="product-footer">
+              <span class="product-price">R$ 54,90</span>
+              <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('Caneca Mães Audiovisual', 54.90)">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  <main class="container">
+    <section class="contato-hero">
+      <span class="eyebrow">Fale com a gente</span>
+      <h1>Como podemos ajudar?</h1>
+      <p>Dúvidas sobre pedidos, coleções autorais ou parcerias? Entre em contato com a equipe Mania Geek.</p>
+    </section>
+
+    <div class="contato-layout">
+      <!-- CARTÕES DE INFORMAÇÃO -->
+      <div class="contato-cards">
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          </div>
+          <div class="info-content">
+            <h4>E-mail direto</h4>
+            <a href="mailto:contato@maniageek.com.br">contato@maniageek.com.br</a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          </div>
+          <div class="info-content">
+            <h4>Atendimento via WhatsApp</h4>
+            <a href="https://wa.me/5521999990000" target="_blank">(21) 99999-0000</a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          </div>
+          <div class="info-content">
+            <h4>Ateliê & produção</h4>
+            <p>Rio de Janeiro, RJ — Brasil</p>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="info-content">
+            <h4>Horário de atendimento</h4>
+            <p>Segunda a sexta: 09h às 18h</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULÁRIO ESTRUTURADO -->
+      <div class="form-box">
+        <h3>Envie uma mensagem</h3>
+        <p>Respondemos em até 1 dia útil.</p>
+        <form id="contatoForm" onsubmit="enviarContato(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="f-nome">Seu nome</label>
+              <input id="f-nome" type="text" placeholder="Ex: Maria Silva" required />
+            </div>
+
+            <div class="form-group">
+              <label for="f-email">Seu e-mail</label>
+              <input id="f-email" type="email" placeholder="nome@exemplo.com" required />
+            </div>
+
+            <div class="form-group full">
+              <label for="f-assunto">Assunto principal</label>
+              <select id="f-assunto">
+                <option value="duvida">Dúvidas sobre pedido</option>
+                <option value="autoral">Informações sobre artes e coleções autorais</option>
+                <option value="troca">Trocas e devoluções</option>
+                <option value="parceria">Parcerias e imprensa</option>
+                <option value="parceria">Falhas técnicas</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="f-msg">Sua mensagem</label>
+              <textarea id="f-msg" placeholder="Como podemos te ajudar hoje?" required></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" style="width: 100%; margin-top: 8px;">Enviar mensagem</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SEÇÃO FAQ -->
+    <section class="faq-section">
+      <h3 class="faq-title">Perguntas frequentes</h3>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">
+          <span>Como funciona o envio das peças autorais?</span>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          Todas as peças são embaladas individualmente com proteção especial para cerâmica e enviadas via Correios/transportadora com código de rastreamento por e-mail.
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">
+          <span>As canecas autorais podem ir ao micro-ondas?</span>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          Sim! Nossas canecas possuem estampa de alta durabilidade resinada, resistente a micro-ondas e lava-louças, sem desbotar a arte.
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-question">
+          <span>Qual o prazo para trocas ou devoluções?</span>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          Você tem até 7 dias corridos após o recebimento para solicitar troca ou devolução sem custos, em caso de defeito ou insatisfação.
+        </div>
+      </div>
+    </section>
+  </main>
+  
+{% endblock %}

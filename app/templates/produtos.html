@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  <div class="container section-padding">
+    <div class="section-header">
+      <div class="section-header-text">
+        <span class="eyebrow">Coleção autoral</span>
+        <h2>Canecas ilustradas</h2>
+        <p>Peças exclusivas ilustradas por Livia Forasteiro, com foco em cultura pop, literatura e cinema.</p>
+      </div>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-thumb">
+          <span class="product-badge">Coleção Frankenstein</span>
+          <img src="can1.png" alt="Caneca Frankenstein">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Caneca Ilustrada Frankenstein</h3>
+          <span class="product-author">Arte por Livia Forasteiro</span>
+          <div class="product-footer">
+            <span class="product-price">R$ 59,90</span>
+            <button class="btn-add-cart" onclick="adicionarAoCarrinho('Caneca Frankenstein', 59.90)">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-thumb">
+          <span class="product-badge">Edição especial</span>
+          <img src="can2.png" alt="Caneca Elementos">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Caneca Elementos</h3>
+          <span class="product-author">Arte por Livia Forasteiro</span>
+          <div class="product-footer">
+            <span class="product-price">R$ 59,90</span>
+            <button class="btn-add-cart" onclick="adicionarAoCarrinho('Caneca Elementos', 59.90)">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLEÇÃO DIA DAS MÃES -->
+    <div class="section-header" style="margin-top: 72px;">
+      <div class="section-header-text">
+        <span class="eyebrow">Série limitada</span>
+        <h2>Coleção Dia das Mães</h2>
+        <p>Estampas autorais homenageando as figuras maternas mais marcantes e icônicas da cultura pop e do cinema.</p>
+      </div>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-thumb">
+          <span class="product-badge">Dia das Mães</span>
+          <img src="can4.png" alt="Caneca Mães Icônicas">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Caneca Mães Icônicas do Audiovisual</h3>
+          <span class="product-author">Arte por Livia Forasteiro</span>
+          <div class="product-footer">
+            <span class="product-price">R$ 54,90</span>
+            <button class="btn-add-cart" onclick="adicionarAoCarrinho('Caneca Mães Icônicas', 54.90)">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-thumb">
+          <span class="product-badge">Dia das Mães</span>
+          <img src="can5.png" alt="Caneca Morticia Addams">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Caneca Morticia Addams</h3>
+          <span class="product-author">Arte por Livia Forasteiro</span>
+          <div class="product-footer">
+            <span class="product-price">R$ 54,90</span>
+            <button class="btn-add-cart" onclick="adicionarAoCarrinho('Caneca Morticia Addams', 54.90)">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-content">
+      <div class="footer-info">
+        <p>&copy; 2026 ManiaGeek. Todos os direitos reservados.</p>
+      </div>
+      <div class="social-links">
+        <a href="https://www.instagram.com/maniageek.br/" target="_blank">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          <span>@maniageek.br</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
+
+{% endblock %}
