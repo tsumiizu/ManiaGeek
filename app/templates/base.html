@@ -12,22 +12,23 @@
 </head>
 <body>
 
-  <!-- BARRA DE ANÚNCIO SUPERIOR -->
-  <div class="top-bar">
-    <span>Arte geek autoral & exclusiva &bull; embalagem especial para todo o Brasil | <strong>Frete grátis acima de R$ 199</strong></span>
-  </div>
-
   <!-- NAVEGAÇÃO -->
-  <nav>
+<nav>
     <a href="index.html" class="nav-brand">
-      <img src="gato geek.webp" alt="ManiaGeek Logo" class="logo" onerror="this.style.display='none'">
+      <img src="{% static 'media/logo.png' %}" alt="ManiaGeek Logo" class="logo" onerror="this.style.display='none'">
     </a>
+    
     <ul>
       <li><a href="index.html" class="nav-active">Início</a></li>
       <li><a href="produtos.html">Produtos</a></li>
       <li><a href="contato.html">Contato</a></li>
     </ul>
+    
     <div class="nav-actions">
+      <div class="search-box">
+        <input type="text" placeholder="Buscar produtos..." class="nav-search-input">
+      </div>
+
       <button class="nav-cart" onclick="abrirCarrinho()" aria-label="Abrir Carrinho">
         <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="9" cy="21" r="1"></circle>
@@ -39,7 +40,6 @@
       </button>
     </div>
   </nav>
-
 {% block content %}
 {% endblock content %}
 

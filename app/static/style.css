@@ -116,7 +116,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 5%;
+    padding: 16px 2%;
     background: rgba(16, 7, 43, 0.92);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border-color);
@@ -125,12 +125,12 @@
     z-index: 1000;
   }
 
-  .nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-  }
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
 
   .logo {
     height: 40px;
@@ -152,12 +152,15 @@
     text-shadow: var(--glow-cyan);
   }
 
-  nav ul {
-    list-style: none;
-    display: flex;
-    gap: 34px;
-    align-items: center;
-  }
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 34px; 
+  align-items: center;
+  margin-left: 32px; 
+  margin-right: auto; 
+  margin-top: 6px; 
+}
 
   nav ul a {
     color: var(--text-secondary);
@@ -191,12 +194,30 @@
 
   nav ul a.nav-active::after { right: 0; }
 
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+/* ── BARRA DE PESQUISA ── */
+.search-box {
+  position: relative;
+}
+.nav-search-input {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  width: 220px;
+  transition: all 0.3s ease;
+}
+.nav-search-input::placeholder {
+  color: var(--text-muted);
+}
   .nav-cart {
     background: transparent;
     color: var(--white);
@@ -953,7 +974,7 @@
   }
 .stamp-frame {
   position: relative;
-  padding: 16px;
+  padding: 0px;
   background: var(--bg-main);
   
   
@@ -990,6 +1011,7 @@
   transform: rotate(6deg); 
   letter-spacing: 0.5px; 
   box-shadow: var(--glow-yellow); 
+  z-index: 10;
 }
 /* Gatinho como selo no canto inferior direito da moldura */
 .stamp-frame::after {
