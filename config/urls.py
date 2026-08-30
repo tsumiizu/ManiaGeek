@@ -23,5 +23,4 @@ from django.conf import settings #importações para imagens
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include ('app.urls')),
-    path('')
 ]
