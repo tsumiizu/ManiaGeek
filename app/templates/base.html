@@ -14,15 +14,14 @@
 
   <!-- NAVEGAÇÃO -->
 <nav>
-    <a href="index.html" class="nav-brand">
+    <a href="{% url 'home' %}" class="nav-brand">
       <img src="{% static 'media/logo.png' %}" alt="ManiaGeek Logo" class="logo" onerror="this.style.display='none'">
     </a>
     
-    <ul>
-      <li><a href="index.html" class="nav-active">Início</a></li>
-      <li><a href="produtos.html">Produtos</a></li>
-      <li><a href="contato.html">Contato</a></li>
-    </ul>
+  <ul>
+    <a href="{% url 'home' %}" class="nav-active">Início</a>
+    <a href="{% url 'produtos' %}">Produtos</a>
+  </ul>
     
     <div class="nav-actions">
       <div class="search-box">
