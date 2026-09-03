@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 # Tirar isso quando for usar o cloudinary
-from django.core.validators import FileExtensionValidator
+from cloudinary.models import CloudinaryField
 import os
 from django.utils.text import slugify
 
@@ -19,7 +19,6 @@ def upload_to(instance, filename):
         produto = instance
         is_imagem = False
     nome_produto = slugify(produto.nome)
-
     if is_imagem:
         if instance.pk:
             numero = instance.ordem
@@ -67,9 +66,11 @@ class Produto(models.Model):
     descricao = models.TextField()
     # depois troque para cloudinary field
     tipos_video = ['mp4', 'mov', 'avi', 'mkv', 'webm']
-    video = models.FileField(
-        upload_to=upload_to,
-        validators=[FileExtensionValidator(allowed_extensions=tipos_video)]
+    video = CloudinaryField( 
+        resource_type="video",
+        folder='videos_produto/',
+        blank=True,
+        null=True,
     )
     def __str__(self):
         return self.nome
@@ -81,7 +82,13 @@ class Imagem(models.Model):
         on_delete=models.CASCADE,
         related_name='Imagem'
     )
-    imagem = models.ImageField(upload_to=upload_to)
+    imagem = CloudinaryField( 
+            resource_type="image",
+            folder='imagens_produto/',
+            default='samples/man-portrait',
+            blank=False,
+            null=False
+        )
     capa = models.BooleanField(default=False)
     alt_text = models.CharField(max_length=255, null=False, blank=False)
     def clean(self):
@@ -104,7 +111,12 @@ class Imagem(models.Model):
 class Anuncio(models.Model):
     titulo = models.CharField(max_length=200, null=False, blank=False)
     descricao = models.TextField()
-    imagem = models.ImageField(upload_to='postagens/')
+    imagem = CloudinaryField( 
+            resource_type="image",
+            folder='postagens/',
+            blank=True,
+            null=True
+        )
 
 # O models de review vai ter o foreign key dos produtos, mas pode ser bom pra reutilizar para os reviews da loja em geral... pode ter 2 campos
 # Ou pode ter algo mais robusto como reviews inteligentes interligando o email 

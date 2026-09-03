@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import random
-# from cloudinary.models import CloudinaryField
+from cloudinary.models import CloudinaryField
 # from cloudinary.utils import cloudinary_url
 
 # DEFAULT_AVATARS = [
@@ -29,8 +29,7 @@ class Usuario(AbstractUser):
     telefone = models.CharField(max_length=15, blank=True, null=True)
     display_name = models.CharField(max_length=50, unique=True, blank=False, null=False)
     # Da pra fazer a foto ser prefedefinida como gatinhos
-    # foto = models.ImageField(upload_to='media/perfis/', blank=True, null=True)
-    # foto = CloudinaryField('image', folder='perfis/', null=True, blank=True)
+    foto = CloudinaryField('image', folder='perfis/', default='samples/man-portrait', null=True, blank=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     # def save(self, *args, **kwargs):
@@ -39,16 +38,4 @@ class Usuario(AbstractUser):
     #     elif self.foto == 'perfis/default05':
     #         self.foto = get_random_avatar()   
     #     super().save(*args, **kwargs)
-    # @property
-    # def foto_url(self):
-    #     if not self.foto:
-    #         url, _ = cloudinary_url(get_random_avatar(), secure=True)
-    #         return url
-    #     if hasattr(self.foto, 'url') and self.foto.url:
-    #         return self.foto.url
-    #     foto_str = str(self.foto)
-    #     if foto_str == 'perfis/default05':
-    #         url, _ = cloudinary_url(get_random_avatar(), secure=True)
-    #         return url
-    #     url, _ = cloudinary_url(foto_str, secure=True)
-    #     return url
+
