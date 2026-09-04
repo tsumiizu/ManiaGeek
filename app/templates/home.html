@@ -1,204 +1,109 @@
 {% extends 'base.html' %}
 {% block content %}
 
-  <!-- BANNER / CARROSSEL HERO -->
+<!-- BANNER / CARROSSEL HERO -->
   <div class="hero-carousel-container" id="hero-carousel">
-        <!-- Função do gatinho do background ESPECIFICAMENTE do carrosel -->
     <div class="carousel" style="--cat-bg: url('/static/media/gato_geek.webp');">
-    <!-- termina aq lol -->
       <button class="carousel-btn prev" id="btn-prev" aria-label="Slide anterior">
-        <img src="static/media/seta.png" alt="Anterior" class="custom-arrow flipped">
+        <img src="/static/media/seta.png" alt="Anterior" class="custom-arrow flipped">
       </button>
-
-      <!-- Botão Próximo (Direita) -->
       <button class="carousel-btn next" id="btn-next" aria-label="Próximo slide">
-        <img src="static/media/seta.png" alt="Próximo" class="custom-arrow">
+        <img src="/static/media/seta.png" alt="Próximo" class="custom-arrow">
       </button>
-
       <div class="carousel-slides" id="carousel-slides">
-        {% if slides %}
-          <!-- DADOS REAIS DO BACK-END -->
-          {% for slide in slides %}
+        <!-- DADOS DINÂMICOS DOS PRODUTOS EM DESTAQUE -->
+        {% for produto in produtos_destaque %}
             <div class="slide">
               <div class="slide-content">
-                <span class="eyebrow">{{ slide.categoria }}</span>
-                <h1 class="slide-title">{{ slide.titulo|safe }}</h1>
-                <p class="slide-desc">{{ slide.descricao }}</p>
+                <span class="eyebrow">{{ produto.get_produto_tipo_display }}</span>
+                <h1 class="slide-title">{{ produto.nome }}</h1>
+                <p class="slide-desc">{{ produto.descricao|truncatewords:20 }}</p>
                 <div class="slide-btns">
-                  <a href="{% url 'produtos' %}" class="btn-primary">{{ slide.texto_botao }}</a>
-                  {% if slide.tem_detalhes %}
-                    <a href="produtos.html" class="btn-outline">Ver detalhes</a>
-                  {% endif %}
+                  <a href="#" class="btn-primary">Ver produto por R$ {{ produto.preco }}</a>
                 </div>
               </div>
               <div class="slide-media">
                 <div class="stamp-frame">
-                  <span class="stamp-edition">{{ slide.tag }}</span>
-                  <img src="{{ slide.imagem.url }}" alt="{{ slide.titulo_limpo }}">
+                  <span class="stamp-edition">Destaque</span>
+                  <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
                 </div>
               </div>
             </div>
-          {% endfor %}
-        
-        {% else %}
-          <!-- DADOS DE TESTE (MOSTRADOS ENQUANTO NÃO HÁ BACK-END) -->
-          <!-- Slide 1 -->
+        {% empty %}
           <div class="slide">
             <div class="slide-content">
               <span class="eyebrow">Coleção autoral em destaque</span>
-              <h1 class="slide-title">Coleção Frankenstein, por <em>Gooner Forasteiro</em></h1>
-              <p class="slide-desc">Uma releitura artística em homenagem a Mary Shelley. Canecas e colecionáveis com ilustrações autorais únicas, feitas para durar.</p>
+              <h1 class="slide-title">Mania Geek Store</h1>
+              <p class="slide-desc">Confira nossos produtos autorais em destaque na loja.</p>
               <div class="slide-btns">
-                <a href="{% url 'produtos' %}" class="btn-primary">Explorar coleção</a>
-                <a href="produtos.html" class="btn-outline">Ver detalhes</a>
+                <a href="#produtos" class="btn-primary">Explorar catálogo</a>
               </div>
             </div>
             <div class="slide-media">
               <div class="stamp-frame">
                 <span class="stamp-edition">Edição Nº 01</span>
-                <img src="static/media/teste1.jpg" alt="Caneca Frankenstein">
+                <img src="/static/media/teste1.jpg" alt="Mania Geek">
               </div>
             </div>
           </div>
-
-          <!-- Slide 2 -->
-          <div class="slide">
-            <div class="slide-content">
-              <span class="eyebrow">Homenagem cinematográfica</span>
-              <h1 class="slide-title">Coleção <em>Mães Icônicas</em> do audiovisual</h1>
-              <p class="slide-desc">Estampas e peças com design autoral homenageando as figuras mais memoráveis da cultura pop.</p>
-              <div class="slide-btns">
-                <a href="{% url 'produtos' %}" class="btn-primary">Ver produtos</a>
-              </div>
-            </div>
-            <div class="slide-media">
-              <div class="stamp-frame">
-                <span class="stamp-edition">Edição Nº 02</span>
-                <img src="can4.png" alt="Coleção Mães">
-              </div>
-            </div>
-          </div>
-
-          <!-- Slide 3 -->
-          <div class="slide">
-            <div class="slide-content">
-              <span class="eyebrow">Oferta especial</span>
-              <h1 class="slide-title">Frete grátis para <em>todo o Brasil</em></h1>
-              <p class="slide-desc">Aproveite as condições de envio para renovar sua coleção de canecas e itens autorais neste mês.</p>
-              <div class="slide-btns">
-                <a href="produtos.html" class="btn-primary">Aproveitar agora</a>
-              </div>
-            </div>
-            <div class="slide-media">
-              <div class="stamp-frame">
-                <span class="stamp-edition">Frete grátis</span>
-                <img src="gato geek.webp" alt="Produtos Geek">
-              </div>
-            </div>
-          </div>
-        {% endif %}
-
+        {% endfor %}
       </div>
 
       <div class="carousel-dots" id="carousel-dots">
-        {% if slides %}
-          <!-- BOLINHAS DINÂMICAS -->
-          {% for slide in slides %}
+        {% for produto in produtos %}
+          {% if produto.destaque %}
             <span class="dot {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></span>
-          {% endfor %}
-        {% else %}
-          <!-- BOLINHAS DE TESTE -->
+          {% endif %}
+        {% empty %}
           <span class="dot active" data-slide="0"></span>
-          <span class="dot" data-slide="1"></span>
-          <span class="dot" data-slide="2"></span>
-        {% endif %}
+        {% endfor %}
       </div>
+
     </div>
   </div>
     
 
-  <!-- DESTAQUES DA LOJA -->
-  <section class="section-padding" style="padding-top: 0;">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-header-text">
-          <span class="eyebrow">Catálogo</span>
-          <h2>Coleções autorais em alta</h2>
-          <p>Peças exclusivas ilustradas com foco em cultura pop, literatura e cinema.</p>
-        </div>
-        <a href="produtos.html" class="section-link">Ver catálogo completo &rarr;</a>
-      </div>
-
-      <div class="products-grid">
-        
-        {% if produtos_destaque %}
-          <!-- DADOS REAIS DO BACK-END -->
-          {% for produto in produtos_destaque %}
-            <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' produto.id %}'">
-              <div class="product-thumb">
-                <span class="product-badge">{{ produto.colecao }}</span>
-                <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
-              </div>
-              <div class="product-info">
-                <h3 class="product-title">{{ produto.nome }}</h3>
-                <span class="product-author">Arte por {{ produto.artista }}</span>
-                <div class="product-footer">
-                  <span class="product-price">R$ {{ produto.preco }}</span>
-                  <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('{{ produto.nome }}', {{ produto.preco }})">+ Adicionar</button>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-          
-        {% else %}
-          <!-- DADOS DE TESTE (MOSTRADOS ENQUANTO NÃO HÁ BACK-END) -->
-          <div class="product-card" onclick="window.location.href='produtos.html'">
-            <div class="product-thumb">
-              <span class="product-badge">Coleção Frankenstein</span>
-              <img src="can1.png" alt="Caneca Frankenstein">
-            </div>
-            <div class="product-info">
-              <h3 class="product-title">Caneca Ilustrada Frankenstein</h3>
-              <span class="product-author">Arte por Livia Forasteiro</span>
-              <div class="product-footer">
-                <span class="product-price">R$ 59,90</span>
-                <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('Caneca Frankenstein', 59.90)">+ Adicionar</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="product-card" onclick="window.location.href='produtos.html'">
-            <div class="product-thumb">
-              <span class="product-badge">Edição especial</span>
-              <img src="can2.png" alt="Caneca Mary Shelley">
-            </div>
-            <div class="product-info">
-              <h3 class="product-title">Caneca Elementos</h3>
-              <span class="product-author">Arte por Livia Forasteiro</span>
-              <div class="product-footer">
-                <span class="product-price">R$ 59,90</span>
-                <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('Caneca Mary Shelley', 59.90)">+ Adicionar</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="product-card" onclick="window.location.href='produtos.html'">
-            <div class="product-thumb">
-              <span class="product-badge">Dia das Mães</span>
-              <img src="can5.png" alt="Caneca Mães Audiovisual">
-            </div>
-            <div class="product-info">
-              <h3 class="product-title">Caneca Morticia Addams</h3>
-              <span class="product-author">Arte por Livia Forasteiro</span>
-              <div class="product-footer">
-                <span class="product-price">R$ 54,90</span>
-                <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('Caneca Mães Audiovisual', 54.90)">+ Adicionar</button>
-              </div>
-            </div>
-          </div>
-        {% endif %}
-        
-      </div>
+<!-- ── PRODUTOS ── -->
+<section id="produtos">
+  <div style="width:100%">
+    <div class="fade-in">
+      <div class="section-subtitle">Catálogo</div>
+      <h2 class="section-title">PRODUTOS INCRÍVEIS</h2>
+      <div class="section-line"></div>
     </div>
-  </section>
+    <div class="sobre-grid fade-in" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; margin-top: 30px;">
+      {% for produto in produtos %}
+        <div class="box" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">  
+          <!-- LÓGICA DE CAPA DA IMAGEM DO PRODUTO -->
+          <div style="position: relative; width: 100%; height: 220px; overflow: hidden; border-radius: 6px; margin-bottom: 15px; background: #0f172a;">
+            {% if produto.imagem_capa %}
+              <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% endif %}    
+            <span class="tag" style="position: absolute; top: 10px; right: 10px;">
+              {{ produto.get_produto_tipo_display }}
+            </span>
+          </div>
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
+              {{ produto.nome }}
+            </h3>
+            <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">
+              {{ produto.descricao }}
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #1e293b; padding-top: 15px; margin-top: auto;">
+            <span style="font-size: 1.25rem; font-weight: 700; color: #38bdf8;">
+              R$ {{ produto.preco }}
+            </span>
+            <a href="#" class="btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Ver Detalhes</a>
+          </div>
+        </div>
+      {% empty %}
+        <div class="box" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94a3b8;">
+          Nenhum produto cadastrado no momento.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 {% endblock %}

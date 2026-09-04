@@ -1,26 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from .forms import ProdutoForm, CategoriaForm
+from django.db.models import Prefetch
 
-def home_view(request):
-    slides = Anuncio.objects.all()[:3] 
-    produtos_destaque = Produto.objects.all()[:6]
-    for produto in produtos_destaque:
-        imagem_capa = produto.Imagem.filter(capa=True).first()
-        if imagem_capa and imagem_capa.imagem:
-            produto.url_capa = imagem_capa.imagem.url
-            produto.alt_capa = imagem_capa.alt_text
-        else:
-            produto.url_capa = '' 
-            produto.alt_capa = produto.nome
-        categoria = produto.categoria.first()
-        produto.nome_categoria = categoria.nome if categoria else produto.get_produto_tipo_display()
-    context = {
-        'slides': slides,
-        'produtos_destaque': produtos_destaque,
-    }
-    return render(request, 'home.html', context)    
+def quatro_view(request):
+    return render(request, '404.html')
 
+def home_view(request): 
+    produtos = Produto.objects.all().order_by('-id')
+    produtos_destaque= Produto.objects.filter(destaque=True)[:5]
+    return render(request, 'home.html', {'produtos': produtos, 'produtos_destaque': produtos_destaque})
 def produtos_view(request):
     return render(request, 'produtos.html')
 
