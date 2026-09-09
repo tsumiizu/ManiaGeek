@@ -3,58 +3,67 @@
 
 {% block content %}
 
+<!-- BANNER / CARROSSEL HERO -->
   <div class="hero-carousel-container" id="hero-carousel">
-    <div class="carousel" style="--cat-bg: url('{% static "media/gato_geek.webp" %}');">
-      
+    <div class="carousel" style="--cat-bg: url('/static/media/gato_geek.webp');">
       <button class="carousel-btn prev" id="btn-prev" aria-label="Slide anterior">
-        <img src="{% static 'media/seta.png' %}" alt="Anterior" class="custom-arrow flipped">
+        <img src="/static/media/seta.png" alt="Anterior" class="custom-arrow flipped">
       </button>
-
       <button class="carousel-btn next" id="btn-next" aria-label="Próximo slide">
-        <img src="{% static 'media/seta.png' %}" alt="Próximo" class="custom-arrow">
+        <img src="/static/media/seta.png" alt="Próximo" class="custom-arrow">
       </button>
-
       <div class="carousel-slides" id="carousel-slides">
-        {% for slide in slides %}
+        <!-- DADOS DINÂMICOS DOS PRODUTOS EM DESTAQUE -->
+        {% for produto in produtos_destaque %}
+            <div class="slide">
+              <div class="slide-content">
+                <span class="eyebrow">{{ produto.get_produto_tipo_display }}</span>
+                <h1 class="slide-title">{{ produto.nome }}</h1>
+                <p class="slide-desc">{{ produto.descricao|truncatewords:20 }}</p>
+                <div class="slide-btns">
+                  <a href="#" class="btn-primary">Ver produto por R$ {{ produto.preco }}</a>
+                </div>
+              </div>
+              <div class="slide-media">
+                <div class="stamp-frame">
+                  <span class="stamp-edition">Destaque</span>
+                  <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
+                </div>
+              </div>
+            </div>
+        {% empty %}
           <div class="slide">
             <div class="slide-content">
-              <span class="eyebrow">{{ slide.categoria }}</span>
-              <h1 class="slide-title">{{ slide.titulo|safe }}</h1>
-              <p class="slide-desc">{{ slide.descricao }}</p>
+              <span class="eyebrow">Coleção autoral em destaque</span>
+              <h1 class="slide-title">Mania Geek Store</h1>
+              <p class="slide-desc">Confira nossos produtos autorais em destaque na loja.</p>
               <div class="slide-btns">
-                <a href="{% url 'produtos' %}" class="btn-primary">{{ slide.texto_botao }}</a>
-                {% if slide.tem_detalhes %}
-                  <a href="{% url 'produtos' %}" class="btn-outline">Ver detalhes</a>
-                {% endif %}
+                <a href="#produtos" class="btn-primary">Explorar catálogo</a>
               </div>
             </div>
             <div class="slide-media">
               <div class="stamp-frame">
-                <span class="stamp-edition">{{ slide.tag }}</span>
-                {% if slide.imagem %}
-                  <img src="{{ slide.imagem.url }}" alt="{{ slide.titulo_limpo }}">
-                {% endif %}
+                <span class="stamp-edition">Edição Nº 01</span>
+                <img src="/static/media/teste1.jpg" alt="Mania Geek">
               </div>
-            </div>
-          </div>
-        {% empty %}
-          <div class="slide">
-            <div class="slide-content">
-              <h1 class="slide-title">Nenhum anúncio cadastrado</h1>
-              <p class="slide-desc">Acesse o painel do Django Admin para adicionar seus primeiros banners ao carrossel.</p>
             </div>
           </div>
         {% endfor %}
       </div>
 
       <div class="carousel-dots" id="carousel-dots">
-        {% for slide in slides %}
-          <span class="dot {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></span>
+        {% for produto in produtos %}
+          {% if produto.destaque %}
+            <span class="dot {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></span>
+          {% endif %}
+        {% empty %}
+          <span class="dot active" data-slide="0"></span>
         {% endfor %}
       </div>
+
     </div>
   </div>
-    
+  
   <section class="section-padding" style="padding-top: 0;">
     <div class="container">
       <div class="section-header">
@@ -67,20 +76,20 @@
       </div>
 
       <div class="products-grid">
-        {% for produto in produtos_destaque %}
-          <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' produto.id %}'">
+        {% for produto in produtos %}
+          <div class="product-card" onclick="window.location.href='#'">
             <div class="product-thumb">
-              <span class="product-badge">{{ produto.colecao }}</span>
-              {% if produto.imagem %}
-                <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
+              <span class="product-badge">{{ produto.get_produto_tipo_display }}</span>
+              {% if produto.imagem_capa %}
+                <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
               {% endif %}
             </div>
             <div class="product-info">
               <h3 class="product-title">{{ produto.nome }}</h3>
-              <span class="product-author">Arte por {{ produto.artista }}</span>
+              <span class="product-author">{{ produto.descricao }}</span>
               <div class="product-footer">
                 <span class="product-price">R$ {{ produto.preco }}</span>
-                <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">+ Adicionar</button>
+                <button class="btn-add-cart" onclick="event.stopPropagation();">Ver Detalhes</button>
               </div>
             </div>
           </div>
@@ -89,5 +98,6 @@
         {% endfor %}
       </div>
     </div>
-  </section>
+  </div>
+</section>
 {% endblock %}

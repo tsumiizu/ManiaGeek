@@ -3,33 +3,21 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from decimal import Decimal
-# Tirar isso quando for usar o cloudinary
 from cloudinary.models import CloudinaryField
-import os
+from cloudinary.utils import cloudinary_url
+import random
 from django.utils.text import slugify
 
-
-# Apagar isso depois
-def upload_to(instance, filename):
-    extensao = os.path.splitext(filename)[1].lower()
-    if hasattr(instance, 'produto'):
-        produto = instance.produto
-        is_imagem = True
-    else:
-        produto = instance
-        is_imagem = False
-    nome_produto = slugify(produto.nome)
-    if is_imagem:
-        if instance.pk:
-            numero = instance.ordem
-        else:
-            total = Imagem.objects.filter(produto=produto).count()
-            numero = total + 1
-        nome_arquivo = f"{nome_produto}-{numero}{extensao}"
-        return f"produtos/{nome_produto}/{nome_arquivo}"
-    else:
-        nome_arquivo = f"{nome_produto}{extensao}"
-        return f"produtos/{nome_produto}/{nome_arquivo}"
+DEFAULTS = [
+    'default08',
+    'default13',
+    'default18',
+    'default19',
+    'default14',
+    'default21',
+]
+def get_random_avatar():
+    return random.choice(DEFAULTS)
 
 class Endereco(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='enderecos')
@@ -65,6 +53,14 @@ class Produto(models.Model):
     preco = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
     descricao = models.TextField()
     # depois troque para cloudinary field
+    capa = CloudinaryField(
+        resource_type="image",
+        folder='capas_produto/',
+        blank=True,
+        null=True
+    )
+    alt_text_capa = models.CharField(max_length=255, default='imagem do produto', null=False, blank=False)
+    destaque = models.BooleanField(default=False)
     tipos_video = ['mp4', 'mov', 'avi', 'mkv', 'webm']
     video = CloudinaryField( 
         resource_type="video",
@@ -72,6 +68,31 @@ class Produto(models.Model):
         blank=True,
         null=True,
     )
+    def clean(self):
+        super().clean()
+        if self.destaque:
+            qs = Produto.objects.filter(destaque=True)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk) 
+            if qs.count() >= 5:
+                raise ValidationError({
+                    'destaque': 'Você já atingiu o limite de 5 produtos em destaque no carrossel. Remova alguns antes de adicionar outros'
+                })
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        if not self.pk and not self.capa:
+            self.capa = get_random_avatar()
+        super().save(*args, **kwargs)
+    @property
+    def imagem_capa(self):
+        if not self.capa:
+            url, _ = cloudinary_url(get_random_avatar(), secure=True)
+            return url
+        if hasattr(self.capa, 'url') and self.capa.url:
+            return self.capa.url
+        foto_str = str(self.capa)
+        url, _ = cloudinary_url(foto_str, secure=True)
+        return url
     def __str__(self):
         return self.nome
 
@@ -89,23 +110,15 @@ class Imagem(models.Model):
             blank=False,
             null=False
         )
-    capa = models.BooleanField(default=False)
     alt_text = models.CharField(max_length=255, null=False, blank=False)
     def clean(self):
-        LIMITE_MAXIMO_IMAGENS = 4
+        LIMITE_MAXIMO_IMAGENS = 3
         if not self.pk:
             total_existente = Imagem.objects.filter(produto=self.produto).count()
             if total_existente >= LIMITE_MAXIMO_IMAGENS:
                 raise ValidationError(
                     f'Este produto atingiu o limite máximo de {LIMITE_MAXIMO_IMAGENS} imagens.'
                 )
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.capa:
-            Imagem.objects.filter(
-                produto=self.produto,
-                capa=True
-        ).exclude(pk=self.pk).update(capa=False)
 
 # Por equanto é a "postagem"
 class Anuncio(models.Model):
