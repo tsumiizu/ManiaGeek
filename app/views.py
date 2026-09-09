@@ -10,9 +10,10 @@ def home_view(request):
     produtos = Produto.objects.all().order_by('-id')
     produtos_destaque= Produto.objects.filter(destaque=True)[:5]
     return render(request, 'home.html', {'produtos': produtos, 'produtos_destaque': produtos_destaque})
-def produtos_view(request):
-    return render(request, 'produtos.html')
-
+def detalhe_produto(request, id):
+  
+    produto = get_object_or_404(Produto, id=id)
+    return render(request, 'detalhe_produto.html', {'produto': produto})
 
 # Administrador 
 
@@ -57,3 +58,4 @@ def categoria_editar(request, pk):
     else:
         form = CategoriaForm(instance=Categoria) 
     return render(request, '.html', {'form': form, 'titulo': 'Editar Categoria'})
+

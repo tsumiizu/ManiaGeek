@@ -67,3 +67,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Iniciamos o timer guardando ele na nossa variável
   autoPlayTimer = setInterval(nextSlide, 5000);
 });
+function showImage(src) {
+    const imgEl = document.getElementById('main-img');
+    const videoEl = document.getElementById('main-video');
+    const emptyEl = document.getElementById('main-img-empty');
+
+    if (imgEl) {
+      imgEl.src = src;
+      imgEl.style.display = 'block';
+    } else if (emptyEl) {
+      emptyEl.style.display = 'block';
+    }
+    
+    if (videoEl) {
+      videoEl.style.display = 'none';
+      videoEl.pause(); // Pausa o vídeo automaticamente ao sair dele
+    }
+  }
+
+  function showVideo() {
+    const imgEl = document.getElementById('main-img');
+    const videoEl = document.getElementById('main-video');
+    const emptyEl = document.getElementById('main-img-empty');
+
+    if (imgEl) imgEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'none';
+    
+    if (videoEl) {
+      videoEl.style.display = 'block';
+      videoEl.play(); // Dá play automático ao clicar na miniatura (estilo Steam)
+    }
+  }

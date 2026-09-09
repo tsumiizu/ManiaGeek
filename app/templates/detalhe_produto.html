@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="product-detail-container">
+  
+  <div class="product-window">
+    
+    <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-top-left" alt="Gato">
+    <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-top-right" alt="Gato">
+    <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-bottom-left" alt="Gato">
+    <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-bottom-right" alt="Gato">
+
+    <div class="product-window-content">
+      <div class="product-gallery">
+        <div class="main-display-box">
+          {% if produto.Imagem.all %}
+            {% with primeira_foto=produto.Imagem.first %}
+              <img src="{{ primeira_foto.imagem.url }}" alt="{{ primeira_foto.alt_text }}" id="main-img" style="display: block;">
+            {% endwith %}
+          {% else %}
+            <span class="empty-photo-text" id="main-img-empty">Sem foto principal</span>
+          {% endif %}
+
+          {% if produto.video %}
+            <video id="main-video" controls preload="metadata" style="display: none;">
+              <source src="{{ produto.video.url }}" type="video/mp4">
+              Seu navegador não suporta a reprodução de vídeos.
+            </video>
+          {% endif %}
+        </div>
+        
+        <div class="thumb-row">
+          {% if produto.video %}
+            <div class="video-thumb" onclick="showVideo()">
+              <video src="{{ produto.video.url }}#t=0.1" muted playsinline></video>
+              <div class="video-thumb-overlay">▶</div>
+            </div>
+          {% endif %}
+
+          {% if produto.Imagem.all %}
+            {% for foto in produto.Imagem.all %}
+              <img src="{{ foto.imagem.url }}" alt="{{ foto.alt_text }}" onclick="showImage('{{ foto.imagem.url }}')">
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="product-info-panel">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <span style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">
+            {{ produto.get_produto_tipo_display }}
+          </span>
+          {% for categoria in produto.categoria.all %}
+            <span style="background: rgba(252, 232, 58, 0.1); color: #fce83a; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">
+              {{ categoria.nome }}
+            </span>
+          {% endfor %}
+        </div>
+
+        <h1 class="product-title-detail">{{ produto.nome }}</h1>
+        <div class="product-price-detail">R$ {{ produto.preco }}</div>
+
+        <div class="product-description">
+          {{ produto.descricao|linebreaks }}
+        </div>
+
+        <div>
+          {% if produto.quantidade > 0 %}
+            <span class="stock-status">✓ Em estoque ({{ produto.quantidade }} disponíveis)</span>
+            <button class="btn-add-cart-large" onclick="adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">
+              Adicionar ao Carrinho
+            </button>
+          {% else %}
+            <span class="stock-status out-of-stock">✗ Produto Esgotado</span>
+            <button class="btn-add-cart-large" disabled style="opacity: 0.4; cursor: not-allowed; background-color: #555; color: #aaa; box-shadow: none;">
+              Produto Indisponível
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
