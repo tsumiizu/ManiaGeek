@@ -34,4 +34,7 @@ class EditarPerfilForm(forms.ModelForm):
                     raise forms.ValidationError("Este e-mail já está em uso por outra conta.")
             return email
 
-# Depois fazer model de foto de perfil 
+class FotoPerfilForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['foto']

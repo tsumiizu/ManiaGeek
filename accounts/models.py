@@ -25,6 +25,7 @@ DEFAULT_AVATARS = [
     'default18',
     'default19',
     'default20',
+    'default21',
 ]
 def get_random_avatar():
     return random.choice(DEFAULT_AVATARS)

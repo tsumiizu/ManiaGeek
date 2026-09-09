@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
+from decouple import config
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -78,11 +80,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=config('NEON_URL'),
+        conn_max_age=600,       # Mantém a conexão aberta para melhorar performance
+        conn_health_checks=True, # Checa se a conexão do Neon continua ativa
+        ssl_require=True         # O Neon exige conexão SSL segura
+    )
 }
 
 
@@ -130,6 +140,10 @@ CLOUDINARY_STORAGE = {
     'API_KEY': os.getenv('CLOUD_API_KEY'),
     'API_SECRET': os.getenv('CLOUD_API_SECRET'),
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -138,6 +152,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
@@ -151,3 +166,6 @@ MAILERS = {
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = '/login/'
+
+SENDGRID_FROM_EMAIL = os.getenv('SENDGRID_EMAIL')
+SENDGRID_KEY = os.getenv('SENDGRID_KEY') 

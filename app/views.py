@@ -3,7 +3,7 @@ from .models import *
 from .forms import ProdutoForm, CategoriaForm
 from django.db.models import Prefetch
 
-def quatro_view(request):
+def quatro_view(request): # Apenas para testes
     return render(request, '404.html')
 
 def home_view(request): 
