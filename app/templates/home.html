@@ -74,30 +74,50 @@
         </div>
         <a href="{% url 'produtos' %}" class="section-link">Ver catálogo completo &rarr;</a>
       </div>
+<!-- ── PRODUTOS ── -->
+{% for categoria in categorias %}
+  {% if categoria.produto.all %}
+    <section class="section-padding" {% if forloop.first %}style="padding-top: 0;"{% endif %}>
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-header-text">
+            <span class="eyebrow">Catálogo</span>
+            <h2>{{ categoria.nome }}</h2>
+            <p>Confira nossa seleção exclusiva da categoria {{ categoria.nome|lower }}.</p>
+          </div>
+          <a href="{% url 'produtos' %}" class="section-link">Ver catálogo completo &rarr;</a>
+        </div>
 
-      <div class="products-grid">
-        {% for produto in produtos %}
-          <div class="product-card" onclick="window.location.href='#'">
-            <div class="product-thumb">
-              <span class="product-badge">{{ produto.get_produto_tipo_display }}</span>
-              {% if produto.imagem_capa %}
-                <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
-              {% endif %}
-            </div>
-            <div class="product-info">
-              <h3 class="product-title">{{ produto.nome }}</h3>
-              <span class="product-author">{{ produto.descricao }}</span>
-              <div class="product-footer">
-                <span class="product-price">R$ {{ produto.preco }}</span>
-                <button class="btn-add-cart" onclick="event.stopPropagation();">Ver Detalhes</button>
+        <div class="products-grid">
+          {% for produto in categoria.produto.all %}
+            <div class="product-card" onclick="window.location.href=''">
+              <div class="product-thumb">
+                <span class="product-badge">{{ categoria.nome }}</span>
+                {% if produto.imagem_capa %}
+                  <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
+                {% endif %}
+              </div>
+              <div class="product-info">
+                <h3 class="product-title">{{ produto.nome }}</h3>
+                <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
+                <div class="product-footer">
+                  <span class="product-price">R$ {{ produto.preco }}</span>
+                  <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href=''">Ver Detalhes</button>
+                </div>
               </div>
             </div>
-          </div>
-        {% empty %}
-          <p style="color: var(--text-secondary);">Nenhum produto cadastrado no momento.</p>
-        {% endfor %}
+          {% endfor %}
+        </div>
+
       </div>
+    </section>
+  {% endif %}
+{% empty %}
+  <section class="section-padding" style="padding-top: 0;">
+    <div class="container">
+      <p style="color: var(--text-secondary); text-align: center;">Nenhuma categoria cadastrada no momento.</p>
     </div>
-  </div>
-</section>
+  </section>
+{% endfor %}
 {% endblock %}

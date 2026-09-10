@@ -31,6 +31,27 @@ class Endereco(models.Model):
 
 class Categoria(models.Model):
     nome = models.CharField(max_length=200)
+    imagem = CloudinaryField(
+        resource_type="image",
+            folder='categorias/',
+            blank=True,
+            null=True
+    )
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        if not self.pk and not self.imagem:
+            self.imagem = get_random_avatar()
+        super().save(*args, **kwargs)
+    @property
+    def imagem_categoria(self):
+        if not self.imagem:
+            url, _ = cloudinary_url(get_random_avatar(), secure=True)
+            return url
+        if hasattr(self.imagem, 'url') and self.imagem.url:
+            return self.imagem.url
+        foto_str = str(self.imagem)
+        url, _ = cloudinary_url(foto_str, secure=True)
+        return url
     def __str__(self):
         return self.nome
 
