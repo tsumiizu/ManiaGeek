@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 
 <!-- BANNER / CARROSSEL HERO -->
@@ -61,11 +63,19 @@
 
     </div>
   </div>
-    
-
+  
+  <section class="section-padding" style="padding-top: 0;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-header-text">
+          <span class="eyebrow">Catálogo</span>
+          <h2>Coleções autorais em alta</h2>
+          <p>Peças exclusivas ilustradas com foco em cultura pop, literatura e cinema.</p>
+        </div>
+        <a href="{% url 'produtos' %}" class="section-link">Ver catálogo completo &rarr;</a>
+      </div>
 <!-- ── PRODUTOS ── -->
 {% for categoria in categorias %}
-  <!-- Só exibe a seção se a categoria tiver produtos vinculados -->
   {% if categoria.produto.all %}
     <section class="section-padding" {% if forloop.first %}style="padding-top: 0;"{% endif %}>
       <div class="container">
