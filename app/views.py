@@ -7,9 +7,13 @@ def quatro_view(request): # Apenas para testes
     return render(request, '404.html')
 
 def home_view(request): 
+    categorias = Categoria.objects.prefetch_related('produto').all().order_by('nome')
     produtos = Produto.objects.all().order_by('-id')
     produtos_destaque= Produto.objects.filter(destaque=True)[:5]
-    return render(request, 'home.html', {'produtos': produtos, 'produtos_destaque': produtos_destaque})
+    
+    return render(request, 'home.html', {'produtos': produtos, 'produtos_destaque': produtos_destaque, 'categorias': categorias})
+
+
 def detalhe_produto(request, id):
   
     produto = get_object_or_404(Produto, id=id)
@@ -59,3 +63,6 @@ def categoria_editar(request, pk):
         form = CategoriaForm(instance=Categoria) 
     return render(request, '.html', {'form': form, 'titulo': 'Editar Categoria'})
 
+def produtos_view(request):
+
+    return render(request, 'produtos.html')

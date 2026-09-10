@@ -4,100 +4,115 @@
 {% block content %}
 
 <!-- BANNER / CARROSSEL HERO -->
-  <div class="hero-carousel-container" id="hero-carousel">
-    <div class="carousel" style="--cat-bg: url('/static/media/gato_geek.webp');">
-      <button class="carousel-btn prev" id="btn-prev" aria-label="Slide anterior">
-        <img src="/static/media/seta.png" alt="Anterior" class="custom-arrow flipped">
-      </button>
-      <button class="carousel-btn next" id="btn-next" aria-label="Próximo slide">
-        <img src="/static/media/seta.png" alt="Próximo" class="custom-arrow">
-      </button>
-      <div class="carousel-slides" id="carousel-slides">
-        <!-- DADOS DINÂMICOS DOS PRODUTOS EM DESTAQUE -->
-        {% for produto in produtos_destaque %}
-            <div class="slide">
-              <div class="slide-content">
-                <span class="eyebrow">{{ produto.get_produto_tipo_display }}</span>
-                <h1 class="slide-title">{{ produto.nome }}</h1>
-                <p class="slide-desc">{{ produto.descricao|truncatewords:20 }}</p>
-                <div class="slide-btns">
-                  <a href="#" class="btn-primary">Ver produto por R$ {{ produto.preco }}</a>
-                </div>
-              </div>
-              <div class="slide-media">
-                <div class="stamp-frame">
-                  <span class="stamp-edition">Destaque</span>
-                  <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
-                </div>
-              </div>
-            </div>
-        {% empty %}
+<div class="hero-carousel-container" id="hero-carousel">
+  <div class="carousel" style="--cat-bg: url('/static/media/gato_geek.webp');">
+    <button class="carousel-btn prev" id="btn-prev" aria-label="Slide anterior">
+      <img src="/static/media/seta.png" alt="Anterior" class="custom-arrow flipped">
+    </button>
+    <button class="carousel-btn next" id="btn-next" aria-label="Próximo slide">
+      <img src="/static/media/seta.png" alt="Próximo" class="custom-arrow">
+    </button>
+    
+    <div class="carousel-slides" id="carousel-slides">
+      {% for produto in produtos_destaque %}
           <div class="slide">
             <div class="slide-content">
-              <span class="eyebrow">Coleção autoral em destaque</span>
-              <h1 class="slide-title">Mania Geek Store</h1>
-              <p class="slide-desc">Confira nossos produtos autorais em destaque na loja.</p>
-              <div class="slide-btns">
-                <a href="#produtos" class="btn-primary">Explorar catálogo</a>
-              </div>
+              <!-- Eyebrow puxando as categorias reais do banco (ManyToManyField) -->
+              <span class="eyebrow">
+                {% for cat in produto.categoria.all %}
+                  {{ cat.nome }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              </span>
+              <h1 class="slide-title">{{ produto.nome }}</h1>
+              <p class="slide-desc">{{ produto.descricao|truncatewords:20 }}</p>
+            <div class="slide-btns">
+              <a href="{% url 'detalhe_produto' produto.id %}" class="btn-primary">Ver produto por R$ {{ produto.preco }}</a>
+            </div>
             </div>
             <div class="slide-media">
               <div class="stamp-frame">
-                <span class="stamp-edition">Edição Nº 01</span>
-                <img src="/static/media/teste1.jpg" alt="Mania Geek">
+                <span class="stamp-edition">Destaque</span>
+                <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
               </div>
             </div>
           </div>
-        {% endfor %}
-      </div>
+      {% empty %}
+        <div class="slide">
+          <div class="slide-content">
+            <span class="eyebrow">Coleção autoral em destaque</span>
+            <h1 class="slide-title">Mania Geek Store</h1>
+            <p class="slide-desc">Confira nossos produtos autorais em destaque na loja.</p>
+            <div class="slide-btns">
+              <a href="{% url 'produtos' %}" class="btn-primary">Explorar catálogo</a>
+            </div>
+          </div>
+          <div class="slide-media">
+            <div class="stamp-frame">
+              <span class="stamp-edition">Edição Nº 01</span>
+              <img src="/static/media/teste1.jpg" alt="Mania Geek">
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
 
-      <div class="carousel-dots" id="carousel-dots">
-        {% for produto in produtos %}
-          {% if produto.destaque %}
-            <span class="dot {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></span>
-          {% endif %}
-        {% empty %}
-          <span class="dot active" data-slide="0"></span>
-        {% endfor %}
-      </div>
-
+    <div class="carousel-dots" id="carousel-dots">
+      {% for produto in produtos_destaque %}
+          <span class="dot {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}"></span>
+      {% empty %}
+        <span class="dot active" data-slide="0"></span>
+      {% endfor %}
     </div>
   </div>
-  
+</div>
+
+<!-- ================= SESSÕES DE PRODUTOS POR CATEGORIA ================= -->
+<!-- Ordena e agrupa os produtos pela PRIMEIRA categoria atrelada a eles, já que a view envia apenas 'produtos' -->
+{% for categoria in categorias %}
+  <!-- Só exibe a seção se a categoria tiver produtos vinculados -->
+  {% if categoria.produto.all %}
+    <section class="section-padding" {% if forloop.first %}style="padding-top: 0;"{% endif %}>
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-header-text">
+            <span class="eyebrow">Catálogo</span>
+            <h2>{{ categoria.nome }}</h2>
+            <p>Confira nossa seleção exclusiva da categoria {{ categoria.nome|lower }}.</p>
+          </div>
+          <a href="{% url 'produtos' %}" class="section-link">Ver catálogo completo &rarr;</a>
+        </div>
+
+        <div class="products-grid">
+          {% for produto in categoria.produto.all %}
+            <div class="product-card" onclick="window.location.href=''">
+              <div class="product-thumb">
+                <span class="product-badge">{{ categoria.nome }}</span>
+                {% if produto.imagem_capa %}
+                  <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
+                {% endif %}
+              </div>
+              <div class="product-info">
+                <h3 class="product-title">{{ produto.nome }}</h3>
+                <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
+                <div class="product-footer">
+                  <span class="product-price">R$ {{ produto.preco }}</span>
+                  <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href=''">Ver Detalhes</button>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </section>
+  {% endif %}
+{% empty %}
   <section class="section-padding" style="padding-top: 0;">
     <div class="container">
-      <div class="section-header">
-        <div class="section-header-text">
-          <span class="eyebrow">Catálogo</span>
-          <h2>Coleções autorais em alta</h2>
-          <p>Peças exclusivas ilustradas com foco em cultura pop, literatura e cinema.</p>
-        </div>
-        <a href="{% url 'produtos' %}" class="section-link">Ver catálogo completo &rarr;</a>
-      </div>
-
-      <div class="products-grid">
-        {% for produto in produtos %}
-          <div class="product-card" onclick="window.location.href='#'">
-            <div class="product-thumb">
-              <span class="product-badge">{{ produto.get_produto_tipo_display }}</span>
-              {% if produto.imagem_capa %}
-                <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
-              {% endif %}
-            </div>
-            <div class="product-info">
-              <h3 class="product-title">{{ produto.nome }}</h3>
-              <span class="product-author">{{ produto.descricao }}</span>
-              <div class="product-footer">
-                <span class="product-price">R$ {{ produto.preco }}</span>
-                <button class="btn-add-cart" onclick="event.stopPropagation();">Ver Detalhes</button>
-              </div>
-            </div>
-          </div>
-        {% empty %}
-          <p style="color: var(--text-secondary);">Nenhum produto cadastrado no momento.</p>
-        {% endfor %}
-      </div>
+      <p style="color: var(--text-secondary); text-align: center;">Nenhuma categoria cadastrada no momento.</p>
     </div>
-  </div>
-</section>
+  </section>
+{% endfor %}
 {% endblock %}
+
