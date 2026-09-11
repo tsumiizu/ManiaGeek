@@ -84,7 +84,7 @@
         </div>
         <div class="products-grid">
           {% for produto in categoria.produto.all %}
-            <div class="product-card" onclick="window.location.href=''">
+            <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' produto.id  %}'">
               <div class="product-thumb">
                 <span class="product-badge">{{ categoria.nome }}</span>
                 {% if produto.imagem_capa %}
@@ -96,7 +96,7 @@
                 <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
                 <div class="product-footer">
                   <span class="product-price">R$ {{ produto.preco }}</span>
-                  <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href=''">Ver Detalhes</button>
+                  <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='{% url 'detalhe_produto' produto.id  %}'">Ver Detalhes</button>
                 </div>
               </div>
             </div>
