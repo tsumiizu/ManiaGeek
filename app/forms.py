@@ -1,15 +1,14 @@
 from django import forms
 from .models import *
 
-
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
-        fields = ['nome']
+        fields = ['nome', 'imagem']
         widgets = {
             'nome': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Digite o nome da categoria'
+                'placeholder': 'Ex: Jogos, Canecas, Pixel Art...'
             }),
         }
 

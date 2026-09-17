@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-padding" style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+  <!-- Aumentado max-width para dar mais espaço horizontal -->
+  <div style="width: 100%; max-width: 640px;">
+    
+    <!-- Padding reduzido para compactar a altura do card -->
+    <div class="profile-header" style="flex-direction: column; align-items: stretch; margin-bottom: 0; position: relative; padding: 28px 36px;">
+      
+      <div style="text-align: center; margin-bottom: 16px;">
+        <span class="eyebrow" style="font-size: 11px;">Criar Conta</span>
+        <h3 style="margin-top: 4px; font-size: 24px; font-weight: 700;">Junte-se à ManiaGeek</h3>
+        <p style="color: #aaa; font-size: 13px; margin-top: 2px;">Preencha seus dados para começar.</p>
+      </div>
+
+      <!-- Alertas de erro -->
+      {% if form.errors %}
+        <div style="background: rgba(244, 67, 54, 0.15); border: 1px solid #F44336; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 16px;">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <p style="margin: 0; padding: 1px 0;">• {{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'cadastro' %}">
+        {% csrf_token %}
+        
+        <!-- Grid de 2 colunas para otimizar espaço vertical -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px;">
+          
+          <div class="form-group">
+            <label for="id_email">E-mail</label>
+            <input type="email" name="email" id="id_email" placeholder="seu@email.com" value="{{ form.email.value|default:'' }}" required autofocus>
+          </div>
+
+          <div class="form-group">
+            <label for="id_username">Usuário (@user)</label>
+            <input type="text" name="username" id="id_username" placeholder="seu_usuario" value="{{ form.username.value|default:'' }}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="id_display_name">Nome de Exibição</label>
+            <input type="text" name="display_name" id="id_display_name" placeholder="Ex: Sábio Gamer" value="{{ form.display_name.value|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="id_telefone">Telefone / WhatsApp</label>
+            <input type="text" name="telefone" id="id_telefone" placeholder="(21) 99999-9999" value="{{ form.telefone.value|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="id_password1">Senha</label>
+            <input type="password" name="password1" id="id_password1" placeholder="••••••••" required>
+          </div>
+
+          <div class="form-group">
+            <label for="id_password2">Confirmar Senha</label>
+            <input type="password" name="password2" id="id_password2" placeholder="••••••••" required>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 10px 0; font-size: 14px;">
+          Criar minha conta
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 16px; font-size: 13px; color: #aaa;">
+        Já possui uma conta? 
+        <a href="{% url 'login' %}" style="color: var(--cyan); text-decoration: none; font-weight: 600;">Faça Login</a>
+      </div>
+
+      <!-- Mascote no canto do card -->
+      <img src="{% static 'media/gato_geek.webp' %}" alt="Mascote ManiaGeek" style="position: absolute; bottom: -18px; right: -18px; width: 60px; height: 60px; object-fit: contain; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); z-index: 10;">
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

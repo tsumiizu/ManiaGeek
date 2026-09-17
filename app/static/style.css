@@ -1331,8 +1331,8 @@ footer {
 }
 
 .profile-avatar {
-  width: 90px;
-  height: 90px;
+  width: 160px;
+  height: 160px;
   background-color: #ffd700; /* Amarelo Mania Geek */
   border-radius: 50%;
   display: flex;

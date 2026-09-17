@@ -58,7 +58,8 @@ class Categoria(models.Model):
 class Produto(models.Model):
     nome = models.CharField(max_length=200)
     STATUS_CHOICES_PRODUTO = [
-        ('copos', 'Copos'),
+        ('canecas', 'Canecas'),
+        ('brincos', 'Brincos'),
         ('bottoms', 'Bottoms'), 
         ('chaveiros', 'Chaveiros')
     ]
@@ -127,7 +128,7 @@ class Imagem(models.Model):
     imagem = CloudinaryField( 
             resource_type="image",
             folder='imagens_produto/',
-            default='samples/man-portrait',
+            default='default08',
             blank=False,
             null=False
         )

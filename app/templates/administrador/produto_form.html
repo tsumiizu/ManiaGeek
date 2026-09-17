@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Pílulas de Categoria (Checkboxes interativos) */
+  .category-pills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .category-pill {
+    position: relative;
+    cursor: pointer;
+  }
+  .category-pill input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .category-pill-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .category-pill input[type="checkbox"]:checked + .category-pill-label {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+  }
+  .category-pill:hover .category-pill-label {
+    border-color: var(--cyan);
+    color: #fff;
+  }
+
+  /* Caixas de Upload / Drag & Drop para Imagem e Vídeo */
+  .upload-preview-box {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-main);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    position: relative;
+  }
+  .upload-preview-box:hover {
+    border-color: var(--cyan);
+    background: rgba(0, 0, 0, 0.3);
+  }
+  .preview-target {
+    max-height: 100px;
+    max-width: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+    margin-bottom: 8px;
+  }
+</style>
+
+<section class="section-padding" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
+  <div style="width: 100%; max-width: 1100px; padding: 0 24px;">
+    
+    <div class="profile-header" style="flex-direction: column; align-items: stretch; margin-bottom: 0; position: relative; padding: 32px 40px;">
+      
+      <!-- Cabeçalho -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+        <div>
+          <span class="eyebrow">
+            {% if form.instance.pk %}Editar Produto{% else %}Painel Administrativo{% endif %}
+          </span>
+          <h3 style="margin-top: 4px; font-size: 26px; font-weight: 700; color: #fff;">{{ titulo }}</h3>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px; margin: 0; max-width: 380px; text-align: right;">
+          {% if form.instance.pk %}
+            Atualizando dados do produto <strong>{{ form.instance.nome }}</strong>.
+          {% else %}
+            Preencha os dados do catálogo abaixo.
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Alertas de Erro -->
+      {% if form.errors or form.non_field_errors %}
+        <div style="background: rgba(244, 67, 54, 0.15); border: 1px solid #F44336; color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 20px;">
+          {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+              <p style="margin: 0; padding: 2px 0;">• {{ error }}</p>
+            {% endfor %}
+          {% endif %}
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p style="margin: 0; padding: 2px 0;">• <strong>{{ field.label }}:</strong> {{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Grid de 2 Colunas Separando Informações e Mídias -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; align-items: start;">
+          
+          <!-- COLUNA ESQUERDA: Textos e Opções -->
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            
+            <!-- Nome do Produto -->
+            <div class="form-group" style="margin: 0;">
+              <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+              {{ form.nome }}
+            </div>
+
+            <!-- Tipo e Estoque -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label for="{{ form.produto_tipo.id_for_label }}">{{ form.produto_tipo.label }}</label>
+                {{ form.produto_tipo }}
+              </div>
+
+              <div class="form-group" style="margin: 0;">
+                <label for="{{ form.quantidade.id_for_label }}">{{ form.quantidade.label }}</label>
+                {{ form.quantidade }}
+              </div>
+            </div>
+
+            <!-- Preço e Destaque -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center;">
+              <div class="form-group" style="margin: 0;">
+                <label for="{{ form.preco.id_for_label }}">{{ form.preco.label }}</label>
+                {{ form.preco }}
+              </div>
+
+              {% if form.destaque %}
+                <div class="form-group" style="margin: 0; padding-top: 20px;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none; color: #fff; font-size: 13px;">
+                    {{ form.destaque }}
+                    <span>Exibir em <strong>Destaques</strong></span>
+                  </label>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Categorias -->
+            <div class="form-group" style="margin: 0;">
+              <label>{{ form.categoria.label }}</label>
+              <div class="category-pills-container">
+                {% for choice in form.categoria.field.queryset %}
+                  <label class="category-pill">
+                    <input type="checkbox" name="categoria" value="{{ choice.id }}" 
+                           {% if choice.id in form.categoria.value %}checked{% endif %}>
+                    <span class="category-pill-label">
+                      ✦ {{ choice.nome }}
+                    </span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="form-group" style="margin: 0;">
+              <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
+              <textarea name="descricao" id="id_descricao" class="form-control" style="height: 110px; resize: none;" placeholder="Descrição detalhada do produto...">{{ form.descricao.value|default_if_none:'' }}</textarea>
+            </div>
+
+          </div>
+
+          <!-- COLUNA DIREITA: Mídias (Capa e Vídeo) -->
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            
+            <!-- Upload da Capa -->
+            <div class="form-group" style="margin: 0;">
+              <label>Capa do Produto (Preview Automático)</label>
+              <div class="upload-preview-box" onclick="document.getElementById('id_capa_input').click();">
+                <img id="cover-preview" 
+                     src="{% if form.instance.pk and form.instance.capa %}{{ form.instance.imagem_capa }}{% else %}{% static 'media/patinha.png' %}{% endif %}" 
+                     class="preview-target" 
+                     style="{% if not form.instance.pk or not form.instance.capa %}opacity: 0.3; height: 50px;{% endif %}" 
+                     alt="Preview da Capa">
+                
+                <span id="cover-text-hint" style="font-size: 12px; color: var(--text-secondary);">
+                  Clique para selecionar ou arrastar a capa aqui
+                </span>
+                
+                <input type="file" name="capa" id="id_capa_input" accept="image/*" style="display: none;" onchange="previewImage(this)">
+              </div>
+            </div>
+
+            <!-- Upload do Vídeo -->
+            <div class="form-group" style="margin: 0;">
+              <label>Vídeo Demonstrativo (Opcional)</label>
+              <div class="upload-preview-box" onclick="document.getElementById('id_video_input').click();">
+                <video id="video-preview" 
+                       src="{% if form.instance.pk and form.instance.video %}{{ form.instance.video.url }}{% endif %}" 
+                       class="preview-target" 
+                       controls 
+                       style="{% if not form.instance.pk or not form.instance.video %}display: none;{% else %}display: block;{% endif %}">
+                </video>
+                
+                <div id="video-placeholder" style="{% if form.instance.pk and form.instance.video %}display: none;{% endif %}">
+                  <span style="font-size: 24px; color: var(--text-muted); display: block; margin-bottom: 4px;">🎬</span>
+                  <span id="video-text-hint" style="font-size: 12px; color: var(--text-secondary);">
+                    Clique para selecionar um vídeo (MP4/WebM)
+                  </span>
+                </div>
+                
+                <input type="file" name="video" id="id_video_input" accept="video/*" style="display: none;" onchange="previewVideo(this)">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Botões de Ação Centralizados -->
+        <div style="display: flex; gap: 16px; margin-top: 32px; align-items: center; justify-content: center;">
+          <a href="{% url 'produtos' %}" class="btn-outline" style="padding: 10px 28px; font-size: 14px; min-width: 140px; text-align: center;">
+            Cancelar
+          </a>
+          <button type="submit" class="btn-primary" style="padding: 10px 36px; font-size: 14px; min-width: 180px;">
+            {% if form.instance.pk %}Salvar Alterações{% else %}Cadastrar Produto{% endif %}
+          </button>
+        </div>
+      </form>
+
+      <!-- Mascote Retro -->
+      <img src="{% static 'media/gato_geek.webp' %}" alt="Mascote ManiaGeek" style="position: absolute; bottom: -18px; right: -18px; width: 60px; height: 60px; object-fit: contain; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); z-index: 10;">
+
+    </div>
+
+  </div>
+</section>
+
+<!-- Scripts para Preview de Imagem e Vídeo -->
+<script>
+  function previewImage(input) {
+    const preview = document.getElementById('cover-preview');
+    const hint = document.getElementById('cover-text-hint');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.opacity = '1';
+        preview.style.height = '100px';
+        hint.innerText = input.files[0].name;
+        hint.style.color = 'var(--cyan)';
+      }
+      
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function previewVideo(input) {
+    const video = document.getElementById('video-preview');
+    const placeholder = document.getElementById('video-placeholder');
+    
+    if (input.files && input.files[0]) {
+      const fileURL = URL.createObjectURL(input.files[0]);
+      video.src = fileURL;
+      video.style.display = 'block';
+      placeholder.style.display = 'none';
+    }
+  }
+</script>
+{% endblock %}

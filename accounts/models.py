@@ -47,6 +47,8 @@ class Usuario(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     def save(self, *args, **kwargs):
+        if not self.display_name:
+            self.display_name = nome_random()
         if not self.pk and not self.foto:
             self.foto = get_random_avatar()
         elif self.foto == 'perfis/default05':
