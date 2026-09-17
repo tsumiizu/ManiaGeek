@@ -151,17 +151,5 @@ class Anuncio(models.Model):
             blank=True,
             null=True
         )
-class Perfil(models.Model):
-    # Conecta este perfil diretamente ao usuário padrão do Django
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil')
-    foto = CloudinaryField(
-        resource_type="image",
-        folder='fotos_perfil/',
-        blank=True,
-        null=True
-    )
-
-    def __str__(self):
-        return f"Perfil de {self.user.username}"
 # O models de review vai ter o foreign key dos produtos, mas pode ser bom pra reutilizar para os reviews da loja em geral... pode ter 2 campos
 # Ou pode ter algo mais robusto como reviews inteligentes interligando o email 
