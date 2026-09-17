@@ -67,7 +67,6 @@
 </div>
 
 <!-- ================= SESSÕES DE PRODUTOS POR CATEGORIA ================= -->
-<!-- Ordena e agrupa os produtos pela PRIMEIRA categoria atrelada a eles, já que a view envia apenas 'produtos' -->
 {% for categoria in categorias %}
   <!-- Só exibe a seção se a categoria tiver produtos vinculados -->
   {% if categoria.produto.all %}
@@ -84,7 +83,8 @@
         </div>
         <div class="products-grid">
           {% for produto in categoria.produto.all %}
-            <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' produto.id  %}'">
+            <!-- CORREÇÃO: URL adicionada no clique do card -->
+            <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' produto.id %}'">
               <div class="product-thumb">
                 <span class="product-badge">{{ categoria.nome }}</span>
                 {% if produto.imagem_capa %}
@@ -96,7 +96,8 @@
                 <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
                 <div class="product-footer">
                   <span class="product-price">R$ {{ produto.preco }}</span>
-                  <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='{% url 'detalhe_produto' produto.id  %}'">Ver Detalhes</button>
+                  <!-- CORREÇÃO: URL adicionada no clique do botão -->
+                  <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='{% url 'detalhe_produto' produto.id %}'">Ver Detalhes</button>
                 </div>
               </div>
             </div>
@@ -114,4 +115,3 @@
   </section>
 {% endfor %}
 {% endblock %}
-

@@ -151,6 +151,5 @@ class Anuncio(models.Model):
             blank=True,
             null=True
         )
-
 # O models de review vai ter o foreign key dos produtos, mas pode ser bom pra reutilizar para os reviews da loja em geral... pode ter 2 campos
 # Ou pode ter algo mais robusto como reviews inteligentes interligando o email 
