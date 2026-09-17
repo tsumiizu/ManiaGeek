@@ -60,7 +60,35 @@ body {
   display: flex;
   flex-direction: column;
 }
-
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  
+  /* O roxo escuro clássico da sua marca */
+  background-color: #1a1a2e; 
+  
+  /* Cria o efeito Halftone (pontinhos de HQ) super discreto */
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.04) 15%, transparent 16%),
+    radial-gradient(rgba(255, 255, 255, 0.04) 15%, transparent 16%);
+  
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  background-attachment: fixed; /* Trava o fundo enquanto o usuário rola a página */
+}
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 a { color: inherit; }
 
 :focus-visible {
@@ -1281,3 +1309,155 @@ footer {
     height: 100%;
     object-fit: cover; /* Faz um crop automático (corta o excesso) sem espremer a foto */
   }
+  /* ── ESTILOS EXCLUSIVOS DO PERFIL ── */
+.profile-container {
+  max-width: 1000px;
+  margin: 60px auto;
+  padding: 0 24px;
+  color: #fff;
+  min-height: 60vh;
+}
+
+.profile-header {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 40px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.profile-avatar {
+  width: 90px;
+  height: 90px;
+  background-color: #ffd700; /* Amarelo Mania Geek */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 900;
+  color: #1a1a2e; /* Fundo escuro */
+  text-transform: uppercase;
+}
+
+.profile-info h1 {
+  margin: 0 0 8px 0;
+  font-size: 32px;
+}
+
+.profile-info p {
+  margin: 0;
+  color: #aaa;
+  font-size: 16px;
+}
+
+.section-title {
+  font-size: 24px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.address-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.address-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.2s ease;
+}
+
+.address-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.address-card h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #ffd700;
+}
+
+.address-card p {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #ddd;
+  line-height: 1.4;
+}
+
+.address-card strong {
+  color: #fff;
+}
+
+.auth-warning {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+/* ── ÍCONE DE PERFIL NA NAVBAR ── */
+.nav-profile-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.nav-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+/* Estilo para quem está logado (Amarelo Mania Geek) */
+.nav-avatar.logged-in {
+  background-color: #ffd700;
+  color: #1a1a2e;
+}
+
+/* Estilo para quem não está logado (Cinza discreto) */
+.nav-avatar.logged-out {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #aaa;
+}
+
+.nav-avatar.logged-out svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+.product-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.product-thumb img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

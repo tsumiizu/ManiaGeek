@@ -64,5 +64,33 @@ def categoria_editar(request, pk):
     return render(request, '.html', {'form': form, 'titulo': 'Editar Categoria'})
 
 def produtos_view(request):
+    query = request.GET.get('q') 
+    
+    if query:
+       
+        produtos = Produto.objects.filter(nome__icontains=query).order_by('-id')
+    else:
+        
+        produtos = Produto.objects.all().order_by('-id')
 
-    return render(request, 'produtos.html')
+    
+    return render(request, 'produtos.html', {'produtos': produtos, 'query': query})
+
+def perfil_view(request):
+   
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    
+    if request.method == 'POST' and request.FILES.get('foto_perfil'):
+       
+        perfil, created = Perfil.objects.get_or_create(user=request.user)
+        perfil.foto = request.FILES['foto_perfil']
+        perfil.save()
+        return redirect('perfil')
+
+    return render(request, 'perfil.html')
+
+def login_view(request):
+    # Por enquanto é só um espaço reservado para a página não quebrar
+    return render(request, 'login.html')
