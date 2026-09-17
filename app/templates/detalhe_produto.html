@@ -14,9 +14,9 @@
     <div class="product-window-content">
       <div class="product-gallery">
         <div class="main-display-box">
-          {% if produto.Imagem.all %}
+          {% if produto.Imagem.all or produto.imagem_capa %}
             {% with primeira_foto=produto.Imagem.first %}
-              <img src="{{ primeira_foto.imagem.url }}" alt="{{ primeira_foto.alt_text }}" id="main-img" style="display: block;">
+              <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text }}" id="main-img" style="display: block;">
             {% endwith %}
           {% else %}
             <span class="empty-photo-text" id="main-img-empty">Sem foto principal</span>
