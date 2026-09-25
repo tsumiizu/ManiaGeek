@@ -98,3 +98,15 @@ function showImage(src) {
       videoEl.play(); // Dá play automático ao clicar na miniatura (estilo Steam)
     }
   }
+    function toggleEditMode() {
+    const viewMode = document.getElementById('view-mode');
+    const editMode = document.getElementById('edit-mode');
+    
+    if (viewMode.style.display === 'none') {
+      viewMode.style.display = 'flex';
+      editMode.style.display = 'none';
+    } else {
+      viewMode.style.display = 'none';
+      editMode.style.display = 'flex';
+    }
+  }

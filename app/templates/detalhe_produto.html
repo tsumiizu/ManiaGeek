@@ -6,17 +6,20 @@
   
   <div class="product-window">
     
+    <!-- Gatinhos Retrô nas Bordas -->
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-top-left" alt="Gato">
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-top-right" alt="Gato">
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-bottom-left" alt="Gato">
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-bottom-right" alt="Gato">
 
     <div class="product-window-content">
+      
+      <!-- LADO ESQUERDO: Imagens -->
       <div class="product-gallery">
         <div class="main-display-box">
           {% if produto.Imagem.all or produto.imagem_capa %}
             {% with primeira_foto=produto.Imagem.first %}
-              <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text }}" id="main-img" style="display: block;">
+              <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}" id="main-img" style="display: block;">
             {% endwith %}
           {% else %}
             <span class="empty-photo-text" id="main-img-empty">Sem foto principal</span>
@@ -46,13 +49,15 @@
         </div>
       </div>
 
+      <!-- LADO DIREITO: Informações -->
       <div class="product-info-panel">
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <span style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">
+        
+        <div class="product-tags">
+          <span class="tag-tipo">
             {{ produto.get_produto_tipo_display }}
           </span>
           {% for categoria in produto.categoria.all %}
-            <span style="background: rgba(252, 232, 58, 0.1); color: #fce83a; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">
+            <span class="tag-categoria">
               {{ categoria.nome }}
             </span>
           {% endfor %}
@@ -65,7 +70,7 @@
           {{ produto.descricao|linebreaks }}
         </div>
 
-        <div>
+        <div class="product-actions">
           {% if produto.quantidade > 0 %}
             <span class="stock-status">✓ Em estoque ({{ produto.quantidade }} disponíveis)</span>
             <button class="btn-add-cart-large" onclick="adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">
@@ -73,11 +78,12 @@
             </button>
           {% else %}
             <span class="stock-status out-of-stock">✗ Produto Esgotado</span>
-            <button class="btn-add-cart-large" disabled style="opacity: 0.4; cursor: not-allowed; background-color: #555; color: #aaa; box-shadow: none;">
+            <button class="btn-add-cart-large btn-disabled" disabled>
               Produto Indisponível
             </button>
           {% endif %}
         </div>
+
       </div>
     </div>
   </div>

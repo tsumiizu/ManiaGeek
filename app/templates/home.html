@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<!-- BANNER / CARROSSEL HERO -->
+<!-- BANNER / CARROSSEL HERO (AGORA FULL WIDTH) -->
 <div class="hero-carousel-container" id="hero-carousel">
   <div class="carousel" style="--cat-bg: url('/static/media/gato_geek.webp');">
     <button class="carousel-btn prev" id="btn-prev" aria-label="Slide anterior">
@@ -16,40 +16,44 @@
     <div class="carousel-slides" id="carousel-slides">
       {% for produto in produtos_destaque %}
           <div class="slide">
-            <div class="slide-content">
-              <!-- Eyebrow puxando as categorias reais do banco (ManyToManyField) -->
-              <span class="eyebrow">
-                {% for cat in produto.categoria.all %}
-                  {{ cat.nome }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-              </span>
-              <h1 class="slide-title">{{ produto.nome }}</h1>
-              <p class="slide-desc">{{ produto.descricao|truncatewords:20 }}</p>
-            <div class="slide-btns">
-              <a href="{% url 'detalhe_produto' produto.id %}" class="btn-primary">Ver produto por R$ {{ produto.preco }}</a>
-            </div>
-            </div>
-            <div class="slide-media">
-              <div class="stamp-frame">
-                <span class="stamp-edition">Destaque</span>
-                <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
+            <!-- WRAPPER ADICIONADO: Mantém o conteúdo centralizado enquanto o fundo é 100% -->
+            <div class="slide-wrapper">
+              <div class="slide-content">
+                <span class="eyebrow">
+                  {% for cat in produto.categoria.all %}
+                    {{ cat.nome }}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                </span>
+                <h1 class="slide-title">{{ produto.nome }}</h1>
+                <p class="slide-desc">{{ produto.descricao|truncatewords:20 }}</p>
+                <div class="slide-btns">
+                  <a href="{% url 'detalhe_produto' produto.id %}" class="btn-primary">Ver produto por R$ {{ produto.preco }}</a>
+                </div>
+              </div>
+              <div class="slide-media">
+                <div class="stamp-frame">
+                  <span class="stamp-edition">Destaque</span>
+                  <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}">
+                </div>
               </div>
             </div>
           </div>
       {% empty %}
         <div class="slide">
-          <div class="slide-content">
-            <span class="eyebrow">Coleção autoral em destaque</span>
-            <h1 class="slide-title">Mania Geek Store</h1>
-            <p class="slide-desc">Confira nossos produtos autorais em destaque na loja.</p>
-            <div class="slide-btns">
-              <a href="{% url 'produtos' %}" class="btn-primary">Explorar catálogo</a>
+          <div class="slide-wrapper">
+            <div class="slide-content">
+              <span class="eyebrow">Coleção autoral em destaque</span>
+              <h1 class="slide-title">Mania Geek Store</h1>
+              <p class="slide-desc">Confira nossos produtos autorais em destaque na loja.</p>
+              <div class="slide-btns">
+                <a href="{% url 'produtos' %}" class="btn-primary">Explorar catálogo</a>
+              </div>
             </div>
-          </div>
-          <div class="slide-media">
-            <div class="stamp-frame">
-              <span class="stamp-edition">Edição Nº 01</span>
-              <img src="/static/media/teste1.jpg" alt="Mania Geek">
+            <div class="slide-media">
+              <div class="stamp-frame">
+                <span class="stamp-edition">Edição Nº 01</span>
+                <img src="/static/media/teste1.jpg" alt="Mania Geek">
+              </div>
             </div>
           </div>
         </div>
@@ -66,11 +70,50 @@
   </div>
 </div>
 
+<!-- ================= ACESSO RÁPIDO (CATEGORIAS) ================= -->
+<section class="quick-categories section-padding" style="padding-top: 0; padding-bottom: 40px;">
+  <div class="container">
+    <div class="quick-category-header">
+      <h3>COMPRE POR CATEGORIA</h3>
+    </div>
+    <div class="quick-categories-list">
+      
+      <a href="{% url 'produtos' %}?tipo=chaveiros" class="quick-category-item">
+        <div class="quick-category-icon" style="background-color: var(--purple);">
+          <img src="/static/media/Chaveiro.png" alt="Chaveiros">
+        </div>
+        <span class="quick-category-text">Chaveiros</span>
+      </a>
+
+      <a href="{% url 'produtos' %}?tipo=brincos" class="quick-category-item">
+        <div class="quick-category-icon" style="background-color: #e63946;">
+          <!-- <img src="/static/media/sua-imagem-aqui.png" alt="Brincos"> -->
+        </div>
+        <span class="quick-category-text">Brincos</span>
+      </a>
+
+      <a href="{% url 'produtos' %}?tipo=canecas" class="quick-category-item">
+        <div class="quick-category-icon" style="background-color: var(--yellow);">
+          <img src="/static/media/Caneca.png" alt="Canecas">
+        </div>
+        <span class="quick-category-text">Canecas</span>
+      </a>
+
+      <a href="{% url 'produtos' %}?tipo=bottoms" class="quick-category-item">
+        <div class="quick-category-icon" style="background-color: var(--cyan);">
+          <!-- <img src="/static/media/sua-imagem-aqui.png" alt="Bottoms"> -->
+        </div>
+        <span class="quick-category-text">Bottoms</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
 <!-- ================= SESSÕES DE PRODUTOS POR CATEGORIA ================= -->
 {% for categoria in categorias %}
-  <!-- Só exibe a seção se a categoria tiver produtos vinculados -->
   {% if categoria.produto.all %}
-    <section class="section-padding" {% if forloop.first %}style="padding-top: 0;"{% endif %}>
+    <section class="section-padding" style="padding-top: 20px;">
       <div class="container">
         
         <div class="section-header">
@@ -83,7 +126,6 @@
         </div>
         <div class="products-grid">
           {% for produto in categoria.produto.all %}
-            <!-- CORREÇÃO: URL adicionada no clique do card -->
             <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' produto.id %}'">
               <div class="product-thumb">
                 <span class="product-badge">{{ categoria.nome }}</span>
@@ -96,8 +138,7 @@
                 <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
                 <div class="product-footer">
                   <span class="product-price">R$ {{ produto.preco }}</span>
-                  <!-- CORREÇÃO: URL adicionada no clique do botão -->
-                  <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='{% url 'detalhe_produto' produto.id %}'">Ver Detalhes</button>
+                  <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">Adicionar ao carrinho</button>
                 </div>
               </div>
             </div>

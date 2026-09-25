@@ -21,14 +21,28 @@ def detalhe_produto(request, id):
   
     produto = get_object_or_404(Produto, id=id)
     return render(request, 'detalhe_produto.html', {'produto': produto})
+
 def produtos_view(request):
-    query = request.GET.get('q')  
+   
+    produtos = Produto.objects.all().order_by('-id')
+    
+    
+    query = request.GET.get('q')
+    tipo = request.GET.get('tipo')
+    
+   
     if query:
-       
-        produtos = Produto.objects.filter(nome__icontains=query).order_by('-id')
-    else:
-        produtos = Produto.objects.all().order_by('-id')
-    return render(request, 'produtos.html', {'produtos': produtos, 'query': query})
+        produtos = produtos.filter(nome__icontains=query)
+        
+   
+    if tipo:
+        produtos = produtos.filter(produto_tipo=tipo)
+        
+   
+    return render(request, 'produtos.html', {
+        'produtos': produtos, 
+        'query': query
+    })
 
 @login_required
 def perfil_view(request):

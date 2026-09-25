@@ -5,13 +5,17 @@
 
 <div class="container section-padding">
   
-  <!-- CABEÇALHO DINÂMICO (Muda se for pesquisa ou catálogo normal) -->
+  <!-- CABEÇALHO DINÂMICO (Muda se for pesquisa, filtro por tipo ou catálogo normal) -->
   <div class="section-header">
     <div class="section-header-text">
       {% if query %}
         <span class="eyebrow">Pesquisa</span>
         <h2>Resultados para: "{{ query }}"</h2>
         <p>Mostrando os produtos que encontramos com base na sua busca.</p>
+      {% elif request.GET.tipo %}
+        <span class="eyebrow">Filtro por Categoria</span>
+        <h2>{{ request.GET.tipo|title }}</h2>
+        <p>Mostrando todos os produtos da categoria {{ request.GET.tipo }}.</p>
       {% else %}
         <span class="eyebrow">Catálogo Completo</span>
         <h2>Todos os Produtos</h2>
@@ -36,7 +40,7 @@
           <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
           <div class="product-footer">
             <span class="product-price">R$ {{ produto.preco }}</span>
-            <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='{% url 'detalhe_produto' produto.id %}'">Ver Detalhes</button>
+            <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">Adicionar ao carrinho</button>
           </div>
         </div>
       </div>
@@ -46,7 +50,11 @@
       <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
         <h3 style="color: var(--text-primary); margin-bottom: 12px;">Puxa, não encontramos nada!</h3>
         <p style="color: var(--text-secondary); font-size: 16px;">
-          Nenhum produto bate com a pesquisa <strong>"{{ query }}"</strong>. Tente usar outras palavras!
+          {% if request.GET.tipo %}
+            Ainda não temos produtos cadastrados na categoria <strong>{{ request.GET.tipo }}</strong>.
+          {% else %}
+            Nenhum produto bate com a pesquisa <strong>"{{ query }}"</strong>. Tente usar outras palavras!
+          {% endif %}
         </p>
         <a href="{% url 'produtos' %}" class="btn-primary" style="margin-top: 24px; display: inline-block;">Ver todo o catálogo</a>
       </div>
