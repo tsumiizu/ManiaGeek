@@ -111,3 +111,26 @@ function showImage(src) {
     }
   }
   
+function previewFoto(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const container = document.getElementById('avatar-preview');
+    if (!container) return;
+
+    // Se o avatar atual é a letra (usuário sem foto), troca por <img>.
+    // Se já é <img>, só atualiza o src.
+    let img = document.getElementById('avatar-img');
+    if (!img) {
+      container.innerHTML = '';
+      img = document.createElement('img');
+      img.id = 'avatar-img';
+      img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;';
+      container.appendChild(img);
+    }
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from .forms import ProdutoForm, CategoriaForm
-from accounts.forms import EditarPerfilForm, UserRegisterForm
+from accounts.forms import EditarPerfilForm, UserRegisterForm, FotoPerfilForm
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -16,7 +16,6 @@ def home_view(request):
     
     return render(request, 'home.html', {'produtos': produtos, 'produtos_destaque': produtos_destaque, 'categorias': categorias})
 
-
 def detalhe_produto(request, id):
     produto = get_object_or_404(Produto, id=id)
     
@@ -28,6 +27,7 @@ def detalhe_produto(request, id):
         'produto': produto,
         'produtos_relacionados': produtos_relacionados
     })
+
 def produtos(request):
     produtos = Produto.objects.all()
     
@@ -49,17 +49,36 @@ def produtos(request):
         'query': query,
     })
 
+def carrinho(request):
+    return render(request, 'carrinho.html')
+
+# User related
+
 @login_required
 def perfil_view(request):
+    perfil_form = EditarPerfilForm(instance=request.user)
+    foto_form = FotoPerfilForm(instance=request.user)
     if request.method == 'POST':
-        form = EditarPerfilForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect('perfil')
-    else:
-        form = EditarPerfilForm(instance=request.user)
-
-    return render(request, 'perfil.html', {'form': form})
+        if 'foto' in request.FILES:
+            foto_form = FotoPerfilForm(
+                request.POST, request.FILES, instance=request.user
+            )
+            if foto_form.is_valid():
+                foto_form.save()
+                messages.success(request, "Foto atualizada!")
+                return redirect('perfil')
+            messages.error(request, "Não foi possível trocar a foto.")
+        else:
+            perfil_form = EditarPerfilForm(request.POST, instance=request.user)
+            if perfil_form.is_valid():
+                perfil_form.save()
+                messages.success(request, "Dados atualizados!")
+                return redirect('perfil')
+            messages.error(request, "Corrija os erros abaixo.")
+    return render(request, 'perfil.html', {
+        'form': perfil_form,
+        'foto_form': foto_form,
+    })
 
 def cadastro_view(request):
     if request.user.is_authenticated:
@@ -118,5 +137,3 @@ def categoria_editar(request, pk):
     else:
         form = CategoriaForm(instance=categoria) 
     return render(request, 'administrador/categoria_form.html', {'form': form, 'titulo': 'Editar Categoria', 'categoria': categoria})
-def carrinho(request):
-    return render(request, 'carrinho.html')

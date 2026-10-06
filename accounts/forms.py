@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
 from .models import Usuario
 
 class UserRegisterForm(UserCreationForm):
@@ -44,20 +45,44 @@ class UserRegisterForm(UserCreationForm):
 class EditarPerfilForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ['display_name', 'telefone', 'email', 'foto']
-        def clean_display_name(self):
-            display_name = self.cleaned_data.get('display_name')
-            if display_name and Usuario.objects.filter(display_name=display_name).exists():
-                raise forms.ValidationError("Este nome de exibição já está em uso. Por favor, escolha outro.")
-            return display_name
-        def clean_email(self):
-            email = self.cleaned_data.get('email')
-            if email:
-                if Usuario.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
-                    raise forms.ValidationError("Este e-mail já está em uso por outra conta.")
-            return email
+        fields = ['display_name', 'telefone', 'email']
+    def clean_display_name(self):
+        display_name = self.cleaned_data.get('display_name')
+        if display_name and Usuario.objects.filter(display_name=display_name).exists():
+            raise forms.ValidationError("Este nome de exibição já está em uso. Por favor, escolha outro.")
+        return display_name
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            if Usuario.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Este e-mail já está em uso por outra conta.")
+        return email
 
-# class FotoPerfilForm(forms.ModelForm):
-#     class Meta:
-#         model = Usuario
-#         fields = ['foto']
+class FotoPerfilForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['foto']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._foto_antiga = None
+        if self.instance and self.instance.pk:
+            self._foto_antiga = self.instance.foto
+    def clean_foto(self):
+        foto = self.cleaned_data.get('foto')
+        if not foto:
+            return foto
+        if not self.instance.pode_alterar():
+            raise ValidationError(
+                "Você já atingiu o limite de 3 trocas de foto neste mês. "
+                "Tente novamente no próximo mês."
+            )
+        if foto.size > 5 * 1024 * 1024:
+            raise ValidationError("A imagem não pode passar de 5MB.")
+        return foto
+    def save(self, commit=True):
+        usuario = super().save(commit=commit)
+        if commit:
+            usuario.registrar_troca_foto()
+            usuario.save(update_fields=['limite_alteracao', 'ultima_foto'])
+            usuario.deletar_cloudinary(self._foto_antiga)
+        return usuario
