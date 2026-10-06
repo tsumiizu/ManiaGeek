@@ -1,126 +1,153 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} 
+{% load static %} 
 
-{% block content %}
-<div class="profile-container" style="max-width: 1280px;">
+{% block content %} 
+
+<div class="profile-container" style="max-width: 1280px;"> 
   
-  {% if user.is_authenticated %}
+  {% if user.is_authenticated %} 
     
-    <!-- CARD DE PERFIL EXPANDIDO -->
-    <div class="profile-header" style="width: 100%; position: relative; display: flex; align-items: center; justify-content: space-between; padding: 40px 48px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; margin-bottom: 40px;">
+    <!-- CARD DE PERFIL EXPANDIDO --> 
+    <div class="profile-header" style="width: 100%; position: relative; display: flex; align-items: center; justify-content: space-between; padding: 40px 48px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; margin-bottom: 40px;"> 
       
-      <form method="POST" enctype="multipart/form-data" action="{% url 'perfil' %}" style="display: flex; align-items: center; gap: 36px; width: 100%;">
-        {% csrf_token %}
+      <form method="POST" enctype="multipart/form-data" action="{% url 'perfil' %}" style="display: flex; align-items: flex-start; gap: 36px; width: 100%;"> 
+        {% csrf_token %} 
         
-        <!-- Foto Ampliada + Botão de Trocar Foto -->
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; flex-shrink: 0;">
-          <div class="profile-avatar" style="width: 130px; height: 130px; font-size: 52px; border: 3px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);">
-            {% if user.foto %}
-              <img src="{{ user.foto.url }}" alt="Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-            {% else %}
-              {{ user.display_name|default:user.username|make_list|first }}
-            {% endif %}
-          </div>
+        <!-- Foto Ampliada + Botão de Trocar Foto --> 
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; flex-shrink: 0;"> 
+          <div class="profile-avatar" style="width: 130px; height: 130px; font-size: 52px; border: 3px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);"> 
+            {% if user.foto %} 
+              <img src="{{ user.foto.url }}" alt="Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"> 
+            {% else %} 
+              {{ user.display_name|default:user.username|make_list|first }} 
+            {% endif %} 
+          </div> 
           
-          <label for="file-upload" class="btn-primary" style="padding: 7px 16px; font-size: 13px; cursor: pointer;">
-            Trocar Foto
-          </label>
-          <input id="file-upload" type="file" name="foto" accept="image/*" style="display: none;" onchange="this.form.submit()">
-        </div>
+          <label for="file-upload" class="btn-primary" style="padding: 7px 16px; font-size: 13px; cursor: pointer;"> 
+            Trocar Foto 
+          </label> 
+          <input id="file-upload" type="file" name="foto" accept="image/*" style="display: none;" onchange="this.form.submit()"> 
+        </div> 
 
-        <!-- Campos e Informações do Perfil -->
-        <div class="profile-info" style="flex: 1; max-width: 500px;">
+        <!-- Campos e Informações do Perfil --> 
+        <div class="profile-info" style="flex: 1; max-width: 500px; padding-top: 10px;"> 
           
-          <!-- Edição do Display Name -->
-          <div class="form-group" style="margin-bottom: 12px;">
-            <label for="id_display_name" style="font-size: 11px; color: var(--yellow); text-transform: uppercase; font-family: var(--font-mono);">Nome de Exibição</label>
-            <div style="display: flex; gap: 8px; margin-top: 4px;">
-              <input type="text" name="display_name" id="id_display_name" value="{{ user.display_name|default:'' }}" placeholder="{{ user.username }}" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; padding: 8px 12px; font-size: 16px; font-weight: 600; width: 100%;">
-              <button type="submit" class="btn-primary" style="padding: 8px 16px; font-size: 12px; border-radius: 8px; white-space: nowrap;">Salvar</button>
-            </div>
+          <!-- ================= MODO VISUALIZAÇÃO ================= -->
+          <div id="view-mode" style="display: flex; flex-direction: column; gap: 8px;">
+            <h2 style="margin: 0; font-size: 26px; color: var(--white);">{{ user.display_name|default:user.username }}</h2>
+            <p style="margin: 4px 0; color: var(--text-secondary);"><strong>E-mail:</strong> {{ user.email|default:"Não cadastrado" }}</p> 
+            <p style="margin: 4px 0; color: var(--text-secondary);"><strong>Usuário:</strong> @{{ user.username }}</p> 
+            {% if user.telefone %} 
+              <p style="margin: 4px 0; color: var(--text-secondary);"><strong>Telefone:</strong> {{ user.telefone }}</p> 
+            {% endif %} 
+
+            <!-- BOTÃO DE EDITAR -->
+            <button type="button" onclick="toggleEditMode()" class="btn-primary" style="padding: 7px 16px; font-size: 13px; cursor: pointer; margin-top: 12px; align-self: flex-start; display: flex; align-items: center; gap: 6px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              Editar informações
+            </button>
           </div>
 
-          <p style="margin: 4px 0;"><strong>E-mail:</strong> {{ user.email|default:"Não cadastrado" }}</p>
-          <p style="margin: 4px 0;"><strong>Usuário:</strong> @{{ user.username }}</p>
-          {% if user.telefone %}
-            <p style="margin: 4px 0;"><strong>Telefone:</strong> {{ user.telefone }}</p>
-          {% endif %}
-        </div>
+          <!-- ================= MODO EDIÇÃO (Oculto por padrão) ================= -->
+          <div id="edit-mode" style="display: none; flex-direction: column; gap: 14px;">
+            
+            <div class="form-group" style="margin-bottom: 0;"> 
+              <label for="id_display_name" style="font-size: 11px; color: var(--yellow); text-transform: uppercase; font-family: var(--font-mono);">Nome de Exibição</label> 
+              <input type="text" name="display_name" id="id_display_name" value="{{ user.display_name|default:'' }}" placeholder="{{ user.username }}" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; padding: 10px 14px; font-size: 14px; width: 100%; margin-top: 4px;"> 
+            </div> 
 
-      </form>
+            <div class="form-group" style="margin-bottom: 0;"> 
+              <label for="id_email" style="font-size: 11px; color: var(--yellow); text-transform: uppercase; font-family: var(--font-mono);">E-mail</label> 
+              <input type="email" name="email" id="id_email" value="{{ user.email|default:'' }}" placeholder="seu@email.com" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; padding: 10px 14px; font-size: 14px; width: 100%; margin-top: 4px;"> 
+            </div> 
+            
+            <!-- Botões de Salvar e Cancelar -->
+            <div style="display: flex; gap: 12px; margin-top: 8px;"> 
+              <button type="submit" class="btn-primary" style="padding: 10px 24px; font-size: 13px; border-radius: 8px;">Salvar</button> 
+              <button type="button" onclick="toggleEditMode()" class="btn-outline" style="padding: 10px 24px; font-size: 13px; border-radius: 8px; border-color: rgba(255,255,255,0.2);">Cancelar</button> 
+            </div> 
 
-      <!-- Mascote no Canto Inferior Direito do Card -->
-      <img src="{% static 'media/gato_geek.webp' %}" alt="Mascote" class="corner-cat cat-bottom-right" style="position: absolute; bottom: -20px; right: -20px; width: 75px; height: 75px; pointer-events: none;">
-    </div>
+          </div>
 
-    <!-- PAINEL INFERIOR COM DUAS COLUNAS: ENDEREÇOS (ESQUERDA) E COMPRAS (DIREITA) -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-bottom: 40px;">
+        </div> 
+      </form> 
+
+      <!-- Mascote no Canto Inferior Direito do Card --> 
+      <img src="{% static 'media/gato_geek.webp' %}" alt="Mascote" class="corner-cat cat-bottom-right" style="position: absolute; bottom: -20px; right: -20px; width: 75px; height: 75px; pointer-events: none;"> 
+    </div> 
+
+    <!-- PAINEL INFERIOR COM DUAS COLUNAS: ENDEREÇOS E COMPRAS --> 
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-bottom: 40px;"> 
       
-      <!-- COLUNA DA ESQUERDA: ENDEREÇOS -->
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;">
-        <h2 class="section-title" style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
-          Meus Endereços
-        </h2>
+      <!-- COLUNA DA ESQUERDA: ENDEREÇOS --> 
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;"> 
+        <h2 class="section-title" style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;"> 
+          Meus Endereços 
+        </h2> 
         
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          {% for endereco in user.enderecos.all %}
-            <div class="address-card">
-              <h3>Endereço #{{ forloop.counter }}</h3>
-              <p><strong>Rua:</strong> {{ endereco.endereco|default:"-" }}, Nº {{ endereco.numero|default:"S/N" }}</p>
-              {% if endereco.complemento %}
-                <p><strong>Complemento:</strong> {{ endereco.complemento }}</p>
-              {% endif %}
-              <p><strong>Bairro:</strong> {{ endereco.bairro|default:"-" }}</p>
-              <p><strong>Cidade:</strong> {{ endereco.cidade|default:"-" }} - {{ endereco.estado|default:"-" }}</p>
-              <p><strong>CEP:</strong> {{ endereco.cep|default:"-" }}</p>
-            </div>
-          {% empty %}
-            <p style="color: #aaa;">Você ainda não possui nenhum endereço cadastrado.</p>
-          {% endfor %}
-        </div>
-      </div>
+        <div style="display: flex; flex-direction: column; gap: 16px;"> 
+          {% for endereco in user.enderecos.all %} 
+            <div class="address-card"> 
+              <h3>Endereço #{{ forloop.counter }}</h3> 
+              <p><strong>Rua:</strong> {{ endereco.endereco|default:"-" }}, Nº {{ endereco.numero|default:"S/N" }}</p> 
+              {% if endereco.complemento %} 
+                <p><strong>Complemento:</strong> {{ endereco.complemento }}</p> 
+              {% endif %} 
+              <p><strong>Bairro:</strong> {{ endereco.bairro|default:"-" }}</p> 
+              <p><strong>Cidade:</strong> {{ endereco.cidade|default:"-" }} - {{ endereco.estado|default:"-" }}</p> 
+              <p><strong>CEP:</strong> {{ endereco.cep|default:"-" }}</p> 
+            </div> 
+          {% empty %} 
+            <p style="color: #aaa;">Você ainda não possui nenhum endereço cadastrado.</p> 
+          {% endfor %} 
+        </div> 
+      </div> 
 
-      <!-- COLUNA DA DIREITA: MINHAS COMPRAS -->
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;">
-        <h2 class="section-title" style="margin-top: 0;">Minhas Compras</h2>
+      <!-- COLUNA DA DIREITA: MINHAS COMPRAS --> 
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;"> 
+        <h2 class="section-title" style="margin-top: 0;">Minhas Compras</h2> 
         
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          {% if compras %}
-            {% for compra in compras %}
-              <div class="address-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <h3 style="margin: 0;">Pedido #{{ compra.id }}</h3>
-                  <span style="font-size: 12px; background: var(--purple); padding: 4px 10px; border-radius: 999px;">{{ compra.status|default:"Concluído" }}</span>
-                </div>
-                <p><strong>Data:</strong> {{ compra.data_criacao|date:"d/m/Y H:i" }}</p>
-                <p><strong>Total:</strong> R$ {{ compra.valor_total }}</p>
-              </div>
-            {% endfor %}
-          {% else %}
-            <p style="color: #aaa;">Você ainda não realizou nenhuma compra.</p>
-          {% endif %}
-        </div>
-      </div>
+        <div style="display: flex; flex-direction: column; gap: 16px;"> 
+          {% if compras %} 
+            {% for compra in compras %} 
+              <div class="address-card"> 
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"> 
+                  <h3 style="margin: 0;">Pedido #{{ compra.id }}</h3> 
+                  <span style="font-size: 12px; background: var(--purple); padding: 4px 10px; border-radius: 999px;">{{ compra.status|default:"Concluído" }}</span> 
+                </div> 
+                <p><strong>Data:</strong> {{ compra.data_criacao|date:"d/m/Y H:i" }}</p> 
+                <p><strong>Total:</strong> R$ {{ compra.valor_total }}</p> 
+              </div> 
+            {% endfor %} 
+          {% else %} 
+            <p style="color: #aaa;">Você ainda não realizou nenhuma compra.</p> 
+          {% endif %} 
+        </div> 
+      </div> 
 
-    </div>
+    </div> 
 
-    <!-- BOTÃO DE LOGOUT -->
-    <div style="display: flex; justify-content: center; margin-bottom: 40px;">
-      <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn-primary" style="background: #e63946; color: #fff; padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; transition: all 0.2s ease;">
-          Sair da Conta
-        </button>
-      </form>
-    </div>
+    <!-- BOTÃO DE LOGOUT --> 
+    <div style="display: flex; justify-content: center; margin-bottom: 40px;"> 
+      <form method="POST" action="{% url 'logout' %}"> 
+        {% csrf_token %} 
+        <button type="submit" class="btn-primary" style="background: #e63946; color: #fff; padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; transition: all 0.2s ease;"> 
+          Sair da Conta 
+        </button> 
+      </form> 
+    </div> 
 
-  {% else %}
-    <div class="auth-warning">
-      <h2>Área Restrita</h2>
-      <p style="color: #aaa; margin: 16px 0 24px;">Você precisa estar logado para ver seu perfil, endereços e histórico de compras.</p>
-      <a href="{% url 'login' %}" class="btn-primary" style="display: inline-block;">Fazer Login</a>
-    </div>
-  {% endif %}
+  {% else %} 
+    <div class="auth-warning"> 
+      <h2>Área Restrita</h2> 
+      <p style="color: #aaa; margin: 16px 0 24px;">Você precisa estar logado para ver seu perfil, endereços e histórico de compras.</p> 
+      <a href="{% url 'login' %}" class="btn-primary" style="display: inline-block;">Fazer Login</a> 
+    </div> 
+  {% endif %} 
 
-</div>
+</div> 
+
 {% endblock %}
