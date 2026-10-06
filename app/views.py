@@ -18,30 +18,35 @@ def home_view(request):
 
 
 def detalhe_produto(request, id):
-  
     produto = get_object_or_404(Produto, id=id)
-    return render(request, 'detalhe_produto.html', {'produto': produto})
-
-def produtos_view(request):
-   
-    produtos = Produto.objects.all().order_by('-id')
     
+    produtos_relacionados = Produto.objects.filter(
+        produto_tipo=produto.produto_tipo
+    ).exclude(id=id)[:4]
     
+    return render(request, 'detalhe_produto.html', {
+        'produto': produto,
+        'produtos_relacionados': produtos_relacionados
+    })
+def produtos(request):
+    produtos = Produto.objects.all()
+    
+    # Pega os parâmetros da URL
     query = request.GET.get('q')
     tipo = request.GET.get('tipo')
-    
-   
+    categoria = request.GET.get('categoria') 
+    # Filtros
     if query:
         produtos = produtos.filter(nome__icontains=query)
-        
-   
     if tipo:
         produtos = produtos.filter(produto_tipo=tipo)
-        
-   
+    if categoria:
+
+        produtos = produtos.filter(categoria__nome__iexact=categoria)
+
     return render(request, 'produtos.html', {
-        'produtos': produtos, 
-        'query': query
+        'produtos': produtos,
+        'query': query,
     })
 
 @login_required
@@ -113,3 +118,5 @@ def categoria_editar(request, pk):
     else:
         form = CategoriaForm(instance=categoria) 
     return render(request, 'administrador/categoria_form.html', {'form': form, 'titulo': 'Editar Categoria', 'categoria': categoria})
+def carrinho(request):
+    return render(request, 'carrinho.html')

@@ -6,16 +6,32 @@
   
   <div class="product-window">
     
-    <!-- Gatinhos Retrô nas Bordas -->
+    <!-- Gatinhos Retrô nas Bordas ESTÃO DE VOLTA -->
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-top-left" alt="Gato">
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-top-right" alt="Gato">
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-bottom-left" alt="Gato">
     <img src="{% static 'media/gato_geek.webp' %}" class="corner-cat cat-bottom-right" alt="Gato">
 
-    <div class="product-window-content">
+    <div class="ml-layout">
       
-      <!-- LADO ESQUERDO: Imagens -->
-      <div class="product-gallery">
+      <!-- COLUNA 1: Miniaturas (Vertical na esquerda) -->
+      <div class="ml-thumbs">
+        {% if produto.video %}
+          <div class="video-thumb" onclick="showVideo()">
+            <video src="{{ produto.video.url }}#t=0.1" muted playsinline></video>
+            <div class="video-thumb-overlay">▶</div>
+          </div>
+        {% endif %}
+
+        {% if produto.Imagem.all %}
+          {% for foto in produto.Imagem.all %}
+            <img src="{{ foto.imagem.url }}" alt="{{ foto.alt_text }}" onclick="showImage('{{ foto.imagem.url }}')">
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <!-- COLUNA 2: Imagem Principal (Meio) AGORA MAIOR -->
+      <div class="ml-main-image">
         <div class="main-display-box">
           {% if produto.Imagem.all or produto.imagem_capa %}
             {% with primeira_foto=produto.Imagem.first %}
@@ -32,45 +48,23 @@
             </video>
           {% endif %}
         </div>
-        
-        <div class="thumb-row">
-          {% if produto.video %}
-            <div class="video-thumb" onclick="showVideo()">
-              <video src="{{ produto.video.url }}#t=0.1" muted playsinline></video>
-              <div class="video-thumb-overlay">▶</div>
-            </div>
-          {% endif %}
-
-          {% if produto.Imagem.all %}
-            {% for foto in produto.Imagem.all %}
-              <img src="{{ foto.imagem.url }}" alt="{{ foto.alt_text }}" onclick="showImage('{{ foto.imagem.url }}')">
-            {% endfor %}
-          {% endif %}
-        </div>
       </div>
 
-      <!-- LADO DIREITO: Informações -->
-      <div class="product-info-panel">
-        
+      <!-- COLUNA 3: Informações e Compra (Direita) -->
+      <div class="ml-info">
         <div class="product-tags">
-          <span class="tag-tipo">
-            {{ produto.get_produto_tipo_display }}
-          </span>
+          <span class="tag-tipo">{{ produto.get_produto_tipo_display }}</span>
           {% for categoria in produto.categoria.all %}
-            <span class="tag-categoria">
-              {{ categoria.nome }}
-            </span>
+            <span class="tag-categoria">{{ categoria.nome }}</span>
           {% endfor %}
         </div>
 
         <h1 class="product-title-detail">{{ produto.nome }}</h1>
-        <div class="product-price-detail">R$ {{ produto.preco }}</div>
+        <span class="product-author" style="font-size: 14px; margin-top: 4px;">Vendido e entregue por Mania Geek Store</span>
+        
+        <div class="product-price-detail" style="margin-top: 16px;">R$ {{ produto.preco }}</div>
 
-        <div class="product-description">
-          {{ produto.descricao|linebreaks }}
-        </div>
-
-        <div class="product-actions">
+        <div class="product-actions" style="margin-top: 16px;">
           {% if produto.quantidade > 0 %}
             <span class="stock-status">✓ Em estoque ({{ produto.quantidade }} disponíveis)</span>
             <button class="btn-add-cart-large" onclick="adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">
@@ -84,8 +78,43 @@
           {% endif %}
         </div>
 
+        <div class="product-description" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+          <h3 style="font-size: 18px; margin-bottom: 12px; color: var(--white);">Descrição do Produto</h3>
+          {{ produto.descricao|linebreaks }}
+        </div>
       </div>
+
     </div>
   </div>
+
+  <!-- SEÇÃO: Produtos Relacionados (Cards agora menores no CSS) -->
+  {% if produtos_relacionados %}
+  <div class="related-products-section" style="margin-top: 60px;">
+    <h2 style="color: var(--white); font-family: var(--font-display); margin-bottom: 24px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">Produtos relacionados</h2>
+    
+    <div class="products-grid">
+      {% for rel_produto in produtos_relacionados %}
+        <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' rel_produto.id %}'">
+          <div class="product-thumb">
+            <span class="product-badge">{{ rel_produto.categoria.first.nome|default:rel_produto.get_produto_tipo_display }}</span>
+            {% if rel_produto.imagem_capa %}
+              <img src="{{ rel_produto.imagem_capa }}" alt="{{ rel_produto.nome }}">
+            {% endif %}
+          </div>
+          <div class="product-info">
+            <h3 class="product-title">{{ rel_produto.nome }}</h3>
+            <!-- O CSS cuidará do "..." na classe product-author -->
+            <span class="product-author">{{ rel_produto.descricao }}</span>
+            <div class="product-footer">
+              <span class="product-price">R$ {{ rel_produto.preco }}</span>
+              <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('{{ rel_produto.nome|escapejs }}', {{ rel_produto.preco|default:0 }})">Adicionar</button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
 </div>
 {% endblock %}

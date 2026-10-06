@@ -4,8 +4,9 @@ from django.contrib.auth.views import LogoutView, LoginView
 
 urlpatterns = [
     path('', views.home_view, name='home'),
-    path('produto/', views.produtos_view, name='produtos'),
+    path('produto/', views.produtos, name='produtos'),
     path('produto/<int:id>/', views.detalhe_produto, name='detalhe_produto'),
+    path('carrinho/', views.carrinho, name='carrinho'),
     # Administrador (temporario)
     path('produto/novo/', views.produto_criar, name='produto_criar'),
     path('produto/<int:pk>/editar/', views.produto_editar, name='produto_editar'),

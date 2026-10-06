@@ -6,16 +6,24 @@
 <div class="container section-padding">
   
   <!-- CABEÇALHO DINÂMICO (Muda se for pesquisa, filtro por tipo ou catálogo normal) -->
-  <div class="section-header">
+<div class="section-header">
     <div class="section-header-text">
       {% if query %}
         <span class="eyebrow">Pesquisa</span>
         <h2>Resultados para: "{{ query }}"</h2>
         <p>Mostrando os produtos que encontramos com base na sua busca.</p>
+      
       {% elif request.GET.tipo %}
         <span class="eyebrow">Filtro por Categoria</span>
         <h2>{{ request.GET.tipo|title }}</h2>
-        <p>Mostrando todos os produtos da categoria {{ request.GET.tipo }}.</p>
+        <p>Mostrando todos os produtos do tipo {{ request.GET.tipo }}.</p>
+      
+      <!-- NOVO: Título dinâmico para a Categoria -->
+      {% elif request.GET.categoria %}
+        <span class="eyebrow">Coleção</span>
+        <h2>{{ request.GET.categoria|title }}</h2>
+        <p>Mostrando a seleção exclusiva da coleção {{ request.GET.categoria }}.</p>
+      
       {% else %}
         <span class="eyebrow">Catálogo Completo</span>
         <h2>Todos os Produtos</h2>
@@ -51,7 +59,9 @@
         <h3 style="color: var(--text-primary); margin-bottom: 12px;">Puxa, não encontramos nada!</h3>
         <p style="color: var(--text-secondary); font-size: 16px;">
           {% if request.GET.tipo %}
-            Ainda não temos produtos cadastrados na categoria <strong>{{ request.GET.tipo }}</strong>.
+            Ainda não temos produtos cadastrados do tipo <strong>{{ request.GET.tipo }}</strong>.
+          {% elif request.GET.categoria %}
+            Ainda não temos produtos na coleção <strong>{{ request.GET.categoria }}</strong>.
           {% else %}
             Nenhum produto bate com a pesquisa <strong>"{{ query }}"</strong>. Tente usar outras palavras!
           {% endif %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container section-padding">
+  
+  <!-- CABEÇALHO DO CARRINHO -->
+  <div class="section-header" style="margin-bottom: 24px;">
+    <div class="section-header-text">
+      <h2 style="font-size: 30px;">Seu Carrinho</h2>
+    </div>
+  </div>
+
+  <!-- LAYOUT REAL DO CARRINHO (2 Colunas) -->
+  <div class="cart-page-layout">
+    
+    <!-- LADO ESQUERDO: Onde ficam os itens (Atualmente mostrando o Empty State estilo Amazon) -->
+    <div class="cart-items-column">
+      
+      <!-- CAIXA DE CARRINHO VAZIO -->
+      <div class="empty-cart-box">
+        
+        <!-- Ilustração (Esquerda) -->
+        <div class="empty-cart-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+
+        <!-- Textos e Botões (Direita) -->
+        <div class="empty-cart-content">
+          <h3>Seu carrinho da ManiaGeek está vazio</h3>
+          <p>O carrinho de compras é um local temporário para armazenar seus itens. Que tal dar uma olhada nas nossas novidades?</p>
+          
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="{% url 'produtos' %}" class="btn-primary" style="padding: 10px 24px; font-size: 14px;">
+              Explorar produtos
+            </a>
+            {% if not user.is_authenticated %}
+              <a href="{% url 'login' %}" class="btn-outline" style="padding: 10px 24px; font-size: 14px;">
+                Faça login na sua conta
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Texto de rodapé estilo Amazon -->
+      <p class="cart-disclaimer">
+        O preço e a disponibilidade dos produtos na ManiaGeek.com.br estão sujeitos a alterações. O carrinho de compras reflete o preço mais atualizado de cada um deles.
+      </p>
+
+    </div>
+
+    <!-- LADO DIREITO: Resumo do Pedido -->
+    <div class="cart-summary-column">
+      <div class="cart-summary-box">
+        <h4>Resumo do Pedido</h4>
+        
+        <div class="summary-row">
+          <span>Subtotal (0 itens)</span>
+          <span>R$ 0,00</span>
+        </div>
+        
+        <div class="summary-row">
+          <span>Frete</span>
+          <span>A calcular</span>
+        </div>
+
+        <div class="summary-total">
+          <span>Total</span>
+          <span class="total-price">R$ 0,00</span>
+        </div>
+
+        <!-- Botão desativado porque não há produtos -->
+        <button class="btn-add-cart-large btn-disabled" disabled style="width: 100%; font-size: 14px; padding: 14px;">
+          Fechar Pedido
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
