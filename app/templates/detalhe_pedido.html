@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container section-padding">
+
+  <div class="section-header" style="margin-bottom: 24px;">
+    <div class="section-header-text">
+      <span class="eyebrow">Pedido #{{ pedido.id }}</span>
+      <h2 style="font-size: 30px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        Detalhes do Pedido
+        <span class="pedido-status pedido-status-{{ pedido.status }}">
+          {{ pedido.get_status_display }}
+        </span>
+      </h2>
+      <p>Feito em {{ pedido.criado_em|date:"d/m/Y \à\s H:i" }}</p>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+      {% for msg in messages %}
+        <div style="padding: 12px 20px; border-radius: 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    color: {% if msg.tags == 'error' %}#e63946{% else %}var(--white){% endif %};">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Alerta de expiração: só aparece se ainda tá pendente -->
+  {% if pedido.pendente and pedido.expira_em %}
+    <div class="pedido-alert pedido-alert-warn">
+      <strong>⏱ Aguardando pagamento</strong>
+      <span>Este pedido será cancelado em {{ pedido.expira_em|timeuntil }} se o pagamento não for confirmado.</span>
+    </div>
+  {% endif %}
+
+  <div class="cart-page-layout">
+
+    <!-- ============ COLUNA ESQUERDA: ITENS + ENDEREÇO + CHAT ============ -->
+    <div class="cart-items-column">
+
+      <!-- Bloco: Itens do pedido -->
+      <div class="checkout-block">
+        <h3 class="checkout-block-title">
+          <span class="checkout-step">•</span>
+          Itens do pedido
+        </h3>
+
+        <div class="cart-items-list">
+          {% for item in itens %}
+            <div class="cart-item-row">
+              <div class="cart-item-thumb">
+                {% if item.imagem_url %}
+                  <img src="{{ item.imagem_url }}" alt="{{ item.nome_produto }}">
+                {% else %}
+                  <span class="cart-item-thumb-empty">sem imagem</span>
+                {% endif %}
+              </div>
+              <div class="cart-item-info">
+                <h3 class="cart-item-name">
+                  {% if item.produto %}
+                    <a href="{% url 'detalhe_produto' item.produto.id %}" class="cart-item-name-link">
+                      {{ item.nome_produto }}
+                    </a>
+                  {% else %}
+                    {{ item.nome_produto }}
+                  {% endif %}
+                </h3>
+                <span class="cart-item-unit-price">
+                  {{ item.quantidade }}× R$ {{ item.preco_unitario }}
+                </span>
+              </div>
+              <div class="cart-item-actions">
+                <span class="item-subtotal">R$ {{ item.subtotal }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Bloco: Endereço de entrega (cópia congelada) -->
+      <div class="checkout-block" style="margin-top: 24px;">
+        <h3 class="checkout-block-title">
+          <span class="checkout-step">•</span>
+          Endereço de entrega
+        </h3>
+        <div class="pedido-endereco">
+          <p class="endereco-linha" style="color: var(--white);">
+            <strong>{{ pedido.entrega_apelido|default:"Endereço" }}</strong>
+          </p>
+          <p class="endereco-linha">
+            {{ pedido.entrega_endereco }}, Nº {{ pedido.entrega_numero }}
+            {% if pedido.entrega_complemento %} — {{ pedido.entrega_complemento }}{% endif %}
+          </p>
+          <p class="endereco-linha">{{ pedido.entrega_bairro }}</p>
+          <p class="endereco-linha">
+            {{ pedido.entrega_cidade }} - {{ pedido.entrega_estado }}
+            {% if pedido.entrega_cep %} · CEP {{ pedido.entrega_cep }}{% endif %}
+          </p>
+        </div>
+      </div>
+
+      <!-- Bloco: Chat com o vendedor (WIP por enquanto) -->
+      {% if pedido.chat_disponivel %}
+        <div class="checkout-block" style="margin-top: 24px;">
+          <h3 class="checkout-block-title">
+            <span class="checkout-step">•</span>
+            Falar com o vendedor
+          </h3>
+          <div class="pedido-chat-wip">
+            <div class="pedido-chat-wip-icon">💬</div>
+            <p class="pedido-chat-wip-title">Chat em breve</p>
+            <p class="pedido-chat-wip-desc">
+              Aqui você poderá tirar dúvidas sobre o pedido, combinar detalhes de
+              entrega e receber atualizações do vendedor.
+            </p>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ============ COLUNA DIREITA: RESUMO + AÇÕES ============ -->
+    <div class="cart-summary-column">
+      <div class="cart-summary-box">
+        <h4>Resumo</h4>
+
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>R$ {{ pedido.valor_produtos }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>
+            Frete
+            {% if pedido.frete_transportadora %}
+              <small style="display: block; color: var(--text-muted); font-size: 11px; font-weight: 400;">
+                {{ pedido.frete_transportadora }}
+                {% if pedido.frete_prazo_dias %} · ~{{ pedido.frete_prazo_dias }} dias{% endif %}
+              </small>
+            {% endif %}
+          </span>
+          <span>R$ {{ pedido.valor_frete }}</span>
+        </div>
+
+        <div class="summary-total">
+          <span>Total</span>
+          <span class="total-price">R$ {{ pedido.valor_total }}</span>
+        </div>
+
+        <!-- Info de pagamento -->
+        {% if pedido.metodo_pagamento %}
+          <div class="summary-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+            <span>Pagamento</span>
+            <span>{{ pedido.get_metodo_pagamento_display }}</span>
+          </div>
+        {% endif %}
+
+        {% if pedido.id_transacao_gateway %}
+          <div class="summary-row" style="font-size: 11px; color: var(--text-muted);">
+            <span>Transação</span>
+            <span>{{ pedido.id_transacao_gateway }}</span>
+          </div>
+        {% endif %}
+
+        <!-- Botões DEV: só aparecem em DEBUG. Em produção somem. -->
+        {% if modo_dev %}
+          <div class="pedido-dev-panel">
+            <p class="pedido-dev-title">🛠 Modo desenvolvedor</p>
+
+            {% if pedido.status == 'pendente_pagamento' %}
+              <form method="POST" action="{% url 'pedido_simular_pagamento' pedido.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="pedido-dev-btn">
+                  Simular pagamento aprovado
+                </button>
+              </form>
+            {% endif %}
+
+            {% if pedido.status == 'pago' %}
+              <form method="POST" action="{% url 'pedido_avancar' pedido.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="pedido-dev-btn">
+                  Avançar: Em preparação
+                </button>
+              </form>
+            {% elif pedido.status == 'em_preparacao' %}
+              <form method="POST" action="{% url 'pedido_avancar' pedido.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="pedido-dev-btn">
+                  Avançar: Enviado
+                </button>
+              </form>
+            {% elif pedido.status == 'enviado' %}
+              <form method="POST" action="{% url 'pedido_avancar' pedido.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="pedido-dev-btn">
+                  Avançar: Entregue
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <a href="{% url 'pedido_lista' %}"
+           class="btn-outline"
+           style="display: block; text-align: center; margin-top: 12px;
+                  padding: 12px; font-size: 13px; text-decoration: none;">
+          Ver todos os pedidos
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

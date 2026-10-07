@@ -1,6 +1,40 @@
 from django import forms
 from .models import *
 
+class EnderecoForm(forms.ModelForm):
+    """Form de endereço. Sem widgets com classe — o template escreve
+    os inputs manualmente, igual ao login, pra herdar o estilo base
+    do auth-card. Bootstrap fora daqui."""
+    class Meta:
+        model = Endereco
+        fields = ['apelido', 'cep', 'endereco', 'numero',
+                  'complemento', 'bairro', 'cidade', 'estado']
+        labels = {
+            'apelido': 'Apelido (opcional)',
+            'cep': 'CEP',
+            'endereco': 'Endereço',
+            'numero': 'Número',
+            'complemento': 'Complemento (opcional)',
+            'bairro': 'Bairro',
+            'cidade': 'Cidade',
+            'estado': 'Estado (UF)',
+        }
+
+    def clean_estado(self):
+        uf = self.cleaned_data.get('estado', '').strip().upper()
+        if uf and len(uf) != 2:
+            raise forms.ValidationError("Use a sigla do estado (ex: RJ, SP).")
+        return uf
+
+    def clean_cep(self):
+        cep = self.cleaned_data.get('cep', '').strip()
+        if cep:
+            apenas_digitos = ''.join(filter(str.isdigit, cep))
+            if len(apenas_digitos) != 8:
+                raise forms.ValidationError("CEP deve ter 8 dígitos.")
+            cep = f"{apenas_digitos[:5]}-{apenas_digitos[5:]}"
+        return cep
+
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria

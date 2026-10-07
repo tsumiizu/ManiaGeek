@@ -3,66 +3,142 @@
 
 {% block content %}
 <div class="container section-padding">
-  
-  <!-- CABEÇALHO DO CARRINHO -->
+
   <div class="section-header" style="margin-bottom: 24px;">
     <div class="section-header-text">
       <h2 style="font-size: 30px;">Seu Carrinho</h2>
     </div>
   </div>
 
-  <!-- LAYOUT REAL DO CARRINHO (2 Colunas) -->
   <div class="cart-page-layout">
-    
-    <!-- LADO ESQUERDO: Onde ficam os itens (Atualmente mostrando o Empty State estilo Amazon) -->
+
+    <!-- ============ COLUNA ESQUERDA: ITENS ============ -->
     <div class="cart-items-column">
-      
-      <!-- CAIXA DE CARRINHO VAZIO -->
-      <div class="empty-cart-box">
-        
-        <!-- Ilustração (Esquerda) -->
-        <div class="empty-cart-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-          </svg>
+
+      {% if itens %}
+
+        <div class="cart-items-list">
+          {% for item in itens %}
+            <div class="cart-item-row" data-item-id="{{ item.id }}">
+
+              <div class="cart-item-thumb">
+                {% if item.imagem_url %}
+                  <img src="{{ item.imagem_url }}" alt="{{ item.nome_produto }}">
+                {% else %}
+                  <span class="cart-item-thumb-empty">sem imagem</span>
+                {% endif %}
+              </div>
+
+              <div class="cart-item-info">
+
+  {# Nome do produto: se ainda existe, vira link pro detalhe. #}
+  {# Se foi deletado (produto=None), vira texto simples — não dá pra #}
+  {# navegar pra um produto que não existe mais. #}
+  <h3 class="cart-item-name">
+    {% if item.produto %}
+      <a href="{% url 'detalhe_produto' item.produto.id %}" class="cart-item-name-link">
+        {{ item.nome_produto }}
+      </a>
+    {% else %}
+      {{ item.nome_produto }}
+    {% endif %}
+  </h3>
+
+  {# FOMO: mostra estoque com urgência decrescente. #}
+  {% if item.produto is None %}
+    <span class="cart-item-status cart-item-status-error">
+      Produto indisponível (removido da loja)
+    </span>
+  {% elif item.produto.quantidade == 0 %}
+    <span class="cart-item-status cart-item-status-error">
+      ✗ Fora de estoque — remova para continuar
+    </span>
+  {% elif item.produto.quantidade <= 5 %}
+    <span class="cart-item-status cart-item-status-warn">
+      ⚡ Só restam {{ item.produto.quantidade }} em estoque
+    </span>
+  {% else %}
+    <span class="cart-item-status cart-item-status-ok">
+      ✓ Em estoque ({{ item.produto.quantidade }} disponíveis)
+    </span>
+  {% endif %}
+
+  {% if item.preco_mudou %}
+    <span class="cart-item-status cart-item-status-info">
+      O preço deste item mudou desde que você o adicionou.
+    </span>
+  {% endif %}
+
+  <span class="cart-item-unit-price">R$ {{ item.preco_unitario }}</span>
+</div>
+
+              <div class="cart-item-actions">
+
+  {% if item.produto and item.produto.quantidade > 0 %}
+    <div class="qty-control" data-estoque="{{ item.produto.quantidade }}">
+      <button type="button" class="qty-btn" data-action="decrement"
+              aria-label="Diminuir quantidade">−</button>
+      <span class="qty-value">{{ item.quantidade }}</span>
+      <button type="button" class="qty-btn" data-action="increment"
+              aria-label="Aumentar quantidade"
+              {% if item.quantidade >= item.produto.quantidade %}disabled{% endif %}>+</button>
+    </div>
+    {% if item.quantidade >= item.produto.quantidade %}
+      <span class="qty-limit-hint">LIMITE DO ESTOQUE</span>
+    {% endif %}
+  {% else %}
+    <span class="qty-value qty-value-static">x{{ item.quantidade }}</span>
+  {% endif %}
+
+  <span class="item-subtotal">R$ {{ item.subtotal }}</span>
+
+  <button type="button" class="remover-item">Remover</button>
+</div>
+
+            </div>
+          {% endfor %}
         </div>
 
-        <!-- Textos e Botões (Direita) -->
-        <div class="empty-cart-content">
-          <h3>Seu carrinho da ManiaGeek está vazio</h3>
-          <p>O carrinho de compras é um local temporário para armazenar seus itens. Que tal dar uma olhada nas nossas novidades?</p>
-          
-          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <a href="{% url 'produtos' %}" class="btn-primary" style="padding: 10px 24px; font-size: 14px;">
-              Explorar produtos
-            </a>
-            {% if not user.is_authenticated %}
-              <a href="{% url 'login' %}" class="btn-outline" style="padding: 10px 24px; font-size: 14px;">
-                Faça login na sua conta
-              </a>
-            {% endif %}
+        <p class="cart-disclaimer">
+          O preço e a disponibilidade dos produtos na ManiaGeek.com.br estão sujeitos a alterações. O carrinho de compras reflete o preço mais atualizado de cada um deles.
+        </p>
+
+      {% else %}
+
+        <div class="empty-cart-box">
+          <div class="empty-cart-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <div class="empty-cart-content">
+            <h3>Seu carrinho da ManiaGeek está vazio</h3>
+            <p>O carrinho de compras é um local temporário para armazenar seus itens. Que tal dar uma olhada nas nossas novidades?</p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <a href="{% url 'produtos' %}" class="btn-primary" style="padding: 10px 24px; font-size: 14px;">Explorar produtos</a>
+              {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn-outline" style="padding: 10px 24px; font-size: 14px;">Faça login na sua conta</a>
+              {% endif %}
+            </div>
           </div>
         </div>
 
-      </div>
-
-      <!-- Texto de rodapé estilo Amazon -->
-      <p class="cart-disclaimer">
-        O preço e a disponibilidade dos produtos na ManiaGeek.com.br estão sujeitos a alterações. O carrinho de compras reflete o preço mais atualizado de cada um deles.
-      </p>
+      {% endif %}
 
     </div>
 
-    <!-- LADO DIREITO: Resumo do Pedido -->
+    <!-- ============ COLUNA DIREITA: RESUMO ============ -->
     <div class="cart-summary-column">
       <div class="cart-summary-box">
         <h4>Resumo do Pedido</h4>
-        
+
         <div class="summary-row">
-          <span>Subtotal (0 itens)</span>
-          <span>R$ 0,00</span>
+          <span id="resumo-label-itens">
+            Subtotal ({{ carrinho.quantidade_total }} {% if carrinho.quantidade_total == 1 %}item{% else %}itens{% endif %})
+          </span>
+          <span id="subtotal-carrinho">R$ {{ carrinho.subtotal }}</span>
         </div>
-        
+
         <div class="summary-row">
           <span>Frete</span>
           <span>A calcular</span>
@@ -70,13 +146,28 @@
 
         <div class="summary-total">
           <span>Total</span>
-          <span class="total-price">R$ 0,00</span>
+          <span class="total-price" id="total-carrinho">R$ {{ carrinho.subtotal }}</span>
         </div>
 
-        <!-- Botão desativado porque não há produtos -->
-        <button class="btn-add-cart-large btn-disabled" disabled style="width: 100%; font-size: 14px; padding: 14px;">
-          Fechar Pedido
-        </button>
+        {% if carrinho.pode_fechar %}
+  <a href="{% url 'checkout' %}"
+     class="btn-add-cart-large"
+     style="width: 100%; font-size: 14px; padding: 14px;
+            text-decoration: none; display: block; text-align: center;">
+    Fechar Pedido
+  </a>
+{% else %}
+  <button class="btn-add-cart-large btn-disabled" disabled
+          style="width: 100%; font-size: 14px; padding: 14px;">
+    {% if carrinho.tem_indisponivel %}
+      Remova itens indisponíveis
+    {% elif carrinho.tem_sem_estoque %}
+      Remova itens sem estoque
+    {% else %}
+      Carrinho vazio
+    {% endif %}
+  </button>
+{% endif %}
       </div>
     </div>
 

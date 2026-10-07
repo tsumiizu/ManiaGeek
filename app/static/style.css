@@ -1910,3 +1910,1794 @@ footer {
     justify-content: center;
   }
 }
+
+/* ── CARRINHO: LISTA DE ITENS (complemento) ── */
+
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cart-item-row {
+  display: flex;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-color);
+  align-items: flex-start;
+}
+
+.cart-item-row:last-child {
+  border-bottom: none;
+}
+
+.cart-item-thumb {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-item-thumb-empty {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cart-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cart-item-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  font-family: var(--font-display);
+}
+
+.cart-item-status {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.cart-item-status-error { color: #e63946; }
+.cart-item-status-warn  { color: var(--yellow); }
+.cart-item-status-info  { color: var(--cyan); }
+
+.cart-item-unit-price {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.qty-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.qty-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  min-width: 20px;
+  text-align: center;
+  color: var(--white);
+}
+
+.qty-value-static {
+  color: var(--text-muted);
+}
+
+.item-subtotal {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.remover-item {
+  background: transparent;
+  border: none;
+  color: #e63946;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-family: var(--font-body);
+  transition: color 0.2s ease;
+}
+
+.remover-item:hover {
+  color: #ff6b78;
+}
+
+@media (max-width: 600px) {
+  .cart-item-row {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .cart-item-thumb {
+    width: 80px;
+    height: 80px;
+  }
+  .cart-item-actions {
+    align-items: flex-start;
+    min-width: 0;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+/* Nome do produto clicável */
+.cart-item-name-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.cart-item-name-link:hover {
+  color: var(--cyan);
+  text-decoration: underline;
+}
+
+/* Estoque saudável: discreto, verde-água, sem alarme */
+.cart-item-status-ok {
+  color: var(--cyan);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* Aviso de "chegou no estoque máximo" (abaixo do controle de quantidade) */
+.qty-limit-hint {
+  font-size: 11px;
+  color: var(--yellow);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Botão de quantidade desabilitado (limite atingido) */
+.qty-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+.qty-btn:disabled:hover {
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* -- Botão Anti-Spam Universal */
+button.is-locked,
+button[aria-busy="true"] {
+  cursor: not-allowed;
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+/* Spinner */
+button.is-locked::after,
+button[aria-busy="true"]::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spinLock 0.6s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spinLock {
+  to { transform: rotate(360deg); }
+}
+.enderecos-scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.enderecos-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.enderecos-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.enderecos-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+.enderecos-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Card individual de endereço */
+.endereco-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.endereco-card:hover {
+  border-color: var(--cyan);
+}
+
+.endereco-titulo {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--yellow);
+  font-family: var(--font-display);
+}
+
+.endereco-linha {
+  margin: 2px 0;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Botões "Editar" e "Remover" */
+.endereco-acao {
+  background: transparent;
+  border: none;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-family: var(--font-body);
+  transition: color 0.2s ease;
+}
+
+.endereco-acao:hover {
+  color: var(--white);
+}
+
+.endereco-acao-remover {
+  color: #e63946;
+}
+
+.endereco-acao-remover:hover {
+  color: #ff6b78;
+}
+/* ── INPUTS DO AUTH-CARD ── */
+.auth-card .form-group input:not([type="checkbox"]),
+.auth-card .form-group select,
+.auth-card .form-group textarea {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-card .form-group input:not([type="checkbox"])::placeholder,
+.auth-card .form-group textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.auth-card .form-group input:not([type="checkbox"]):focus,
+.auth-card .form-group select:focus,
+.auth-card .form-group textarea:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
+  background: rgba(0, 0, 0, 0.45);
+}
+/* ── PEDIDOS NO PERFIL ── */
+/* Card de pedido é um <a> — herda o visual do .endereco-card mas
+   com cursor pointer pra deixar claro que é clicável. */
+.pedido-card {
+  display: block;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.pedido-card:hover {
+  border-color: var(--cyan);
+  transform: translateY(-2px);
+}
+
+/* Badge de status. Cada status tem uma cor própria — o usuário bate
+   o olho e sabe onde o pedido está. */
+.pedido-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Aguardando pagamento: amarelo (atenção, precisa agir) */
+.pedido-status-pendente_pagamento {
+  background: rgba(255, 229, 0, 0.15);
+  color: var(--yellow);
+  border: 1px solid rgba(255, 229, 0, 0.3);
+}
+
+/* Pago / Em preparação: ciano (tudo certo, esperando) */
+.pedido-status-pago,
+.pedido-status-em_preparacao {
+  background: rgba(18, 206, 170, 0.12);
+  color: var(--cyan);
+  border: 1px solid rgba(18, 206, 170, 0.3);
+}
+
+/* Enviado: roxo (em trânsito) */
+.pedido-status-enviado {
+  background: rgba(69, 39, 126, 0.4);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+/* Entregue: verde (fim do fluxo, tudo certo) */
+.pedido-status-entregue {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+/* Cancelado / Falha: vermelho (deu algo errado) */
+.pedido-status-cancelado,
+.pedido-status-falha_pagamento {
+  background: rgba(244, 67, 54, 0.12);
+  color: #ff6b78;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+/* ── CHECKOUT / PEDIDOS ── */
+
+/* Bloco branco que agrupa uma etapa do checkout */
+.checkout-block {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.checkout-block-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.checkout-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--text-on-yellow);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* Lista de opções (endereço ou pagamento) */
+.checkout-address-list,
+.checkout-payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Cada opção é um label clicável que contém um radio escondido */
+.checkout-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.checkout-option:hover {
+  border-color: var(--cyan);
+}
+
+/* Radio visível, mas pequeno e alinhado ao topo */
+.checkout-option input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--yellow);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Quando o radio está marcado, o label ganha destaque */
+.checkout-option:has(input[type="radio"]:checked) {
+  border-color: var(--yellow);
+  background: rgba(255, 229, 0, 0.05);
+}
+
+.checkout-option-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkout-option-title {
+  display: block;
+  color: var(--white);
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.checkout-option-line {
+  margin: 2px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Link "+ Adicionar novo endereço" */
+.checkout-add-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--cyan);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.checkout-add-link:hover {
+  color: var(--white);
+  text-decoration: underline;
+}
+
+/* Lista enxuta de itens no resumo do checkout */
+.checkout-items-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.checkout-item-mini {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.checkout-item-qty {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.checkout-item-name {
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkout-item-sub {
+  font-family: var(--font-mono);
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* ── TELA DO PEDIDO: ALERTAS ── */
+
+.pedido-alert {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pedido-alert-warn {
+  background: rgba(255, 229, 0, 0.08);
+  border: 1px solid rgba(255, 229, 0, 0.3);
+  color: var(--yellow);
+}
+
+.pedido-alert-warn strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pedido-alert-warn span {
+  font-size: 13px;
+  color: rgba(255, 229, 0, 0.85);
+}
+
+/* Bloco de endereço na tela do pedido */
+.pedido-endereco {
+  padding: 4px 0;
+}
+
+/* ── CHAT WIP ── */
+
+.pedido-chat-wip {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.pedido-chat-wip-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  filter: grayscale(0.4);
+}
+
+.pedido-chat-wip-title {
+  margin: 0 0 8px 0;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.pedido-chat-wip-desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+/* ── PAINEL DEV (botões de simulação) ── */
+
+.pedido-dev-panel {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: rgba(18, 206, 170, 0.05);
+  border: 1px dashed rgba(18, 206, 170, 0.35);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pedido-dev-title {
+  margin: 0 0 4px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cyan);
+}
+
+.pedido-dev-btn {
+  width: 100%;
+  background: rgba(18, 206, 170, 0.12);
+  border: 1px solid rgba(18, 206, 170, 0.4);
+  color: var(--cyan);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pedido-dev-btn:hover {
+  background: rgba(18, 206, 170, 0.2);
+  border-color: rgba(18, 206, 170, 0.7);
+}
+
+/* ── LISTA DE PEDIDOS (/pedidos/) ── */
+
+.pedido-lista-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.pedido-card {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.pedido-card:hover {
+  border-color: var(--cyan);
+  transform: translateY(-2px);
+}
+
+.pedido-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pedido-card-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.pedido-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* ── DASHBOARD (STAFF) ── */
+
+.dash-counters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.dash-counter {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-counter-accent {
+  border-color: rgba(255, 229, 0, 0.4);
+  background: rgba(255, 229, 0, 0.04);
+}
+
+.dash-counter-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+}
+
+.dash-counter-value {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.dash-counter-accent .dash-counter-value {
+  color: var(--yellow);
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 700px) {
+  .dash-grid { grid-template-columns: 1fr; }
+}
+
+.dash-block {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.dash-block-title {
+  margin: 0 0 16px 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.dash-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dash-shortcut:hover {
+  border-color: var(--cyan);
+  transform: translateX(3px);
+}
+
+.dash-shortcut-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(18, 206, 170, 0.12);
+  border: 1px solid rgba(18, 206, 170, 0.3);
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dash-shortcut-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dash-shortcut-text strong {
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dash-shortcut-text small {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ── TABELAS DO DASHBOARD ── */
+
+.dash-table-wrap {
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.dash-table thead th {
+  padding: 14px 16px;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.dash-table tbody td {
+  padding: 14px 16px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.dash-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dash-table tbody tr:hover {
+  background: rgba(18, 206, 170, 0.03);
+}
+
+/* ── AVATAR PEQUENO NAS TABELAS ── */
+
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--text-on-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dash-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dash-user-avatar-lg {
+  width: 44px;
+  height: 44px;
+  font-size: 16px;
+}
+
+/* ── BADGES ── */
+
+.dash-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-right: 4px;
+}
+
+.dash-badge-ok {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.dash-badge-off {
+  background: rgba(244, 67, 54, 0.12);
+  color: #ff6b78;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.dash-badge-staff {
+  background: rgba(255, 229, 0, 0.12);
+  color: var(--yellow);
+  border: 1px solid rgba(255, 229, 0, 0.3);
+}
+
+/* ── BOTÕES MINI NA TABELA ── */
+
+.dash-btn-mini {
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(18, 206, 170, 0.1);
+  border: 1px solid rgba(18, 206, 170, 0.35);
+  border-radius: 8px;
+  color: var(--cyan);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dash-btn-mini:hover {
+  background: rgba(18, 206, 170, 0.2);
+  border-color: var(--cyan);
+}
+
+/* ── BUSCA DO DASHBOARD ── */
+
+.dash-search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dash-search-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.dash-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.dash-search-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
+}
+
+.dash-search-btn {
+  background: var(--yellow);
+  color: var(--text-on-yellow);
+  border: 1px solid var(--yellow);
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dash-search-btn:hover {
+  background: var(--yellow-hover);
+  border-color: var(--yellow-hover);
+}
+
+.dash-search-clear {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.dash-search-clear:hover {
+  color: var(--white);
+}
+
+/* ── FILTROS DE STATUS (pedidos) ── */
+
+.dash-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dash-filter {
+  padding: 7px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dash-filter:hover {
+  border-color: var(--cyan);
+  color: var(--white);
+}
+
+.dash-filter-active {
+  background: rgba(255, 229, 0, 0.12);
+  border-color: rgba(255, 229, 0, 0.5);
+  color: var(--yellow);
+}
+
+/* ── LISTA DE CATEGORIAS (categoria_form.html) ── */
+
+.categorias-scroll {
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.categorias-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.categorias-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.categorias-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+.categorias-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Cada categoria da lista é um <a> clicável */
+.categoria-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.categoria-mini:hover {
+  border-color: var(--cyan);
+  background: rgba(0, 0, 0, 0.35);
+  transform: translateX(3px);
+}
+
+.categoria-mini-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.categoria-mini-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.categoria-mini-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.categoria-mini-nome {
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoria-mini-count {
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+}
+
+/* Selo "Editando" quando a categoria atual é a que está aberta no form */
+.categoria-mini-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 229, 0, 0.15);
+  color: var(--yellow);
+  border: 1px solid rgba(255, 229, 0, 0.35);
+  flex-shrink: 0;
+}
+/* ── BOTÃO DE EDITAR NO CARD DE PRODUTO (só staff) ── */
+/* Fica no canto superior direito do thumb, sobreposto à imagem.
+   Mesma lógica visual do .product-badge, mas com ícone. */
+
+.product-admin-edit {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  z-index: 3;                 /* acima do badge e da imagem */
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.product-admin-edit:hover {
+  background: var(--yellow);
+  color: var(--text-on-yellow);
+  border-color: var(--yellow);
+  transform: scale(1.1);
+}
+
+.product-admin-edit svg {
+  display: block;
+}

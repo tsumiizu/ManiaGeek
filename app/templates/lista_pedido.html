@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container section-padding">
+
+  <div class="section-header" style="margin-bottom: 24px;">
+    <div class="section-header-text">
+      <span class="eyebrow">Minhas Compras</span>
+      <h2 style="font-size: 30px;">Todos os Pedidos</h2>
+      <p>Acompanhe o status de cada pedido.</p>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+      {% for msg in messages %}
+        <div style="padding: 12px 20px; border-radius: 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    color: {% if msg.tags == 'error' %}#e63946{% else %}var(--white){% endif %};">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if pedidos %}
+
+    <div class="pedido-lista-grid">
+      {% for pedido in pedidos %}
+        <a href="{% url 'pedido_detalhe' pedido.id %}" class="pedido-card">
+          <div class="pedido-card-head">
+            <h3 class="pedido-card-title">Pedido #{{ pedido.id }}</h3>
+            <span class="pedido-status pedido-status-{{ pedido.status }}">
+              {{ pedido.get_status_display }}
+            </span>
+          </div>
+
+          <div class="pedido-card-body">
+            <p class="endereco-linha">
+              <strong>Data:</strong> {{ pedido.criado_em|date:"d/m/Y H:i" }}
+            </p>
+            <p class="endereco-linha">
+              <strong>Itens:</strong> {{ pedido.itens.count }}
+              · <strong>Total:</strong> R$ {{ pedido.valor_total }}
+            </p>
+            {% if pedido.metodo_pagamento %}
+              <p class="endereco-linha">
+                <strong>Pagamento:</strong> {{ pedido.get_metodo_pagamento_display }}
+              </p>
+            {% endif %}
+            {% if pedido.pendente and pedido.expira_em %}
+              <p class="endereco-linha" style="color: var(--yellow); font-size: 12px; margin-top: 6px;">
+                ⏱ Expira em {{ pedido.expira_em|timeuntil }}
+              </p>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+  {% else %}
+
+    <div class="empty-cart-box">
+      <div class="empty-cart-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+        </svg>
+      </div>
+      <div class="empty-cart-content">
+        <h3>Você ainda não fez nenhum pedido</h3>
+        <p>Quando você finalizar uma compra, ela aparece aqui com o status de entrega.</p>
+        <a href="{% url 'produtos' %}" class="btn-primary" style="padding: 10px 24px; font-size: 14px;">
+          Explorar produtos
+        </a>
+      </div>
+    </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

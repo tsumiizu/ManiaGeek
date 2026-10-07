@@ -138,7 +138,7 @@
                 <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
                 <div class="product-footer">
                   <span class="product-price">R$ {{ produto.preco }}</span>
-                  <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">Adicionar ao carrinho</button>
+                  <button class="btn-add-cart" type="button" data-add-to-cart data-produto-id="{{ produto.id }}">Adicionar ao carrinho</button>
                 </div>
               </div>
             </div>

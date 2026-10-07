@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-padding auth-container">
+  <div class="auth-giant-bg"></div>
+
+  <div class="auth-card" style="max-width: 640px; padding: 40px;">
+
+    <div class="auth-header" style="margin-bottom: 24px;">
+      <span class="eyebrow" style="font-size: 12px;">Endereço</span>
+      <h3 style="font-size: 26px;">{{ titulo }}</h3>
+      <p>Preencha os dados de entrega.</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="auth-alert">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="" novalidate>
+      {% csrf_token %}
+
+      <!-- Grid de 2 colunas, igual ao cadastro.
+           Os inputs são escritos manualmente (sem {{ form.campo }})
+           pra não puxar o form-control do Bootstrap, que deixaria
+           caixas brancas fora do padrão. Mesma abordagem do login. -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px;">
+
+        <div class="form-group" style="margin-bottom: 0; grid-column: 1 / -1;">
+          <label for="id_apelido">Apelido (opcional)</label>
+          <input type="text" name="apelido" id="id_apelido"
+                 placeholder="Ex: Casa, Trabalho"
+                 maxlength="50"
+                 value="{{ form.apelido.value|default:'' }}">
+          {% if form.apelido.errors %}
+            <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+              {% for e in form.apelido.errors %}{{ e }}{% endfor %}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="id_cep">CEP</label>
+          <input type="text" name="cep" id="id_cep"
+                 placeholder="00000-000" maxlength="9"
+                 value="{{ form.cep.value|default:'' }}">
+          {% if form.cep.errors %}
+            <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+              {% for e in form.cep.errors %}{{ e }}{% endfor %}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="id_numero">Número</label>
+          <input type="text" name="numero" id="id_numero"
+                 placeholder="Nº" maxlength="20"
+                 value="{{ form.numero.value|default:'' }}">
+          {% if form.numero.errors %}
+            <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+              {% for e in form.numero.errors %}{{ e }}{% endfor %}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0; grid-column: 1 / -1;">
+          <label for="id_endereco">Endereço (Rua / Avenida)</label>
+          <input type="text" name="endereco" id="id_endereco"
+                 placeholder="Rua / Avenida"
+                 value="{{ form.endereco.value|default:'' }}">
+          {% if form.endereco.errors %}
+            <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+              {% for e in form.endereco.errors %}{{ e }}{% endfor %}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0; grid-column: 1 / -1;">
+          <label for="id_complemento">Complemento (opcional)</label>
+          <input type="text" name="complemento" id="id_complemento"
+                 placeholder="Apto, bloco, casa..."
+                 maxlength="100"
+                 value="{{ form.complemento.value|default:'' }}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="id_bairro">Bairro</label>
+          <input type="text" name="bairro" id="id_bairro"
+                 placeholder="Bairro"
+                 value="{{ form.bairro.value|default:'' }}">
+          {% if form.bairro.errors %}
+            <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+              {% for e in form.bairro.errors %}{{ e }}{% endfor %}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="id_cidade">Cidade</label>
+          <input type="text" name="cidade" id="id_cidade"
+                 placeholder="Cidade"
+                 value="{{ form.cidade.value|default:'' }}">
+          {% if form.cidade.errors %}
+            <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+              {% for e in form.cidade.errors %}{{ e }}{% endfor %}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="id_estado">Estado (UF)</label>
+          <input type="text" name="estado" id="id_estado"
+                 placeholder="UF" maxlength="2"
+                 style="text-transform: uppercase;"
+                 value="{{ form.estado.value|default:'' }}">
+          {% if form.estado.errors %}
+            <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+              {% for e in form.estado.errors %}{{ e }}{% endfor %}
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn-primary btn-auth"
+                style="margin-top: 0; flex: 1;" data-submit-button>
+          Salvar endereço
+        </button>
+        <a href="{% url 'perfil' %}" class="btn-outline"
+           style="padding: 16px 24px; font-size: 14px; text-align: center;
+                  text-decoration: none; display: inline-flex;
+                  align-items: center; justify-content: center;">
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+    <img src="{% static 'media/gato_geek.webp' %}" alt="Mascote"
+         style="position: absolute; bottom: -25px; right: -25px;
+                width: 85px; height: 85px; pointer-events: none;">
+  </div>
+</section>
+{% endblock %}

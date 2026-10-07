@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-padding auth-container">
+  <div class="auth-giant-bg"></div>
+
+  <div class="auth-card" style="max-width: 460px;">
+    <div class="auth-header">
+      <span class="eyebrow">Verificação</span>
+      <h3>Confirme seu código</h3>
+      <p>Enviamos um código de 6 dígitos para <strong>{{ email }}</strong>. Lembre-se de procurar na caixa de spam.</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="auth-alert">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="id_codigo">Código</label>
+        <input type="text" name="codigo" id="id_codigo"
+               maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+               placeholder="000000" autofocus required
+               style="text-align:center; font-family: var(--font-mono); font-size: 24px; letter-spacing: 8px;">
+        {% if form.codigo.errors %}
+          <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
+            {% for e in form.codigo.errors %}{{ e }}{% endfor %}
+          </span>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn-primary btn-auth" data-submit-button>
+        Verificar
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Não recebeu?
+      <!-- Depois consertar essa logica, por enquanto vai ficar assim -->
+      <!-- {% if 'cadastro' in request.path %}
+        <a href="{% url 'reenviar_codigo' %}">Reenviar código</a>
+      {% else %}
+        <a href="{% url 'reenviar_codigo_login' %}">Reenviar código</a>
+      {% endif %} -->
+      <a href="{% url 'reenviar_codigo_login' %}">Reenviar código</a>
+    </div>
+
+    <img src="{% static 'media/gato_geek.webp' %}" alt="Mascote"
+         style="position: absolute; bottom: -25px; right: -25px; width: 85px; height: 85px; pointer-events: none;">
+  </div>
+</section>
+{% endblock %}

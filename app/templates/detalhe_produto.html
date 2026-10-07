@@ -67,8 +67,9 @@
         <div class="product-actions" style="margin-top: 16px;">
           {% if produto.quantidade > 0 %}
             <span class="stock-status">✓ Em estoque ({{ produto.quantidade }} disponíveis)</span>
-            <button class="btn-add-cart-large" onclick="adicionarAoCarrinho('{{ produto.nome|escapejs }}', {{ produto.preco|default:0 }})">
-              Adicionar ao Carrinho
+            <button class="btn-add-cart-large" type="button"
+                    data-add-to-cart data-produto-id="{{ produto.id }}">
+                    Adicionar ao Carrinho
             </button>
           {% else %}
             <span class="stock-status out-of-stock">✗ Produto Esgotado</span>
@@ -107,7 +108,7 @@
             <span class="product-author">{{ rel_produto.descricao }}</span>
             <div class="product-footer">
               <span class="product-price">R$ {{ rel_produto.preco }}</span>
-              <button class="btn-add-cart" onclick="event.stopPropagation(); adicionarAoCarrinho('{{ rel_produto.nome|escapejs }}', {{ rel_produto.preco|default:0 }})">Adicionar</button>
+              <button class="btn-add-cart" type="button" data-add-to-cart data-produto-id="{{ rel_produto.id }}">Adicionar</button>
             </div>
           </div>
         </div>

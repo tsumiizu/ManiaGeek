@@ -4,7 +4,47 @@ from django.utils import timezone
 import random
 from cloudinary.models import CloudinaryField
 import cloudinary.uploader
-# from cloudinary.utils import cloudinary_url
+from datetime import timedelta
+
+class CodigoVerificacao(models.Model):
+    TIPO_CHOICES = [
+        ('cadastro', 'Verificação de Cadastro'),
+        ('login', 'Verificação de Login (2FA)'),
+    ]
+    usuario = models.ForeignKey(
+        'Usuario',
+        on_delete=models.CASCADE,
+        related_name='codigos_verificacao',
+    )
+    codigo = models.CharField(max_length=6)
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    usado = models.BooleanField(default=False)
+    tentativas = models.PositiveSmallIntegerField(default=0)
+    class Meta:
+        ordering = ['-criado_em']
+    @classmethod
+    def gerar(cls, usuario, tipo):
+        cls.objects.filter(usuario=usuario, tipo=tipo, usado=False).update(usado=True)
+        codigo = f"{random.randint(0, 999999):06d}"
+        return cls.objects.create(usuario=usuario, codigo=codigo, tipo=tipo)
+    def expirado(self):
+        return timezone.now() > self.criado_em + timedelta(minutes=10)
+    def valido(self):
+        return not self.usado and not self.expirado() and self.tentativas < 5
+
+class DispositivoConfiavel(models.Model):
+    # O token é viável porque mesmo se vazado ainda é necessário ter a senha
+    usuario = models.ForeignKey(
+        'Usuario',
+        on_delete=models.CASCADE,
+        related_name='dispositivos_confiaveis',
+    )
+    token = models.CharField(max_length=64, unique=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    expira_em = models.DateTimeField()
+    def valido(self):
+        return timezone.now() < self.expira_em
 
 DEFAULT_AVATARS = [
     'default01',

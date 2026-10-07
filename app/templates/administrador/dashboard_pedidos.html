@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container section-padding">
+
+  <div class="section-header" style="margin-bottom: 24px;">
+    <div class="section-header-text">
+      <span class="eyebrow">Administração</span>
+      <h2 style="font-size: 30px;">Pedidos</h2>
+      <p>{{ pedidos|length }} pedido{{ pedidos|length|pluralize }} listado{{ pedidos|length|pluralize }}.</p>
+    </div>
+  </div>
+
+  <!-- Filtro por status -->
+  <div class="dash-filter-bar">
+    <a href="{% url 'dashboard_pedidos' %}"
+       class="dash-filter {% if not status_filtro %}dash-filter-active{% endif %}">
+      Todos
+    </a>
+    {% for valor, label in status_choices %}
+      <a href="?status={{ valor }}"
+         class="dash-filter {% if status_filtro == valor %}dash-filter-active{% endif %}">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if pedidos %}
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+            <th>Total</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pedido in pedidos %}
+            <tr>
+              <td><strong>#{{ pedido.id }}</strong></td>
+              <td>
+                <div class="dash-user">
+                  <div class="dash-user-avatar">
+                    {% if pedido.usuario.foto %}
+                      <img src="{{ pedido.usuario.foto.url }}" alt="{{ pedido.usuario.display_name }}">
+                    {% else %}
+                      {{ pedido.usuario.display_name|default:pedido.usuario.username|make_list|first }}
+                    {% endif %}
+                  </div>
+                  <div>
+                    <div style="color: var(--white); font-weight: 600; font-size: 13.5px;">
+                      {{ pedido.usuario.display_name|default:pedido.usuario.email }}
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 11.5px;">
+                      {{ pedido.usuario.email }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="pedido-status pedido-status-{{ pedido.status }}">
+                  {{ pedido.get_status_display }}
+                </span>
+              </td>
+              <td>
+                {% if pedido.metodo_pagamento %}
+                  {{ pedido.get_metodo_pagamento_display }}
+                {% else %}
+                  <span style="color: var(--text-muted);">—</span>
+                {% endif %}
+              </td>
+              <td><strong style="color: var(--white);">R$ {{ pedido.valor_total }}</strong></td>
+              <td>{{ pedido.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>
+                <a href="{% url 'pedido_detalhe' pedido.id %}" class="dash-btn-mini">Ver</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div style="padding: 60px 20px; text-align: center; color: var(--text-muted);">
+      Nenhum pedido {% if status_filtro %}com status "{{ status_filtro }}"{% endif %} encontrado.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

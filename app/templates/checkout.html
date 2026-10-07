@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container section-padding">
+
+  <div class="section-header" style="margin-bottom: 24px;">
+    <div class="section-header-text">
+      <span class="eyebrow">Finalizar Compra</span>
+      <h2 style="font-size: 30px;">Confirmar Pedido</h2>
+      <p>Escolha o endereço de entrega e o método de pagamento.</p>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+      {% for msg in messages %}
+        <div style="padding: 12px 20px; border-radius: 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    color: {% if msg.tags == 'error' %}#e63946{% else %}var(--white){% endif %};">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" action="{% url 'checkout' %}">
+    {% csrf_token %}
+
+    <div class="cart-page-layout">
+
+      <!-- ============ COLUNA ESQUERDA: ENDEREÇO + PAGAMENTO ============ -->
+      <div class="cart-items-column">
+
+        <!-- Bloco: Endereço de entrega -->
+        <div class="checkout-block">
+          <h3 class="checkout-block-title">
+            <span class="checkout-step">1</span>
+            Endereço de entrega
+          </h3>
+
+          <div class="checkout-address-list">
+            {% for endereco in enderecos %}
+              <label class="checkout-option" for="endereco-{{ endereco.id }}">
+                <input type="radio" name="endereco_id" id="endereco-{{ endereco.id }}"
+                       value="{{ endereco.id }}"
+                       {% if forloop.first %}checked{% endif %}>
+                <div class="checkout-option-body">
+                  <div class="checkout-option-head">
+                    <strong class="checkout-option-title">
+                      {{ endereco.apelido|default:"Endereço" }}
+                    </strong>
+                  </div>
+                  <p class="checkout-option-line">
+                    {{ endereco.endereco|default:"-" }}, Nº {{ endereco.numero|default:"S/N" }}
+                    {% if endereco.complemento %} — {{ endereco.complemento }}{% endif %}
+                  </p>
+                  <p class="checkout-option-line">
+                    {{ endereco.bairro|default:"-" }} ·
+                    {{ endereco.cidade|default:"-" }}{% if endereco.estado %} - {{ endereco.estado }}{% endif %}
+                    {% if endereco.cep %} · CEP {{ endereco.cep }}{% endif %}
+                  </p>
+                </div>
+              </label>
+            {% endfor %}
+          </div>
+
+          <a href="{% url 'endereco_adicionar' %}"
+             class="checkout-add-link">
+            + Adicionar novo endereço
+          </a>
+        </div>
+
+        <!-- Bloco: Método de pagamento -->
+        <div class="checkout-block" style="margin-top: 24px;">
+          <h3 class="checkout-block-title">
+            <span class="checkout-step">2</span>
+            Método de pagamento
+          </h3>
+
+          <div class="checkout-payment-list">
+            {% for valor, label in metodos_pagamento %}
+              <label class="checkout-option" for="pag-{{ valor }}">
+                <input type="radio" name="metodo_pagamento" id="pag-{{ valor }}"
+                       value="{{ valor }}"
+                       {% if forloop.first %}checked{% endif %}>
+                <div class="checkout-option-body">
+                  <strong class="checkout-option-title">{{ label }}</strong>
+                  <p class="checkout-option-line" style="font-size: 12px; color: var(--text-muted);">
+                    {% if valor == 'pix' %}
+                      Aprovação imediata. QR Code gerado após confirmação.
+                    {% elif valor == 'boleto' %}
+                      Vencimento em 2 dias úteis. Aprovação em até 3 dias após pagamento.
+                    {% elif valor == 'cartao_credito' %}
+                      Parcelamento disponível. Aprovação imediata.
+                    {% elif valor == 'cartao_debito' %}
+                      Débito à vista. Aprovação imediata.
+                    {% endif %}
+                  </p>
+                </div>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ COLUNA DIREITA: RESUMO ============ -->
+      <div class="cart-summary-column">
+        <div class="cart-summary-box">
+          <h4>Resumo do Pedido</h4>
+
+          <!-- Lista enxuta de itens, só nome + qtd + subtotal -->
+          <div class="checkout-items-mini">
+            {% for item in carrinho.itens.all %}
+              <div class="checkout-item-mini">
+                <span class="checkout-item-qty">{{ item.quantidade }}×</span>
+                <span class="checkout-item-name">{{ item.nome_produto }}</span>
+                <span class="checkout-item-sub">R$ {{ item.subtotal }}</span>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="summary-row" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+            <span>Subtotal</span>
+            <span>R$ {{ carrinho.subtotal }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span>
+              Frete
+              <small style="display: block; color: var(--text-muted); font-size: 11px; font-weight: 400;">
+                {{ frete_transportadora }} · ~{{ frete_prazo_dias }} dias úteis
+              </small>
+            </span>
+            <span>R$ {{ frete }}</span>
+          </div>
+
+          <div class="summary-total">
+            <span>Total</span>
+            <span class="total-price">
+              {# Soma no template — quando plugar frete real, ainda serve. #}
+              R$ {{ carrinho.subtotal|add:frete }}
+            </span>
+          </div>
+
+          <button type="submit" class="btn-add-cart-large"
+                  style="width: 100%; font-size: 14px; padding: 14px;"
+                  data-submit-button>
+            Confirmar Pedido
+          </button>
+
+          <a href="{% url 'carrinho' %}"
+             class="btn-outline"
+             style="display: block; text-align: center; margin-top: 12px;
+                    padding: 12px; font-size: 13px; text-decoration: none;">
+            Voltar ao carrinho
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %}

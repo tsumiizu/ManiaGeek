@@ -140,50 +140,136 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-bottom: 40px;">
 
       <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;">
-        <h2 class="section-title" style="margin-top: 0;">Meus Endereços</h2>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          {% for endereco in user.enderecos.all %}
-            <div class="address-card">
-              <h3>Endereço #{{ forloop.counter }}</h3>
-              <p><strong>Rua:</strong> {{ endereco.endereco|default:"-" }}, Nº {{ endereco.numero|default:"S/N" }}</p>
-              {% if endereco.complemento %}
-                <p><strong>Complemento:</strong> {{ endereco.complemento }}</p>
-              {% endif %}
-              <p><strong>Bairro:</strong> {{ endereco.bairro|default:"-" }}</p>
-              <p><strong>Cidade:</strong> {{ endereco.cidade|default:"-" }} - {{ endereco.estado|default:"-" }}</p>
-              <p><strong>CEP:</strong> {{ endereco.cep|default:"-" }}</p>
-            </div>
-          {% empty %}
-            <p style="color: #aaa;">Você ainda não possui nenhum endereço cadastrado.</p>
-          {% endfor %}
+
+  <!-- Cabeçalho da coluna com botão de adicionar -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h2 class="section-title" style="margin: 0; border: none; padding: 0;">
+      Meus Endereços
+      <span style="font-size: 14px; color: var(--text-secondary); font-weight: 400; margin-left: 8px;">
+        {{ user.enderecos.count }}/5
+      </span>
+    </h2>
+    {% if user.enderecos.count < 5 %}
+      <a href="{% url 'endereco_adicionar' %}"
+         class="btn-primary"
+         style="padding: 7px 16px; font-size: 13px; text-decoration: none;">
+        + Novo
+      </a>
+    {% else %}
+      <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
+        Limite atingido
+      </span>
+    {% endif %}
+  </div>
+
+  <!-- Lista scrollável. Altura fixa em ~340px, dá pra ver 2 endereços
+       confortavelmente e rolar até o 5º. -->
+  <div class="enderecos-scroll">
+    {% for endereco in user.enderecos.all %}
+      <div class="endereco-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px;">
+          <h3 class="endereco-titulo">
+            {{ endereco.apelido|default:"Endereço" }}
+          </h3>
+          <div style="display: flex; gap: 8px; flex-shrink: 0;">
+            <a href="{% url 'endereco_editar' endereco.id %}"
+               class="endereco-acao">Editar</a>
+            <form method="POST"
+                  action="{% url 'endereco_remover' endereco.id %}"
+                  style="display: inline; margin: 0;"
+                  onsubmit="return confirm('Remover este endereço?');">
+              {% csrf_token %}
+              <button type="submit" class="endereco-acao endereco-acao-remover">Remover</button>
+            </form>
+          </div>
         </div>
+        <p class="endereco-linha">
+          {{ endereco.endereco|default:"-" }}, Nº {{ endereco.numero|default:"S/N" }}
+          {% if endereco.complemento %} — {{ endereco.complemento }}{% endif %}
+        </p>
+        <p class="endereco-linha">{{ endereco.bairro|default:"-" }}</p>
+        <p class="endereco-linha">
+          {{ endereco.cidade|default:"-" }}{% if endereco.estado %} - {{ endereco.estado }}{% endif %}
+          {% if endereco.cep %} · CEP {{ endereco.cep }}{% endif %}
+        </p>
       </div>
+    {% empty %}
+      <p style="color: #aaa; font-size: 14px;">
+        Você ainda não possui nenhum endereço cadastrado.
+        <a href="{% url 'endereco_adicionar' %}" style="color: var(--cyan);">
+          Adicionar o primeiro
+        </a>.
+      </p>
+    {% endfor %}
+  </div>
+
+</div>
 
       <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;">
-        <h2 class="section-title" style="margin-top: 0;">Minhas Compras</h2>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          {% if compras %}
-            {% for compra in compras %}
-              <div class="address-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <h3 style="margin: 0;">Pedido #{{ compra.id }}</h3>
-                  <span style="font-size: 12px; background: var(--purple); padding: 4px 10px; border-radius: 999px;">{{ compra.status|default:"Concluído" }}</span>
-                </div>
-                <p><strong>Data:</strong> {{ compra.data_criacao|date:"d/m/Y H:i" }}</p>
-                <p><strong>Total:</strong> R$ {{ compra.valor_total }}</p>
-              </div>
-            {% endfor %}
-          {% else %}
-            <p style="color: #aaa;">Você ainda não realizou nenhuma compra.</p>
-          {% endif %}
+
+  <!-- Cabeçalho com link "ver todos" (a página /pedidos/ mostra mais se um dia precisar) -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h2 class="section-title" style="margin: 0; border: none; padding: 0;">
+      Minhas Compras
+      <span style="font-size: 14px; color: var(--text-secondary); font-weight: 400; margin-left: 8px;">
+        {{ user.pedidos.count }}
+      </span>
+    </h2>
+    {% if user.pedidos.count > 0 %}
+      <a href="{% url 'pedido_lista' %}"
+         class="btn-outline"
+         style="padding: 7px 16px; font-size: 13px; text-decoration: none;">
+        Ver todos
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Lista scrollável, mesmo padrão dos endereços.
+       Reaproveita a classe .enderecos-scroll (nome genérico, dá pra
+       usar aqui também). Se quiser separar, é só duplicar a regra
+       com outro nome no CSS. -->
+  <div class="enderecos-scroll">
+    {% for pedido in user.pedidos.all|slice:":5" %}
+      <a href="{% url 'pedido_detalhe' pedido.id %}"
+         class="pedido-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px;">
+          <h3 class="endereco-titulo" style="color: var(--white);">
+            Pedido #{{ pedido.id }}
+          </h3>
+          <span class="pedido-status pedido-status-{{ pedido.status }}">
+            {{ pedido.get_status_display }}
+          </span>
         </div>
-      </div>
+        <p class="endereco-linha">
+          <strong>Data:</strong> {{ pedido.criado_em|date:"d/m/Y H:i" }}
+        </p>
+        <p class="endereco-linha">
+          <strong>Itens:</strong> {{ pedido.itens.count }}
+          · <strong>Total:</strong> R$ {{ pedido.valor_total }}
+        </p>
+        {% if pedido.pendente and pedido.expira_em %}
+          <p class="endereco-linha" style="color: var(--yellow); font-size: 12px; margin-top: 6px;">
+            ⏱ Expira em {{ pedido.expira_em|timeuntil }}
+          </p>
+        {% endif %}
+      </a>
+    {% empty %}
+      <p style="color: #aaa; font-size: 14px;">
+        Você ainda não realizou nenhuma compra.
+        <a href="{% url 'produtos' %}" style="color: var(--cyan);">
+          Explorar produtos
+        </a>.
+      </p>
+    {% endfor %}
+  </div>
+
+</div>
 
     </div>
 
     <!-- LOGOUT -->
     <div style="display: flex; justify-content: center; margin-bottom: 40px;">
-      <form method="POST" action="{% url 'logout' %}">
+      <form method="POST" action="{% url 'logout' %}" data-no-lock="true">
         {% csrf_token %}
         <button type="submit" class="btn-primary" style="background: #e63946; color: #fff; padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer;">Sair da Conta</button>
       </form>

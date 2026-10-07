@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container section-padding">
+
+  <div class="section-header" style="margin-bottom: 24px;">
+    <div class="section-header-text">
+      <span class="eyebrow">Administração</span>
+      <h2 style="font-size: 30px;">Dashboard</h2>
+      <p>Visão geral da loja e atalhos de gestão.</p>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+      {% for msg in messages %}
+        <div style="padding: 12px 20px; border-radius: 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    color: {% if msg.tags == 'error' %}#e63946{% else %}var(--white){% endif %};">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- ============ CONTADORES ============ -->
+  <div class="dash-counters">
+
+    <div class="dash-counter">
+      <span class="dash-counter-label">Usuários</span>
+      <span class="dash-counter-value">{{ total_usuarios }}</span>
+    </div>
+
+    <div class="dash-counter">
+      <span class="dash-counter-label">Produtos</span>
+      <span class="dash-counter-value">{{ total_produtos }}</span>
+    </div>
+
+    <div class="dash-counter">
+      <span class="dash-counter-label">Categorias</span>
+      <span class="dash-counter-value">{{ total_categorias }}</span>
+    </div>
+
+    <div class="dash-counter dash-counter-accent">
+      <span class="dash-counter-label">Pedidos abertos</span>
+      <span class="dash-counter-value">{{ pedidos_abertos }}</span>
+    </div>
+
+    <div class="dash-counter">
+      <span class="dash-counter-label">Pedidos totais</span>
+      <span class="dash-counter-value">{{ pedidos_totais }}</span>
+    </div>
+
+  </div>
+
+  <!-- ============ ATALHOS ============ -->
+  <div class="dash-grid">
+
+    <!-- Coluna: Gestão de catálogo -->
+    <div class="dash-block">
+      <h3 class="dash-block-title">Catálogo</h3>
+      <div class="dash-shortcuts">
+        <a href="{% url 'produto_criar' %}" class="dash-shortcut">
+          <span class="dash-shortcut-icon">+</span>
+          <span class="dash-shortcut-text">
+            <strong>Novo Produto</strong>
+            <small>Cadastrar item no catálogo</small>
+          </span>
+        </a>
+        <a href="{% url 'categoria_criar' %}" class="dash-shortcut">
+          <span class="dash-shortcut-icon">+</span>
+          <span class="dash-shortcut-text">
+            <strong>Nova Categoria</strong>
+            <small>Adicionar agrupamento de produtos</small>
+          </span>
+        </a>
+        <a href="{% url 'produtos' %}" class="dash-shortcut">
+          <span class="dash-shortcut-icon">◇</span>
+          <span class="dash-shortcut-text">
+            <strong>Ver catálogo</strong>
+            <small>Como o cliente vê</small>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Coluna: Gestão de usuários e pedidos -->
+    <div class="dash-block">
+      <h3 class="dash-block-title">Gestão</h3>
+      <div class="dash-shortcuts">
+        <a href="{% url 'dashboard_usuarios' %}" class="dash-shortcut">
+          <span class="dash-shortcut-icon">◉</span>
+          <span class="dash-shortcut-text">
+            <strong>Usuários</strong>
+            <small>{{ total_usuarios }} cadastrado{{ total_usuarios|pluralize }}</small>
+          </span>
+        </a>
+        <a href="{% url 'dashboard_pedidos' %}" class="dash-shortcut">
+          <span class="dash-shortcut-icon">▤</span>
+          <span class="dash-shortcut-text">
+            <strong>Pedidos</strong>
+            <small>{{ pedidos_abertos }} aberto{{ pedidos_abertos|pluralize }} · {{ pedidos_totais }} total</small>
+          </span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ ÚLTIMOS PEDIDOS ============ -->
+  <div class="dash-block" style="margin-top: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 class="dash-block-title" style="margin: 0;">Últimos Pedidos</h3>
+      <a href="{% url 'dashboard_pedidos' %}" class="section-link">Ver todos &rarr;</a>
+    </div>
+
+    {% if ultimos_pedidos %}
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cliente</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Data</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido in ultimos_pedidos %}
+              <tr>
+                <td><strong>#{{ pedido.id }}</strong></td>
+                <td>
+                  <div class="dash-user">
+                    <div class="dash-user-avatar">
+                      {% if pedido.usuario.foto %}
+                        <img src="{{ pedido.usuario.foto.url }}" alt="{{ pedido.usuario.display_name }}">
+                      {% else %}
+                        {{ pedido.usuario.display_name|default:pedido.usuario.username|make_list|first }}
+                      {% endif %}
+                    </div>
+                    <span>{{ pedido.usuario.display_name|default:pedido.usuario.email }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="pedido-status pedido-status-{{ pedido.status }}">
+                    {{ pedido.get_status_display }}
+                  </span>
+                </td>
+                <td>R$ {{ pedido.valor_total }}</td>
+                <td>{{ pedido.criado_em|date:"d/m/Y H:i" }}</td>
+                <td>
+                  <a href="{% url 'pedido_detalhe' pedido.id %}" class="dash-btn-mini">Ver</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 14px;">Nenhum pedido feito ainda.</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

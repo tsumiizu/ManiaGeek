@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container section-padding">
+
+  <div class="section-header" style="margin-bottom: 24px;">
+    <div class="section-header-text">
+      <span class="eyebrow">Administração</span>
+      <h2 style="font-size: 30px;">Usuários</h2>
+      <p>{{ usuarios|length }} cadastrado{{ usuarios|length|pluralize }} no sistema.</p>
+    </div>
+  </div>
+
+  <!-- Busca -->
+  <form method="GET" action="{% url 'dashboard_usuarios' %}" style="margin-bottom: 24px;">
+    <div class="dash-search">
+      <input type="text" name="q" placeholder="Buscar por nome, e-mail ou usuário..."
+             value="{{ q }}" class="dash-search-input">
+      <button type="submit" class="dash-search-btn">Buscar</button>
+      {% if q %}
+        <a href="{% url 'dashboard_usuarios' %}" class="dash-search-clear">Limpar</a>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if usuarios %}
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Avatar</th>
+            <th>Nome de exibição</th>
+            <th>E-mail</th>
+            <th>Usuário</th>
+            <th>Status</th>
+            <th>Cadastro</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+            <tr>
+              <td>
+                <div class="dash-user-avatar dash-user-avatar-lg">
+                  {% if u.foto %}
+                    <img src="{{ u.foto.url }}" alt="{{ u.display_name }}">
+                  {% else %}
+                    {{ u.display_name|default:u.username|make_list|first }}
+                  {% endif %}
+                </div>
+              </td>
+              <td><strong style="color: var(--white);">{{ u.display_name|default:"—" }}</strong></td>
+              <td>{{ u.email }}</td>
+              <td style="font-family: var(--font-mono); font-size: 12.5px;">@{{ u.username }}</td>
+              <td>
+                {% if u.is_active %}
+                  <span class="dash-badge dash-badge-ok">Ativo</span>
+                {% else %}
+                  <span class="dash-badge dash-badge-off">Inativo</span>
+                {% endif %}
+                {% if u.is_staff %}
+                  <span class="dash-badge dash-badge-staff">Staff</span>
+                {% endif %}
+              </td>
+              <td>{{ u.date_joined|date:"d/m/Y" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div style="padding: 60px 20px; text-align: center; color: var(--text-muted);">
+      Nenhum usuário encontrado{% if q %} para "{{ q }}"{% endif %}.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -42,8 +42,13 @@
         <label for="id_password">Senha</label>
         <input type="password" name="password" id="id_password" placeholder="••••••••" required>
       </div>
-
-      <button type="submit" class="btn-primary btn-auth">
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 16px; color: var(--text-secondary); font-size: 14px;">
+        <input type="checkbox" name="remember" id="id_remember" style="width: auto; cursor: pointer;">
+        <label for="id_remember" style="cursor: pointer; text-transform: none; font-family: var(--font-body); font-size: 14px; letter-spacing: 0; font-weight: 400;">
+          Lembrar este dispositivo por 30 dias
+        </label>
+      </div>
+      <button type="submit" class="btn-primary btn-auth" data-submit-button>
         Entrar
       </button>
     </form>
