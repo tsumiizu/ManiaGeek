@@ -110,32 +110,48 @@ function showImage(src) {
       editMode.style.display = 'flex';
     }
   }
-  
-function previewFoto(input) {
-  const file = input.files && input.files[0];
-  if (!file) return;
+/* ================= PRODUTO FORM: PREVIEWS ================= */
+// Preview da capa do produto.
+function previewImage(input) {
+  const preview = document.getElementById('cover-preview');
+  const hint = document.getElementById('cover-text-hint');
+  if (!preview || !input.files || !input.files[0]) return;
 
   const reader = new FileReader();
-  reader.onload = (e) => {
-    const container = document.getElementById('avatar-preview');
-    if (!container) return;
-
-    // Se o avatar atual é a letra (usuário sem foto), troca por <img>.
-    // Se já é <img>, só atualiza o src.
-    let img = document.getElementById('avatar-img');
-    if (!img) {
-      container.innerHTML = '';
-      img = document.createElement('img');
-      img.id = 'avatar-img';
-      img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;';
-      container.appendChild(img);
+  reader.onload = function (e) {
+    preview.src = e.target.result;
+    preview.classList.remove('preview-target-empty');
+    if (hint) {
+      hint.innerText = input.files[0].name;
+      hint.style.color = 'var(--cyan)';
     }
-    img.src = e.target.result;
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(input.files[0]);
 }
+// Preview do vídeo demonstrativo.
+function previewVideo(input) {
+  const video = document.getElementById('video-preview');
+  const placeholder = document.getElementById('video-placeholder');
+  if (!video || !input.files || !input.files[0]) return;
 
+  video.src = URL.createObjectURL(input.files[0]);
+  video.classList.remove('hidden');
+  if (placeholder) placeholder.classList.add('hidden');
+}
+// Preview de cada imagem extra.
+function previewExtra(input, idx) {
+  const preview = document.getElementById('extra-preview-' + idx);
+  const placeholder = document.getElementById('extra-placeholder-' + idx);
+  if (!preview || !input.files || !input.files[0]) return;
 
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    preview.src = e.target.result;
+    preview.classList.remove('hidden');
+    if (placeholder) placeholder.classList.add('hidden');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
 
 
 
@@ -696,4 +712,84 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+});
+
+/* ================= DASHBOARD: EDITOR DE CARGOS ================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+  }
+  document.querySelectorAll('.cargo-editor').forEach(editor => {
+    const url = editor.dataset.url;
+    // Coleta os IDs de grupos atualmente aplicados lendo os
+    // selects "editáveis" (um por grupo atual).
+    function gruposAtuais() {
+      return Array.from(
+        editor.querySelectorAll('.cargo-select-editavel')
+      ).map(s => s.value).filter(v => v !== '');
+    }
+    async function salvar(novosIds) {
+      // Desabilita tudo enquanto salva
+      editor.querySelectorAll('select').forEach(s => s.disabled = true);
+      try {
+        const body = new URLSearchParams();
+        novosIds.forEach(id => body.append('grupos_ids', id));
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body,
+        });
+        const data = await resp.json();
+        if (!data.ok) {
+          alert(data.erro || 'Erro ao atualizar.');
+          // Recarrega a página pra voltar ao estado real. Menos
+          // elegante que reverter no DOM, mas garante consistência
+          // sem rastrear estado.
+          window.location.reload();
+          return;
+        }
+        // Sucesso: recarrega pra reconstruir os pills com o novo
+        // estado. Simples e sempre correto.
+        window.location.reload();
+      } catch (err) {
+        console.error('Erro ao salvar cargos:', err);
+        alert('Erro de conexão. Tente novamente.');
+        window.location.reload();
+      }
+    }
+    // Selects de grupos existentes: trocar = remove o antigo + adiciona o novo
+    editor.querySelectorAll('.cargo-select-editavel').forEach(select => {
+      select.addEventListener('change', () => {
+        const grupoAntigo = select.closest('.cargo-chip').dataset.grupoAtual;
+        const novoGrupo = select.value;
+        const atuais = gruposAtuais();
+        // Remove o antigo
+        const semAntigo = atuais.filter(id => id !== grupoAntigo);
+        // Adiciona o novo, se veio um
+        const final = novoGrupo ? [...semAntigo, novoGrupo] : semAntigo;
+        // Remove duplicatas (por segurança)
+        const unicos = [...new Set(final)];
+        salvar(unicos);
+      });
+    });
+    // Select "+ Adicionar": adiciona ao conjunto atual
+    const addSelect = editor.querySelector('.cargo-select-add');
+    if (addSelect) {
+      addSelect.addEventListener('change', () => {
+        const novoGrupo = addSelect.value;
+        if (!novoGrupo) return;
+
+        const atuais = gruposAtuais();
+        const final = [...atuais, novoGrupo];
+        const unicos = [...new Set(final)];
+        salvar(unicos);
+      });
+    }
+  });
 });

@@ -16,13 +16,15 @@
       
       <!-- COLUNA 1: Miniaturas (Vertical na esquerda) -->
       <div class="ml-thumbs">
+        {% if produto.imagem_capa %}
+            <img src="{{ produto.imagem_capa }}" alt="{{ produto.alt_text_capa }}" onclick="showImage('{{ produto.imagem_capa }}')">
+        {% endif %}
         {% if produto.video %}
           <div class="video-thumb" onclick="showVideo()">
             <video src="{{ produto.video.url }}#t=0.1" muted playsinline></video>
             <div class="video-thumb-overlay">▶</div>
           </div>
         {% endif %}
-
         {% if produto.Imagem.all %}
           {% for foto in produto.Imagem.all %}
             <img src="{{ foto.imagem.url }}" alt="{{ foto.alt_text }}" onclick="showImage('{{ foto.imagem.url }}')">

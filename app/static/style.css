@@ -85,7 +85,9 @@ a { color: inherit; }
   flex-shrink: 0;
 }
 
-/* ── COMPONENTES MENORES ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: COMPONENTES MENORES
+   ════════════════════════════════════════════════════════════════ */
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -105,7 +107,9 @@ a { color: inherit; }
   text-shadow: var(--glow-cyan);
 }
 
-/* ── BARRA SUPERIOR ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: BARRA SUPERIOR
+   ════════════════════════════════════════════════════════════════ */
 .top-bar {
   background: linear-gradient(90deg, var(--purple-deep), var(--purple), var(--purple-deep));
   color: rgba(255, 255, 255, 0.85);
@@ -122,7 +126,9 @@ a { color: inherit; }
   font-weight: 700;
 }
 
-/* ── NAVEGAÇÃO ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: NAVEGAÇÃO
+   ════════════════════════════════════════════════════════════════ */
 nav {
   display: flex;
   align-items: center;
@@ -328,7 +334,9 @@ nav ul a.nav-active:hover {
   height: 20px;
 }
 
-/* ── CARROSSEL HERO ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: CARROSSEL HERO
+   ════════════════════════════════════════════════════════════════ */
 .hero-carousel-container {
   position: relative;
   width: 100%;
@@ -563,7 +571,9 @@ nav ul a.nav-active:hover {
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5)); 
 }
 
-/* ── ACESSO RÁPIDO (CATEGORIAS) ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: ACESSO RÁPIDO (CATEGORIAS)
+   ════════════════════════════════════════════════════════════════ */
 .quick-category-header {
   display: flex;
   align-items: center;
@@ -640,7 +650,9 @@ nav ul a.nav-active:hover {
   transition: color 0.2s ease;
 }
 
-/* ── BOTÕES GERAIS ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: BOTÕES GERAIS
+   ════════════════════════════════════════════════════════════════ */
 .btn-primary {
   background: var(--yellow);
   color: var(--text-on-yellow);
@@ -686,7 +698,9 @@ nav ul a.nav-active:hover {
   box-shadow: var(--glow-purple);
 }
 
-/* ── SEÇÕES ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: SEÇÕES & LAYOUT GLOBAL
+   ════════════════════════════════════════════════════════════════ */
 .container {
   max-width: 1280px;
   margin: 0 auto;
@@ -784,7 +798,9 @@ nav ul a.nav-active:hover {
   line-height: 1.65;
 }
 
-/* ── GRADE DE PRODUTOS ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: GRADE DE PRODUTOS
+   ════════════════════════════════════════════════════════════════ */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -904,8 +920,9 @@ nav ul a.nav-active:hover {
   box-shadow: none; 
 }
 
-
-/* ── ESTRUTURA DA PÁGINA DE DETALHES (LAYOUT MERCADO LIVRE) ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: DETALHES DO PRODUTO (LAYOUT MERCADO LIVRE)
+   ════════════════════════════════════════════════════════════════ */
 .product-detail-container {
   width: 100%;
   max-width: 1300px; 
@@ -1202,7 +1219,9 @@ nav ul a.nav-active:hover {
   transform: none;
 }
 
-/* ── PÁGINA DE CONTATO ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: PÁGINA DE CONTATO
+   ════════════════════════════════════════════════════════════════ */
 .contato-hero {
   text-align: center;
   max-width: 640px;
@@ -1360,7 +1379,9 @@ nav ul a.nav-active:hover {
   min-height: 120px;
 }
 
-/* ── FAQ ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: FAQ
+   ════════════════════════════════════════════════════════════════ */
 .faq-section {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -1422,7 +1443,9 @@ nav ul a.nav-active:hover {
   text-shadow: var(--glow-cyan);
 }
 
-/* ── RODAPÉ ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: RODAPÉ
+   ════════════════════════════════════════════════════════════════ */
 footer {
   background: var(--purple-deep);
   color: var(--text-secondary);
@@ -1458,7 +1481,9 @@ footer {
   text-shadow: var(--glow-cyan);
 }
 
-/* ── TOAST ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: TOAST
+   ════════════════════════════════════════════════════════════════ */
 #toast {
   position: fixed;
   bottom: 30px;
@@ -1481,7 +1506,9 @@ footer {
   opacity: 1;
 }
 
-/* ── ESTILOS EXCLUSIVOS DO PERFIL ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: ESTILOS EXCLUSIVOS DO PERFIL
+   ════════════════════════════════════════════════════════════════ */
 .profile-container {
   max-width: 1000px;
   margin: 60px auto;
@@ -1611,7 +1638,9 @@ footer {
   height: 15px;
 }
 
-/* ── AUTENTICAÇÃO (LOGIN / CADASTRO) ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: AUTENTICAÇÃO (LOGIN / CADASTRO)
+   ════════════════════════════════════════════════════════════════ */
 .auth-container {
   min-height: 80vh;
   display: flex;
@@ -1746,7 +1775,9 @@ footer {
   text-shadow: var(--glow-yellow);
 }
 
-/* ── RESPONSIVIDADE ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: RESPONSIVIDADE GERAL
+   ════════════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
   .ml-layout {
     grid-template-columns: 1fr; 
@@ -1794,7 +1825,10 @@ footer {
   .faq-section, .form-box { padding: 26px; }
   .section-header { flex-direction: column; align-items: flex-start; }
 }
-/* ── PÁGINA DE CARRINHO ── */
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: PÁGINA DE CARRINHO
+   ════════════════════════════════════════════════════════════════ */
 .cart-page-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -2078,6 +2112,7 @@ footer {
     justify-content: space-between;
   }
 }
+
 /* Nome do produto clicável */
 .cart-item-name-link {
   color: inherit;
@@ -2119,590 +2154,9 @@ footer {
   color: var(--text-muted);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: BOTÕES ESPECÍFICOS & ANTI-SPAM
+   ════════════════════════════════════════════════════════════════ */
 /* -- Botão Anti-Spam Universal */
 button.is-locked,
 button[aria-busy="true"] {
@@ -2711,6 +2165,7 @@ button[aria-busy="true"] {
   pointer-events: none;
   position: relative;
 }
+
 /* Spinner */
 button.is-locked::after,
 button[aria-busy="true"]::after {
@@ -2725,9 +2180,14 @@ button[aria-busy="true"]::after {
   animation: spinLock 0.6s linear infinite;
   vertical-align: middle;
 }
+
 @keyframes spinLock {
   to { transform: rotate(360deg); }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: ENDEREÇOS
+   ════════════════════════════════════════════════════════════════ */
 .enderecos-scroll {
   max-height: 340px;
   overflow-y: auto;
@@ -2807,7 +2267,10 @@ button[aria-busy="true"]::after {
 .endereco-acao-remover:hover {
   color: #ff6b78;
 }
-/* ── INPUTS DO AUTH-CARD ── */
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: INPUTS DO AUTH-CARD
+   ════════════════════════════════════════════════════════════════ */
 .auth-card .form-group input:not([type="checkbox"]),
 .auth-card .form-group select,
 .auth-card .form-group textarea {
@@ -2836,7 +2299,10 @@ button[aria-busy="true"]::after {
   box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
   background: rgba(0, 0, 0, 0.45);
 }
-/* ── PEDIDOS NO PERFIL ── */
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: PEDIDOS NO PERFIL
+   ════════════════════════════════════════════════════════════════ */
 /* Card de pedido é um <a> — herda o visual do .endereco-card mas
    com cursor pointer pra deixar claro que é clicável. */
 .pedido-card {
@@ -2905,8 +2371,10 @@ button[aria-busy="true"]::after {
   color: #ff6b78;
   border: 1px solid rgba(244, 67, 54, 0.3);
 }
-/* ── CHECKOUT / PEDIDOS ── */
 
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: CHECKOUT
+   ════════════════════════════════════════════════════════════════ */
 /* Bloco branco que agrupa uma etapa do checkout */
 .checkout-block {
   background: rgba(0, 0, 0, 0.15);
@@ -3163,8 +2631,9 @@ button[aria-busy="true"]::after {
   border-color: rgba(18, 206, 170, 0.7);
 }
 
-/* ── LISTA DE PEDIDOS (/pedidos/) ── */
-
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: LISTA DE PEDIDOS (/pedidos/)
+   ════════════════════════════════════════════════════════════════ */
 .pedido-lista-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -3210,8 +2679,10 @@ button[aria-busy="true"]::after {
   flex-direction: column;
   gap: 2px;
 }
-/* ── DASHBOARD (STAFF) ── */
 
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: DASHBOARD (STAFF)
+   ════════════════════════════════════════════════════════════════ */
 .dash-counters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -3559,8 +3030,9 @@ button[aria-busy="true"]::after {
   color: var(--yellow);
 }
 
-/* ── LISTA DE CATEGORIAS (categoria_form.html) ── */
-
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: LISTA DE CATEGORIAS (categoria_form.html)
+   ════════════════════════════════════════════════════════════════ */
 .categorias-scroll {
   max-height: 280px;
   overflow-y: auto;
@@ -3666,7 +3138,10 @@ button[aria-busy="true"]::after {
   border: 1px solid rgba(255, 229, 0, 0.35);
   flex-shrink: 0;
 }
-/* ── BOTÃO DE EDITAR NO CARD DE PRODUTO (só staff) ── */
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: BOTÃO DE EDITAR NO CARD DE PRODUTO (só staff)
+   ════════════════════════════════════════════════════════════════ */
 /* Fica no canto superior direito do thumb, sobreposto à imagem.
    Mesma lógica visual do .product-badge, mas com ícone. */
 
@@ -3700,4 +3175,692 @@ button[aria-busy="true"]::after {
 
 .product-admin-edit svg {
   display: block;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: SELECT DE GRUPO NO DASHBOARD DE USUÁRIOS
+   ════════════════════════════════════════════════════════════════ */
+.dash-group-select {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 6px 10px;
+  min-width: 160px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f6f8f4' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+  padding-right: 30px;
+}
+
+.dash-group-select:hover {
+  border-color: var(--cyan);
+}
+
+.dash-group-select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
+}
+
+.dash-group-select:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* Feedback visual de sucesso após a troca */
+.dash-group-select-ok {
+  border-color: #2ecc71 !important;
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2) !important;
+}
+
+/* Badge de superuser */
+.dash-badge-super {
+  background: linear-gradient(135deg, rgba(255, 229, 0, 0.18), rgba(168, 85, 247, 0.25));
+  color: #fff;
+  border: 1px solid rgba(255, 229, 0, 0.5);
+  font-weight: 800;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: EDITOR DE GRUPOS EM PILLS (multi-checkbox)
+   ════════════════════════════════════════════════════════════════ */
+.dash-groups-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dash-groups-editor-ok {
+  border-color: #2ecc71;
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.15);
+}
+
+.dash-group-pill {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Checkbox invisível — o pill faz o trabalho visual */
+.dash-group-pill input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.dash-group-pill-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.dash-group-pill:hover .dash-group-pill-label {
+  border-color: var(--cyan);
+  color: var(--white);
+}
+
+/* Marcado: dourado (mesma cor de "staff") */
+.dash-group-pill input[type="checkbox"]:checked + .dash-group-pill-label {
+  background: rgba(255, 229, 0, 0.15);
+  border-color: rgba(255, 229, 0, 0.55);
+  color: var(--yellow);
+}
+
+.dash-group-pill input[type="checkbox"]:disabled + .dash-group-pill-label {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: EDITOR DE CARGOS (chips com dropdown)
+   ════════════════════════════════════════════════════════════════ */
+.cargo-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Cada chip é um <select> estilizado como pill */
+.cargo-chip {
+  position: relative;
+  display: inline-flex;
+}
+
+.cargo-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 229, 0, 0.12);
+  border: 1px solid rgba(255, 229, 0, 0.5);
+  color: var(--yellow);
+  border-radius: 999px;
+  padding: 5px 28px 5px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  /* Setinha do select, desenhada com SVG inline */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFE500' stroke-width='2.5'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+}
+
+.cargo-select:hover {
+  background-color: rgba(255, 229, 0, 0.2);
+  border-color: var(--yellow);
+}
+
+.cargo-select:focus {
+  box-shadow: 0 0 0 3px rgba(255, 229, 0, 0.2);
+}
+
+.cargo-select:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* Select "+ Adicionar": visual diferente (vazio, tracejado) */
+.cargo-select-add {
+  background-color: transparent;
+  border: 1px dashed var(--border-color);
+  color: var(--text-secondary);
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f6f8f4' stroke-width='2.5'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+}
+
+.cargo-select-add:hover {
+  border-color: var(--cyan);
+  color: var(--white);
+  background-color: rgba(18, 206, 170, 0.05);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: PRODUTO FORM (LAYOUT RESPONSIVO)
+   ════════════════════════════════════════════════════════════════ */
+.form-page-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.form-page-card {
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 0;
+  position: relative;
+  padding: 32px 40px;
+}
+
+.form-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 16px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.form-page-title {
+  margin-top: 4px;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.form-page-hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0;
+  max-width: 380px;
+  text-align: right;
+}
+
+.form-error-alert {
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid #F44336;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.form-error-alert p {
+  margin: 0;
+  padding: 2px 0;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px 32px;
+  align-items: start;
+}
+
+.form-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.form-grid-2-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .form-grid-2-inner { grid-template-columns: 1fr; }
+}
+
+/* Bloco do checkbox de destaque: alinha ao fundo do campo ao lado */
+.form-group-checkbox {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.form-checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-transform: none;
+  color: var(--white);
+  font-size: 13px;
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  font-weight: 500;
+  padding-bottom: 6px;
+}
+
+.form-help {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.form-field-error {
+  display: block;
+  color: #e63946;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ── Upload preview boxes ── */
+.upload-preview-box {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-main);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-preview-box:hover {
+  border-color: var(--cyan);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.preview-target {
+  max-height: 100px;
+  max-width: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+/* Estado "vazio" da capa — imagem pequena e translúcida até o upload */
+.preview-target-empty {
+  opacity: 0.3;
+  height: 50px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.upload-icon {
+  font-size: 24px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Inputs de arquivo: escondidos, acionados via clique no box */
+.hidden-file-input {
+  display: none;
+}
+
+/* Utilitário de esconder. Usa !important pra vencer inline styles
+   residuais e classes de display flex. */
+.hidden {
+  display: none !important;
+}
+
+/* ── Imagens extras ── */
+.form-extra-images {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.form-extra-head {
+  margin-bottom: 16px;
+}
+
+.form-extra-head h4 {
+  margin: 0 0 4px 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.form-extra-head span {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.form-extra-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.extra-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.extra-slot-box {
+  min-height: 130px;
+}
+
+.extra-slot-alt {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  padding: 8px 12px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.extra-slot-alt:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
+}
+
+.extra-slot-remove {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #e63946;
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+/* ── Botões de ação ── */
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.form-mascot {
+  position: absolute;
+  bottom: -18px;
+  right: -18px;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  z-index: 10;
+}
+
+@media (max-width: 600px) {
+  .form-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .form-page-hint {
+    text-align: left;
+    max-width: 100%;
+  }
+  .form-actions {
+    flex-direction: column;
+  }
+  .form-actions .btn-outline,
+  .form-actions .btn-primary {
+    width: 100%;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: CATEGORY PILLS (pro produto_form)
+   ════════════════════════════════════════════════════════════════ */
+.category-pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.category-pill {
+  position: relative;
+  cursor: pointer;
+}
+
+.category-pill input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.category-pill-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.category-pill input[type="checkbox"]:checked + .category-pill-label {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.category-pill:hover .category-pill-label {
+  border-color: var(--cyan);
+  color: #fff;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: INPUTS DO FORM-PAGE-CARD (produto/categoria/endereço)
+   ════════════════════════════════════════════════════════════════ */
+/* Mesma regra do .auth-card, aplicada no card que usa .profile-header.
+   Cobre inputs, selects, textareas e arquivos. Sem isso, o Bootstrap
+   injeta fundo branco via classe .form-control e o placeholder some. */
+
+.form-page-card .form-group input:not([type="checkbox"]):not([type="file"]),
+.form-page-card .form-group select,
+.form-page-card .form-group textarea {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-page-card .form-group input:not([type="checkbox"]):not([type="file"])::placeholder,
+.form-page-card .form-group textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.form-page-card .form-group input:not([type="checkbox"]):not([type="file"]):focus,
+.form-page-card .form-group select:focus,
+.form-page-card .form-group textarea:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Inputs de arquivo: herdam estilo similar mas com fundo mais leve.
+   O `::file-selector-button` estiliza o botão "Escolher arquivo". */
+.form-page-card .form-group input[type="file"] {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-page-card .form-group input[type="file"]::file-selector-button {
+  background: var(--purple);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  margin-right: 10px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.form-page-card .form-group input[type="file"]::file-selector-button:hover {
+  background: var(--purple-deep);
+}
+
+/* Select: seta customizada (mesmo padrão do dashboard) */
+.form-page-card .form-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f6f8f4' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+/* Textarea: sem resize horizontal, só vertical */
+.form-page-card .form-group textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: PRODUTO FORM — CORREÇÕES DE RESPONSIVIDADE E LAYOUT
+   ════════════════════════════════════════════════════════════════ */
+
+/* 1. Força os grids a virarem uma coluna em telas menores */
+@media (max-width: 900px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  
+  .form-grid-2-inner {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+/* 2. Garante que todos os campos ocupem 100% e não vazem */
+.form-page-card .form-group input,
+.form-page-card .form-group select,
+.form-page-card .form-group textarea,
+.extra-slot-alt {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+/* 3. Remove as setinhas (spinners) dos inputs de número */
+.form-page-card input[type="number"]::-webkit-inner-spin-button,
+.form-page-card input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.form-page-card input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* 4. Ajuste fino para telas muito pequenas (celulares) */
+@media (max-width: 600px) {
+  .form-page-wrapper {
+    padding: 0 16px;
+  }
+
+  .form-page-card {
+    padding: 24px 16px;
+  }
+
+  .form-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-page-hint {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .form-extra-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn-outline,
+  .form-actions .btn-primary {
+    width: 100%;
+  }
 }

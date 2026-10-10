@@ -21,8 +21,10 @@
     <ul>
       <a href="{% url 'home' %}" class="nav-active">Início</a>
       <a href="{% url 'produtos' %}">Produtos</a>
-      {% if user.is_authenticated and user.is_staff %}
-        <a href="{% url 'dashboard' %}" style="color: var(--yellow);">Dashboard</a>
+      {% if user.is_authenticated %}
+        {% if user.is_staff or user.is_superuser or user.groups.exists %}
+          <a href="{% url 'dashboard' %}" style="color: var(--yellow);">Dashboard</a>
+        {% endif %}
       {% endif %}
     </ul>
     

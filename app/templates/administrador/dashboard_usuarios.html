@@ -3,7 +3,6 @@
 
 {% block content %}
 <div class="container section-padding">
-
   <div class="section-header" style="margin-bottom: 24px;">
     <div class="section-header-text">
       <span class="eyebrow">Administração</span>
@@ -11,68 +10,98 @@
       <p>{{ usuarios|length }} cadastrado{{ usuarios|length|pluralize }} no sistema.</p>
     </div>
   </div>
-
   <!-- Busca -->
   <form method="GET" action="{% url 'dashboard_usuarios' %}" style="margin-bottom: 24px;">
     <div class="dash-search">
-      <input type="text" name="q" placeholder="Buscar por nome, e-mail ou usuário..."
-             value="{{ q }}" class="dash-search-input">
+      <input type="text" name="q" placeholder="Buscar por nome, e-mail ou usuário..." value="{{ q }}"
+        class="dash-search-input">
       <button type="submit" class="dash-search-btn">Buscar</button>
       {% if q %}
-        <a href="{% url 'dashboard_usuarios' %}" class="dash-search-clear">Limpar</a>
+      <a href="{% url 'dashboard_usuarios' %}" class="dash-search-clear">Limpar</a>
       {% endif %}
     </div>
   </form>
-
   {% if usuarios %}
-    <div class="dash-table-wrap">
-      <table class="dash-table">
-        <thead>
-          <tr>
-            <th>Avatar</th>
-            <th>Nome de exibição</th>
-            <th>E-mail</th>
-            <th>Usuário</th>
-            <th>Status</th>
-            <th>Cadastro</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for u in usuarios %}
-            <tr>
-              <td>
-                <div class="dash-user-avatar dash-user-avatar-lg">
-                  {% if u.foto %}
-                    <img src="{{ u.foto.url }}" alt="{{ u.display_name }}">
-                  {% else %}
-                    {{ u.display_name|default:u.username|make_list|first }}
-                  {% endif %}
-                </div>
-              </td>
-              <td><strong style="color: var(--white);">{{ u.display_name|default:"—" }}</strong></td>
-              <td>{{ u.email }}</td>
-              <td style="font-family: var(--font-mono); font-size: 12.5px;">@{{ u.username }}</td>
-              <td>
-                {% if u.is_active %}
-                  <span class="dash-badge dash-badge-ok">Ativo</span>
-                {% else %}
-                  <span class="dash-badge dash-badge-off">Inativo</span>
-                {% endif %}
-                {% if u.is_staff %}
-                  <span class="dash-badge dash-badge-staff">Staff</span>
-                {% endif %}
-              </td>
-              <td>{{ u.date_joined|date:"d/m/Y" }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <div style="padding: 60px 20px; text-align: center; color: var(--text-muted);">
-      Nenhum usuário encontrado{% if q %} para "{{ q }}"{% endif %}.
-    </div>
-  {% endif %}
+  <div class="dash-table-wrap">
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Avatar</th>
+          <th>Nome de exibição</th>
+          <th>E-mail</th>
+          <th>Usuário</th>
+          <th>Cargo</th>
+          <th>Cadastro</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        <tr>
+          <td>
+            <div class="dash-user-avatar dash-user-avatar-lg">
+              {% if u.foto %}
+              <img src="{{ u.foto.url }}" alt="{{ u.display_name }}">
+              {% else %}
+              {{ u.display_name|default:u.username|make_list|first }}
+              {% endif %}
+            </div>
+          </td>
+          <td><strong style="color: var(--white);">{{ u.display_name|default:"—" }}</strong></td>
+          <td>{{ u.email }}</td>
+          <td style="font-family: var(--font-mono); font-size: 12.5px;">@{{ u.username }}</td>
+          <!-- COLUNA CARGO: dropdown ou badge pra superuser -->
+          <td>
+            {% if u.eh_superuser_visivel %}
+            <span class="dash-badge dash-badge-super">Superuser</span>
+            {% elif u.pode_editar_cargo %}
 
+            <div class="cargo-editor" data-usuario-id="{{ u.id }}" data-url="{% url 'user_trocar_grupo' u.id %}">
+              {% for ug in u.groups.all %}
+              <div class="cargo-chip" data-grupo-atual="{{ ug.id }}">
+                <select class="cargo-select cargo-select-editavel">
+                  {% for g in todos_grupos %}
+                  <option value="{{ g.id }}" {% if g.id == ug.id %}selected{% endif %}>
+                    {{ g.name }}
+                  </option>
+                  {% endfor %}
+                  <option value="">✕ Remover</option>
+                </select>
+              </div>
+              {% endfor %}
+              {% with grupos_usuario=u.groups.all %}
+              {% if grupos_usuario|length < todos_grupos|length %} <div class="cargo-chip cargo-chip-add">
+                <select class="cargo-select cargo-select-add">
+                  <option value="">+ Adicionar</option>
+                  {% for g in todos_grupos %}
+                  {% if g not in grupos_usuario %}
+                  <option value="{{ g.id }}">{{ g.name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            {% endwith %}
+  </div>
+  {% else %}
+  {% if u.groups.all %}
+  {% for g in u.groups.all %}
+  <span class="dash-badge dash-badge-staff">{{ g.name }}</span>
+  {% endfor %}
+  {% else %}
+  <span class="dash-badge dash-badge-off">Sem cargo</span>
+  {% endif %}
+  {% endif %}
+  </td>
+  <td>{{ u.date_joined|date:"d/m/Y" }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+</div>
+{% else %}
+<div style="padding: 60px 20px; text-align: center; color: var(--text-muted);">
+  Nenhum usuário encontrado{% if q %} para "{{ q }}"{% endif %}.
+</div>
+{% endif %}
 </div>
 {% endblock %}

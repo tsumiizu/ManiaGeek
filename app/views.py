@@ -1,17 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import Group  
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.conf import settings
+from decimal import Decimal
+import cloudinary.uploader
 from .models import *
 from .forms import ProdutoForm, CategoriaForm, EnderecoForm 
 from accounts.forms import EditarPerfilForm, UserRegisterForm, FotoPerfilForm, CodigoVerificacaoForm
 from accounts.models import CodigoVerificacao, Usuario
 from accounts.utils import (enviar_codigo_email, gerar_token_dispositivo, token_dispositivo_valido, ultimo_codigo_recente)
-from decimal import Decimal
 
 
 def quatro_view(request):  # Apenas para testes
@@ -607,21 +609,38 @@ def reenviar_codigo_login_view(request):
 # ============================================================
 # DASHBOARD (STAFF)
 # ============================================================
-from django.contrib.auth.decorators import user_passes_test
 
-def _so_staff(user):
-    """Retorna True se o usuário é staff. Usado como decorator."""
-    return user.is_authenticated and user.is_staff
-@user_passes_test(_so_staff, login_url='login')
+# (PERMISSÕES)
+def _acessa_dashboard(user):
+    if not user.is_authenticated:
+        return False
+    if user.is_staff or user.is_superuser:
+        return True
+    return user.groups.exists()
+def _gerencia_usuarios(user):
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='Dono').exists()
+def _gerencia_produtos(user):
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.groups.filter(
+        name__in=['Dono', 'Gestor de Produtos']
+    ).exists()
+def _gerencia_pedidos(user):
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.groups.filter(
+        name__in=['Dono', 'Gestor de Pedidos', 'Suporte']
+    ).exists()
+@user_passes_test(_acessa_dashboard, login_url='login')
 def dashboard_view(request):
-    """Painel principal de administração.
-
-    Mostra contadores e atalhos. Só acessível por is_staff=True.
-    Se um cliente logado tentar acessar, o user_passes_test
-    redireciona pro login (o Django faz isso por padrão).
-    """
-    # Contadores — um `count()` por métrica. Aceitável pra dev.
-    # Em produção, se o dashboard ficar lento, agrega em uma query só.
     total_usuarios = Usuario.objects.count()
     total_produtos = Produto.objects.count()
     total_categorias = Categoria.objects.count()
@@ -629,23 +648,25 @@ def dashboard_view(request):
         status__in=['pendente_pagamento', 'pago', 'em_preparacao', 'enviado']
     ).count()
     pedidos_totais = Pedido.objects.count()
-    # Últimos pedidos pra mostrar de relance
-    ultimos_pedidos = Pedido.objects.select_related('usuario').order_by('-criado_em')[:5]
+    pode_ver_usuarios = _gerencia_usuarios(request.user)
+    pode_ver_pedidos = _gerencia_pedidos(request.user)
+    pendencias = []
+    if pode_ver_pedidos:
+        pendencias = Pedido.objects.select_related('usuario').filter(status__in=['pendente_pagamento', 'pago', 'em_preparacao', 'enviado']).order_by('-criado_em')[:10]
     return render(request, 'administrador/dashboard.html', {
         'total_usuarios': total_usuarios,
         'total_produtos': total_produtos,
         'total_categorias': total_categorias,
         'pedidos_abertos': pedidos_abertos,
         'pedidos_totais': pedidos_totais,
-        'ultimos_pedidos': ultimos_pedidos,
+        'pendencias': pendencias,
+        'pode_ver_usuarios': pode_ver_usuarios,
+        'pode_ver_pedidos': pode_ver_pedidos,
     })
 
-@user_passes_test(_so_staff, login_url='login')
+@user_passes_test(_gerencia_usuarios, login_url='login')
 def dashboard_usuarios_view(request):
-    """Lista todos os usuários do sistema. Só staff."""
     usuarios = Usuario.objects.all().order_by('-date_joined')
-
-    # Busca por nome/email/username
     q = request.GET.get('q', '').strip()
     if q:
         usuarios = usuarios.filter(
@@ -653,13 +674,66 @@ def dashboard_usuarios_view(request):
             models.Q(display_name__icontains=q) |
             models.Q(username__icontains=q)
         )
-
+    usuarios = usuarios.prefetch_related('groups')
+    todos_grupos = Group.objects.all().order_by('name')
+    eh_superuser = request.user.is_superuser
+    eh_dono = request.user.groups.filter(name='Dono').exists()
+    pode_gerenciar_cargos = eh_superuser or eh_dono
+    for u in usuarios:
+        # - Superuser logado: vê o badge "Superuser" na PRÓPRIA linha e nos OUTROS superusers também (ele já sabe quem é, não vaza nada pra ele).
+        # - Dono não-superuser: NÃO vê badge em nenhum superuser.
+        u.eh_superuser_visivel = u.is_superuser and eh_superuser
+        if not pode_gerenciar_cargos:
+            u.pode_editar_cargo = False
+        elif u.id == request.user.id:
+            u.pode_editar_cargo = False
+        else:
+            u.pode_editar_cargo = True
     return render(request, 'administrador/dashboard_usuarios.html', {
         'usuarios': usuarios,
         'q': q,
+        'todos_grupos': todos_grupos,
+        'pode_gerenciar_cargos': pode_gerenciar_cargos,
+    })
+@user_passes_test(_gerencia_usuarios, login_url='login')
+@require_POST
+def user_trocar_grupo_view(request, usuario_id):
+    usuario_alvo = get_object_or_404(Usuario, id=usuario_id)
+    if usuario_alvo.id == request.user.id:
+        return JsonResponse(
+            {'ok': False, 'erro': 'Você não pode alterar seus próprios grupos.'},
+            status=400,
+        )
+    if usuario_alvo.is_superuser:
+        if request.user.is_superuser:
+            return JsonResponse(
+                {'ok': False, 'erro': 'Não é possível alterar grupos de outro superuser.'},
+                status=400,
+            )
+        return JsonResponse({
+            'ok': True,
+            'usuario_id': usuario_alvo.id,
+            'grupos': [
+                {'id': g.id, 'nome': g.name}
+                for g in usuario_alvo.groups.all()
+            ],
+        })
+    eh_dono = request.user.groups.filter(name='Dono').exists()
+    if not eh_dono and not request.user.is_superuser:
+        return JsonResponse(
+            {'ok': False, 'erro': 'Apenas o Dono ou superuser pode alterar cargos.'},
+            status=403,
+        )
+    grupos_ids = [gid for gid in request.POST.getlist('grupos_ids') if gid.strip()]
+    grupos = Group.objects.filter(id__in=grupos_ids)
+    usuario_alvo.groups.set(grupos)
+    return JsonResponse({
+        'ok': True,
+        'usuario_id': usuario_alvo.id,
+        'grupos': [{'id': g.id, 'nome': g.name} for g in usuario_alvo.groups.all()],
     })
 
-@user_passes_test(_so_staff, login_url='login')
+@user_passes_test(_gerencia_pedidos, login_url='login')
 def dashboard_pedidos_view(request):
     """Lista TODOS os pedidos (não só do usuário logado). Só staff."""
     Pedido.cancelar_pedidos_expirados()
@@ -676,28 +750,90 @@ def dashboard_pedidos_view(request):
         'status_choices': Pedido.STATUS,
     })
 
+@user_passes_test(_gerencia_produtos, login_url='login')
 def produto_criar(request):
     if request.method == 'POST':
         form = ProdutoForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            produto = form.save()
+            for i in range(1, 4):
+                imagem = request.FILES.get(f'img_slot_{i}_imagem')
+                alt = request.POST.get(f'img_slot_{i}_alt', '').strip()
+                if imagem:
+                    Imagem.objects.create(
+                        produto=produto,
+                        imagem=imagem,
+                        alt_text=alt or produto.nome,
+                    )
+            messages.success(request, f"Produto '{produto.nome}' cadastrado!")
             return redirect('produtos')
+        else:
+            messages.error(request, "Corrija os erros abaixo.")
     else:
         form = ProdutoForm()
-    return render(request, 'administrador/produto_form.html', {'form': form, 'titulo': 'Novo Produto'})
-
-
+    slots_imagens = [
+        {'indice': 1, 'imagem': None},
+        {'indice': 2, 'imagem': None},
+        {'indice': 3, 'imagem': None},
+    ]
+    return render(request, 'administrador/produto_form.html', {
+        'form': form,
+        'titulo': 'Novo Produto',
+        'slots_imagens': slots_imagens,
+    })
+@user_passes_test(_gerencia_produtos, login_url='login')
 def produto_editar(request, pk):
     produto = get_object_or_404(Produto, pk=pk)
+    imagens_qs = list(produto.Imagem.all().order_by('id'))
     if request.method == 'POST':
         form = ProdutoForm(request.POST, request.FILES, instance=produto)
         if form.is_valid():
-            form.save()
+            produto = form.save()
+            for i in range(1, 4):
+                imagem = request.FILES.get(f'img_slot_{i}_imagem')
+                alt = request.POST.get(f'img_slot_{i}_alt', '').strip()
+                remover = request.POST.get(f'img_slot_{i}_remover') == '1'
+                imagem_atual = imagens_qs[i - 1] if i <= len(imagens_qs) else None
+                if remover and imagem_atual:
+                    imagem_atual.delete()
+                elif imagem and imagem_atual:
+                    try:
+                        cloudinary.uploader.destroy(
+                            imagem_atual.imagem.public_id, invalidate=True
+                        )
+                    except Exception:
+                        pass
+                    imagem_atual.imagem = imagem
+                    imagem_atual.alt_text = alt or produto.nome
+                    imagem_atual.save()
+                elif imagem and not imagem_atual:
+                    Imagem.objects.create(
+                        produto=produto,
+                        imagem=imagem,
+                        alt_text=alt or produto.nome,
+                    )
+                elif imagem_atual and alt:
+                    imagem_atual.alt_text = alt
+                    imagem_atual.save(update_fields=['alt_text'])
+            messages.success(request, f"Produto '{produto.nome}' atualizado!")
             return redirect('produtos')
+        else:
+            messages.error(request, "Corrija os erros abaixo.")
     else:
         form = ProdutoForm(instance=produto)
-    return render(request, 'administrador/produto_form.html', {'form': form, 'titulo': 'Editar Produto'})
-
+    imagens_qs = list(produto.Imagem.all().order_by('id'))
+    slots_imagens = []
+    for i in range(3):
+        if i < len(imagens_qs):
+            slots_imagens.append({'indice': i + 1, 'imagem': imagens_qs[i]})
+        else:
+            slots_imagens.append({'indice': i + 1, 'imagem': None})
+    return render(request, 'administrador/produto_form.html', {
+        'form': form,
+        'titulo': 'Editar Produto',
+        'slots_imagens': slots_imagens,
+    })
+@user_passes_test(_gerencia_produtos, login_url='login')
 def categoria_criar(request):
     if request.method == 'POST':
         form = CategoriaForm(request.POST, request.FILES)
@@ -711,7 +847,7 @@ def categoria_criar(request):
         'titulo': 'Nova Categoria',
         'todas_categorias': Categoria.objects.all().order_by('nome'),
     })
-
+@user_passes_test(_gerencia_produtos, login_url='login')
 def categoria_editar(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':

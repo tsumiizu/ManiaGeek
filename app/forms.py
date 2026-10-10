@@ -57,39 +57,11 @@ class ProdutoForm(forms.ModelForm):
             'categoria',
             'preco',
             'descricao',
+            'capa',
+            'alt_text_capa',
             'video',
+            'destaque'
         ]
-        widgets = {
-            'nome': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Nome do produto'
-            }),
-            'produto_tipo': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'quantidade': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0'
-            }),
-            'categoria': forms.SelectMultiple(attrs={
-                'class': 'form-select',
-                'size': '4'
-            }),
-            'preco': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'placeholder': '0.00'
-            }),
-            'descricao': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Descrição detalhada do produto...'
-            }),
-            'video': forms.ClearableFileInput(attrs={
-                'class': 'form-control',
-                'accept': 'video/*'
-            }),
-        }
         labels = {
             'nome': 'Nome do Produto',
             'produto_tipo': 'Tipo de Produto',
@@ -97,5 +69,18 @@ class ProdutoForm(forms.ModelForm):
             'categoria': 'Categorias (Selecione uma ou mais)',
             'preco': 'Preço (R$)',
             'descricao': 'Descrição',
+            'capa': 'Capa do Produto',
+            'alt_text_capa': 'Texto Alternativo da Capa',
             'video': 'Vídeo Demonstrativo (Opcional)',
+            'destaque': 'Se o produto vai aparecer como destaque no carrossel da pagina inicial'
+        }
+class ProdutoImagemForm(forms.ModelForm):
+    class Meta:
+        model = Imagem
+        fields = ['imagem', 'alt_text']
+        widgets = {
+            'imagem': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
+            'alt_text': forms.TextInput(attrs={
+                'placeholder': 'Texto alternativo da imagem',
+            }),
         }

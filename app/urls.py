@@ -38,4 +38,5 @@ urlpatterns = [
     path('produto/<int:pk>/editar/', views.produto_editar, name='produto_editar'),
     path('categoria/nova/', views.categoria_criar, name='categoria_criar'),
     path('categoria/<int:pk>/editar/', views.categoria_editar, name='categoria_editar'),
+    path('dashboard/usuarios/<int:usuario_id>/grupo/', views.user_trocar_grupo_view, name='user_trocar_grupo'),
 ] 
