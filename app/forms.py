@@ -38,7 +38,7 @@ class EnderecoForm(forms.ModelForm):
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
-        fields = ['nome', 'imagem']
+        fields = ['nome']
         widgets = {
             'nome': forms.TextInput(attrs={
                 'class': 'form-control',

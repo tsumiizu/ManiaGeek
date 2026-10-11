@@ -10,7 +10,7 @@
     <div class="auth-header" style="margin-bottom: 24px;">
       <span class="eyebrow" style="font-size: 12px;">Endereço</span>
       <h3 style="font-size: 26px;">{{ titulo }}</h3>
-      <p>Preencha os dados de entrega.</p>
+      <p>Tenha atenção na hora de preencher para que não tenham erros, recomendamos começar pelo CEP.</p>
     </div>
 
     {% if messages %}
@@ -19,13 +19,9 @@
       {% endfor %}
     {% endif %}
 
-    <form method="POST" action="" novalidate>
+    <form method="POST" action="" novalidate id="form-endereco">
       {% csrf_token %}
 
-      <!-- Grid de 2 colunas, igual ao cadastro.
-           Os inputs são escritos manualmente (sem {{ form.campo }})
-           pra não puxar o form-control do Bootstrap, que deixaria
-           caixas brancas fora do padrão. Mesma abordagem do login. -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px;">
 
         <div class="form-group" style="margin-bottom: 0; grid-column: 1 / -1;">
@@ -45,7 +41,9 @@
           <label for="id_cep">CEP</label>
           <input type="text" name="cep" id="id_cep"
                  placeholder="00000-000" maxlength="9"
+                 inputmode="numeric" autocomplete="postal-code"
                  value="{{ form.cep.value|default:'' }}">
+          <small id="cep-status" style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;"></small>
           {% if form.cep.errors %}
             <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
               {% for e in form.cep.errors %}{{ e }}{% endfor %}
@@ -69,6 +67,7 @@
           <label for="id_endereco">Endereço (Rua / Avenida)</label>
           <input type="text" name="endereco" id="id_endereco"
                  placeholder="Rua / Avenida"
+                 readonly
                  value="{{ form.endereco.value|default:'' }}">
           {% if form.endereco.errors %}
             <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
@@ -89,6 +88,7 @@
           <label for="id_bairro">Bairro</label>
           <input type="text" name="bairro" id="id_bairro"
                  placeholder="Bairro"
+                 readonly
                  value="{{ form.bairro.value|default:'' }}">
           {% if form.bairro.errors %}
             <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
@@ -101,6 +101,7 @@
           <label for="id_cidade">Cidade</label>
           <input type="text" name="cidade" id="id_cidade"
                  placeholder="Cidade"
+                 readonly
                  value="{{ form.cidade.value|default:'' }}">
           {% if form.cidade.errors %}
             <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">
@@ -114,6 +115,7 @@
           <input type="text" name="estado" id="id_estado"
                  placeholder="UF" maxlength="2"
                  style="text-transform: uppercase;"
+                 readonly
                  value="{{ form.estado.value|default:'' }}">
           {% if form.estado.errors %}
             <span style="color: #e63946; font-size: 12px; margin-top: 4px; display: block;">

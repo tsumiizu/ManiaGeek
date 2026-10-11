@@ -152,9 +152,133 @@ function previewExtra(input, idx) {
   };
   reader.readAsDataURL(input.files[0]);
 }
+/* ================= ENDEREÇO FORM: ViaCEP + VALIDAÇÃO DO BOTÃO ================= */
 
-
-
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('form-endereco');
+  if (!form) return;
+  const inputCep = document.getElementById('id_cep');
+  const inputEndereco = document.getElementById('id_endereco');
+  const inputBairro = document.getElementById('id_bairro');
+  const inputCidade = document.getElementById('id_cidade');
+  const inputEstado = document.getElementById('id_estado');
+  const statusEl = document.getElementById('cep-status');
+  const btnSalvar = form.querySelector('[data-submit-button]');
+  if (!inputCep || !btnSalvar) return;
+  // ── Campos que precisam estar preenchidos pro botão liberar ──
+  const camposObrigatorios = [
+    'id_cep',
+    'id_endereco',
+    'id_numero',
+    'id_bairro',
+    'id_cidade',
+    'id_estado',
+  ];
+  const textoOriginalBotao = btnSalvar.textContent;
+  // ── Utilitário: só dígitos ──
+  function apenasDigitos(str) {
+    return (str || '').replace(/\D/g, '');
+  }
+  // ── Utilitário: 00000000 -> 00000-000 ──
+  function formatarCep(valor) {
+    const d = apenasDigitos(valor).slice(0, 8);
+    if (d.length <= 5) return d;
+    return d.slice(0, 5) + '-' + d.slice(5);
+  }
+  // ── Utilitário: mensagem abaixo do CEP ──
+  function setStatus(msg, cor) {
+    if (!statusEl) return;
+    statusEl.textContent = msg;
+    statusEl.style.color = cor || 'var(--text-muted)';
+  }
+  // ── Limpa os campos preenchidos pelo ViaCEP ──
+  function limparEndereco() {
+    inputEndereco.value = '';
+    inputBairro.value = '';
+    inputCidade.value = '';
+    inputEstado.value = '';
+  }
+  // ── Validação do botão ──
+  function todosPreenchidos() {
+    for (const id of camposObrigatorios) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      if (!el.value || !el.value.trim()) return false;
+    }
+    return true;
+  }
+  function atualizarEstadoBotao() {
+    if (todosPreenchidos()) {
+      btnSalvar.disabled = false;
+      btnSalvar.removeAttribute('aria-disabled');
+      btnSalvar.textContent = textoOriginalBotao;
+    } else {
+      btnSalvar.disabled = true;
+      btnSalvar.setAttribute('aria-disabled', 'true');
+      btnSalvar.textContent = 'Preencha os campos';
+    }
+  }
+  // ── Busca CEP no ViaCEP ──
+  async function buscarCep() {
+    const cepLimpo = apenasDigitos(inputCep.value);
+    if (cepLimpo.length === 0) {
+      limparEndereco();
+      setStatus('', '');
+      atualizarEstadoBotao();
+      return;
+    }
+    if (cepLimpo.length !== 8) {
+      setStatus('CEP incompleto.', 'var(--yellow)');
+      return;
+    }
+    setStatus('Buscando CEP...', 'var(--cyan)');
+    try {
+      const resp = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      if (!resp.ok) throw new Error('Falha na rede');
+      const dados = await resp.json();
+      if (dados.erro) {
+        limparEndereco();
+        setStatus('CEP não encontrado.', '#e63946');
+        atualizarEstadoBotao();
+        return;
+      }
+      inputEndereco.value = dados.logradouro || '';
+      inputBairro.value = dados.bairro || '';
+      inputCidade.value = dados.localidade || '';
+      inputEstado.value = dados.uf || '';
+      setStatus('Endereço preenchido automaticamente.', 'var(--cyan)');
+      atualizarEstadoBotao();
+    } catch (err) {
+      console.error('Erro ao consultar ViaCEP:', err);
+      setStatus('Erro ao consultar o CEP. Tente novamente.', '#e63946');
+      atualizarEstadoBotao();
+    }
+  }
+  // ── Formata o CEP enquanto o usuário digita ──
+  inputCep.addEventListener('input', (e) => {
+    e.target.value = formatarCep(e.target.value);
+  });
+  // ── Dispara a busca ao sair do campo ──
+  inputCep.addEventListener('blur', buscarCep);
+  // ── Dispara a busca com Enter ──
+  inputCep.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      buscarCep();
+    }
+  });
+  // ── Escuta mudanças em todos os inputs do form pra reavaliar o botão ──
+  form.querySelectorAll('input').forEach((el) => {
+    el.addEventListener('input', atualizarEstadoBotao);
+    el.addEventListener('change', atualizarEstadoBotao);
+  });
+  // ── Estado inicial: cobre edição (campos já preenchidos) ──
+  atualizarEstadoBotao();
+  // ── Se já veio com CEP (edição), busca o endereço ──
+  if (apenasDigitos(inputCep.value).length === 8) {
+    buscarCep();
+  }
+});
 
 
 

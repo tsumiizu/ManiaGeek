@@ -6,17 +6,18 @@
 <div class="profile-container" style="max-width: 1280px;">
 
   {% if user.is_authenticated %}
-
     <!-- Mensagens de sucesso/erro -->
     {% if messages %}
       <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
         {% for msg in messages %}
-          <div style="padding: 12px 20px; border-radius: 10px;
-                      background: rgba(255,255,255,0.05);
-                      border: 1px solid rgba(255,255,255,0.15);
-                      color: {% if msg.tags == 'error' %}#e63946{% else %}var(--white){% endif %};">
-            {{ msg }}
-          </div>
+          {% if msg.tags == 'error' %}
+            <div style="padding: 12px 20px; border-radius: 10px;
+                        background: rgba(244, 67, 54, 0.12);
+                        border: 1px solid rgba(244, 67, 54, 0.4);
+                        color: #ff6b78;">
+              {{ msg }}
+            </div>
+          {% endif %}
         {% endfor %}
       </div>
     {% endif %}

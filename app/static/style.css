@@ -3714,6 +3714,19 @@ button[aria-busy="true"]::after {
 /* Mesma regra do .auth-card, aplicada no card que usa .profile-header.
    Cobre inputs, selects, textareas e arquivos. Sem isso, o Bootstrap
    injeta fundo branco via classe .form-control e o placeholder some. */
+.categorias-scroll + .btn-primary,
+h4 + .btn-primary {
+  white-space: nowrap;
+}
+
+.btn-primary:disabled,
+.btn-primary[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: var(--yellow) !important;
+  border-color: var(--yellow) !important;
+}
 
 .form-page-card .form-group input:not([type="checkbox"]):not([type="file"]),
 .form-page-card .form-group select,
