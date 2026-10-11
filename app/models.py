@@ -85,6 +85,7 @@ class Produto(models.Model):
     )
     alt_text_capa = models.CharField(max_length=255, default='imagem do produto', null=False, blank=False)
     destaque = models.BooleanField(default=False)
+    deletado = models.BooleanField(default=False)
     tipos_video = ['mp4', 'mov', 'avi', 'mkv', 'webm']
     video = CloudinaryField( 
         resource_type="video",
@@ -248,7 +249,7 @@ class Carrinho(models.Model):
         return sum(item.quantidade for item in self.itens.all())
     @property
     def tem_indisponivel(self):
-        return self.itens.filter(produto__isnull=True).exists()
+        return self.itens.filter(models.Q(produto__isnull=True) | models.Q(produto__deletado=True)).exists()
     @property
     def tem_sem_estoque(self):
         return self.itens.filter(

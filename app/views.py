@@ -21,8 +21,8 @@ def quatro_view(request):  # Apenas para testes
 
 def home_view(request):
     categorias = Categoria.objects.prefetch_related('produto').all().order_by('nome')
-    produtos = Produto.objects.all().order_by('-id')
-    produtos_destaque = Produto.objects.filter(destaque=True)[:5]
+    produtos = Produto.objects.all().exclude(deletado=True).exclude(quantidade=0).order_by('-id')
+    produtos_destaque = produtos.filter(destaque=True)[:5]
 
     return render(request, 'home.html', {
         'produtos': produtos,
@@ -42,8 +42,14 @@ def detalhe_produto(request, id):
         'produto': produto,
         'produtos_relacionados': produtos_relacionados,
     })
-def produtos(request):
+def produtos(request):   
+    pode_ver_deletados = request.user.is_authenticated and request.user.is_superuser
+    mostrar_deletados = pode_ver_deletados and request.GET.get('mostrar_deletados') == '1'
     produtos = Produto.objects.all()
+    if pode_ver_deletados and mostrar_deletados:
+        produtos = produtos.filter(deletado=True)
+    else:
+        produtos = produtos.exclude(deletado=True)
     query = request.GET.get('q')
     tipo = request.GET.get('tipo')
     categoria = request.GET.get('categoria')
@@ -56,8 +62,9 @@ def produtos(request):
     return render(request, 'produtos.html', {
         'produtos': produtos,
         'query': query,
+        'pode_ver_deletados': pode_ver_deletados,
+        'mostrar_deletados': mostrar_deletados,
     })
-
 
 # ============================================================
 # CARRINHO

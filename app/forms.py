@@ -60,7 +60,8 @@ class ProdutoForm(forms.ModelForm):
             'capa',
             'alt_text_capa',
             'video',
-            'destaque'
+            'destaque',
+            'deletado'
         ]
         labels = {
             'nome': 'Nome do Produto',
@@ -72,7 +73,8 @@ class ProdutoForm(forms.ModelForm):
             'capa': 'Capa do Produto',
             'alt_text_capa': 'Texto Alternativo da Capa',
             'video': 'Vídeo Demonstrativo (Opcional)',
-            'destaque': 'Se o produto vai aparecer como destaque no carrossel da pagina inicial'
+            'destaque': 'Se o produto vai aparecer como destaque no carrossel da pagina inicial',
+            'deletado': 'Se quiser deletar o produto (softdelete)'
         }
 class ProdutoImagemForm(forms.ModelForm):
     class Meta:

@@ -3366,6 +3366,10 @@ button[aria-busy="true"]::after {
 /* ════════════════════════════════════════════════════════════════
    BLOCO: PRODUTO FORM (LAYOUT RESPONSIVO)
    ════════════════════════════════════════════════════════════════ */
+.form-checkbox-inline input[type="checkbox"][name="deletado"] {
+  accent-color: #e63946;
+  cursor: pointer;
+}
 .form-page-wrapper {
   width: 100%;
   max-width: 1100px;

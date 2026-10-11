@@ -29,6 +29,28 @@
       <h2>Todos os Produtos</h2>
       <p>Explore nossa coleção completa de peças exclusivas e autorais.</p>
       {% endif %}
+
+      <!-- TOGGLE DE DELETADOS (só superuser) -->
+      {% if pode_ver_deletados %}
+        <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px;">
+          {% if mostrar_deletados %}
+            <a href="?{% if query %}q={{ query }}&{% endif %}{% if request.GET.tipo %}tipo={{ request.GET.tipo }}&{% endif %}{% if request.GET.categoria %}categoria={{ request.GET.categoria }}{% endif %}"
+              class="btn-primary"
+              style="font-size: 12px; padding: 8px 18px;">
+              ✓ Mostrando deletados
+            </a>
+            <span style="font-size: 12px; color: var(--text-secondary);">
+              Clique para voltar ao catálogo normal
+            </span>
+          {% else %}
+            <a href="?mostrar_deletados=1{% if query %}&q={{ query }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}"
+              class="btn-outline"
+              style="font-size: 12px; padding: 8px 18px;">
+              Ver produtos deletados
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
     </div>
   </div>
 
@@ -63,8 +85,14 @@
         <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
         <div class="product-footer">
           <span class="product-price">R$ {{ produto.preco }}</span>
+          {% if produto.quantidade and not produto.deletado %}
           <button class="btn-add-cart" type="button" data-add-to-cart data-produto-id="{{ produto.id }}">Adicionar ao
             carrinho</button>
+          {% else %}
+            <button class="btn-add-cart btn-disabled" disabled>
+              Produto Indisponível
+            </button>
+          {% endif %}
         </div>
       </div>
     </div>

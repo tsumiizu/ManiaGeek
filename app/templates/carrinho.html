@@ -45,7 +45,7 @@
   </h3>
 
   {# FOMO: mostra estoque com urgência decrescente. #}
-  {% if item.produto is None %}
+  {% if item.produto is None or item.produto.deletado %}
     <span class="cart-item-status cart-item-status-error">
       Produto indisponível (removido da loja)
     </span>

@@ -68,6 +68,12 @@
                     <span>Exibir em <strong>Destaques</strong></span>
                     {{ form.destaque }}
                   </label>
+                  {% if form.instance.pk %}
+                  <label class="form-checkbox-inline" style="color: #e63946;">
+                    <span>Deletar produto?</span>
+                    {{ form.deletado }}
+                  </label>
+                  {% endif %}
               </div>
             </div>
             <div class="form-group">
