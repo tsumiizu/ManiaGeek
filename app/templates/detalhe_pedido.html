@@ -103,24 +103,66 @@
           </p>
         </div>
       </div>
-
-      <!-- Bloco: Chat com o vendedor (WIP por enquanto) -->
+      <!-- Bloco: Chat com o vendedor -->
       {% if pedido.chat_disponivel %}
-        <div class="checkout-block" style="margin-top: 24px;">
-          <h3 class="checkout-block-title">
-            <span class="checkout-step">•</span>
-            Falar com o vendedor
-          </h3>
-          <div class="pedido-chat-wip">
-            <div class="pedido-chat-wip-icon">💬</div>
-            <p class="pedido-chat-wip-title">Chat em breve</p>
-            <p class="pedido-chat-wip-desc">
-              Aqui você poderá tirar dúvidas sobre o pedido, combinar detalhes de
-              entrega e receber atualizações do vendedor.
-            </p>
-          </div>
+      <div class="checkout-block chat-block"
+          id="chat"
+          data-pedido-id="{{ pedido.id }}"
+          data-user-id="{{ request.user.id }}"
+          style="margin-top: 24px;">
+        <h3 class="checkout-block-title">
+          <span class="checkout-step">•</span>
+          Falar com o vendedor
+        </h3>
+
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-loading">Carregando conversa…</div>
         </div>
-      {% endif %}
+
+        <form class="chat-form" id="chat-form" autocomplete="off" data-no-lock="true">
+          {% csrf_token %}
+          <textarea
+            class="chat-input"
+            id="chat-input"
+            name="conteudo"
+            placeholder="Escreva uma mensagem…"
+            maxlength="2000"
+            rows="2"
+            required></textarea>
+          <button type="submit" class="chat-send" id="chat-send" aria-label="Enviar mensagem">
+            Enviar
+          </button>
+        </form>
+      </div>
+    {% elif pedido.chat_encerrado %}
+      <div class="checkout-block chat-block"
+          id="chat"
+          data-pedido-id="{{ pedido.id }}"
+          data-user-id="{{ request.user.id }}"
+          data-chat-encerrado="true"
+          style="margin-top: 24px;">
+        <h3 class="checkout-block-title">
+          <span class="checkout-step">•</span>
+          Conversa com o vendedor
+        </h3>
+
+        <div class="chat-encerrado-aviso">
+          Conversa encerrada — este pedido foi finalizado.
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-loading">Carregando conversa…</div>
+        </div>
+
+        <p class="chat-encerrado-desc">
+          {% if pedido.status == 'entregue' %}
+            Pedido entregue. A conversa não aceita mais mensagens.
+          {% else %}
+            Pedido cancelado. A conversa não aceita mais mensagens.
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
 
     </div>
 
@@ -151,7 +193,56 @@
           <span>Total</span>
           <span class="total-price">R$ {{ pedido.valor_total }}</span>
         </div>
+        {# ============ BLOCO PIX ============ #}
+{% if pedido.status == 'pendente_pagamento' %}
+  <div class="pix-block">
+    <h5 class="pix-block-title">Pague com Pix</h5>
 
+    <p class="pix-block-desc">
+      Aponte a câmera do seu banco para o QR Code abaixo. Depois de pagar, anexe o comprovante.
+    </p>
+
+    <div class="pix-qr-wrap">
+      <img src="{% static 'media/pix_qr.png' %}" alt="QR Code Pix" class="pix-qr-img">
+    </div>
+
+    <div class="pix-warning">
+      <strong>Valor a pagar:</strong> R$ {{ pedido.valor_total }}
+    </div>
+
+    <form method="POST"
+          action="{% url 'pedido_enviar_comprovante' pedido.id %}"
+          enctype="multipart/form-data"
+          class="pix-comprovante-form">
+      {% csrf_token %}
+      <label for="comprovante-input" class="pix-label">Anexar comprovante</label>
+      <input type="file"
+             name="comprovante"
+             id="comprovante-input"
+             accept="image/*"
+             required
+             class="pix-input-file">
+      <button type="submit" class="btn-primary pix-submit-btn">
+        Enviar comprovante
+      </button>
+    </form>
+  </div>
+
+{% elif pedido.status == 'aguardando_confirmacao' %}
+  <div class="pix-block pix-block-aguardando">
+    <h5 class="pix-block-title">⏳ Aguardando confirmação</h5>
+
+    <p class="pix-block-desc">
+      Recebemos seu comprovante. O vendedor vai conferir o pagamento em breve.
+    </p>
+
+    {% if pedido.comprovante %}
+      <a href="{{ pedido.comprovante.url }}" target="_blank" class="pix-comprovante-link">
+        Ver comprovante enviado
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
         <!-- Info de pagamento -->
         {% if pedido.metodo_pagamento %}
           <div class="summary-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border-color);">
@@ -180,7 +271,17 @@
                 </button>
               </form>
             {% endif %}
-
+              {% if pedido.status == 'aguardando_confirmacao' and user.is_staff %}
+                <form method="POST"
+                      action="{% url 'pedido_aprovar_pix' pedido.id %}"
+                      style="margin-top: 12px;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-primary"
+                          style="width: 100%; padding: 12px; font-size: 13px;">
+                    ✓ Aprovar pagamento Pix
+                  </button>
+                </form>
+              {% endif %}
             {% if pedido.status == 'pago' %}
               <form method="POST" action="{% url 'pedido_avancar' pedido.id %}" style="margin: 0;">
                 {% csrf_token %}

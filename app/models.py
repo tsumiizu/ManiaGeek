@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
 from cloudinary.models import CloudinaryField
 from cloudinary.utils import cloudinary_url
@@ -155,12 +155,8 @@ class Anuncio(models.Model):
             blank=True,
             null=True
         )
-# O models de review vai ter o foreign key dos produtos, mas pode ser bom pra reutilizar para os reviews da loja em geral... pode ter 2 campos
-# Ou pode ter algo mais robusto como reviews inteligentes interligando o email 
-
 
 # Carrinho
-
 class Carrinho(models.Model):
     STATUS = [ # Total inutilidade 
         ('ativo', 'Ativo'),
@@ -176,7 +172,7 @@ class Carrinho(models.Model):
     # session_key do Django — identifica visitante anônimo. Quando o
     # usuário loga, o carrinho anônimo é migrado pra ele.
     session_key = models.CharField(max_length=40, null=True, blank=True)
-    status = models.CharField(max_length=12, choices=STATUS, default='ativo')
+    status = models.CharField(max_length=22, choices=STATUS, default='ativo')
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     class Meta:
@@ -333,6 +329,7 @@ class ItemCarrinho(models.Model):
 class Pedido(models.Model):
     STATUS = [
         ('pendente_pagamento', 'Aguardando Pagamento'),
+        ('aguardando_confirmacao', 'Aguardando Confirmação do Pix'),
         ('pago', 'Pago'),
         ('em_preparacao', 'Aguardando Envio'),
         ('enviado', 'Enviado'),
@@ -346,7 +343,10 @@ class Pedido(models.Model):
         ('cartao_credito', 'Cartão de Crédito'),
         ('boleto', 'Boleto Bancário'),
     ]
-
+    TIPOS_ENTREGA = [
+        ('envio', 'Envio por transportadora'),
+        ('combinar', 'Combinar entrega com o vendedor'),
+    ]
     # ── Relacionamentos ──
     usuario = models.ForeignKey(
         'accounts.Usuario',
@@ -361,9 +361,14 @@ class Pedido(models.Model):
     )
 
     # ── Status e pagamento ──
-    status = models.CharField(max_length=20, choices=STATUS, default='pendente_pagamento')
+    status = models.CharField(max_length=30, choices=STATUS, default='pendente_pagamento')
     metodo_pagamento = models.CharField(
         max_length=20, choices=METODOS_PAGAMENTO, null=True, blank=True
+    )
+    tipo_entrega = models.CharField(
+        max_length=10,
+        choices=TIPOS_ENTREGA,
+        default='envio',
     )
     # Campos preenchidos pelo gateway (futuro). Vazios por enquanto.
     id_transacao_gateway = models.CharField(
@@ -375,11 +380,9 @@ class Pedido(models.Model):
     valor_produtos = models.DecimalField(max_digits=10, decimal_places=2)
     valor_frete = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     valor_total = models.DecimalField(max_digits=10, decimal_places=2)
-
-    # ── Frete (info do serviço escolhido) ──
+    # ── Frete (info do serviço escolhido, WIP) ──
     frete_transportadora = models.CharField(max_length=80, null=True, blank=True)
     frete_prazo_dias = models.PositiveSmallIntegerField(null=True, blank=True)
-
     # ── Endereço de entrega (CÓPIA, não FK. PARA IMPEDIR ALTERAÇÕES, DEPOIS DEVE HAVER UMA BRECHA MAS AINDA FALTA LOGICA) ──
     entrega_apelido = models.CharField(max_length=255, blank=True, null=True)
     entrega_cep = models.CharField(max_length=9)
@@ -389,7 +392,13 @@ class Pedido(models.Model):
     entrega_bairro = models.CharField(max_length=100)
     entrega_cidade = models.CharField(max_length=100)
     entrega_estado = models.CharField(max_length=2)
-
+    # ── Comprovante Pix ──
+    comprovante = CloudinaryField(
+        resource_type='image',
+        folder='comprovantes/',
+        blank=True,
+        null=True,
+    )
     # ── Datas ──
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -398,7 +407,15 @@ class Pedido(models.Model):
     enviado_em = models.DateTimeField(null=True, blank=True)
     entregue_em = models.DateTimeField(null=True, blank=True)
     cancelado_em = models.DateTimeField(null=True, blank=True)
-
+    # ── Restreio ──
+    codigo_rastreio = models.CharField(
+        max_length=40, null=True, blank=True,
+        help_text="Código de rastreio da transportadora (ex: BR123456789BR)",
+    )
+    transportadora = models.CharField(
+        max_length=80, null=True, blank=True,
+        help_text="Nome da transportadora usada no envio (ex: Correios, Jadlog)",
+    )
     class Meta:
         ordering = ['-criado_em']
         indexes = [
@@ -407,8 +424,10 @@ class Pedido(models.Model):
         ]
     def __str__(self):
         return f"Pedido #{self.pk} — {self.usuario.email} ({self.get_status_display()})"
-
     # ── Propriedades de conveniência (template não precisa saber lógica) ──
+    @property
+    def tem_rastreio(self):
+        return bool(self.codigo_rastreio)
     @property
     def pode_avancar(self):
         return self.status in ('pendente_pagamento', 'pago', 'em_preparacao', 'enviado')
@@ -421,13 +440,22 @@ class Pedido(models.Model):
             return False
         return timezone.now() > self.expira_em
     @property
+    def combinar(self):
+        return self.tipo_entrega == 'combinar'
+    @property
     def chat_disponivel(self):
-        """Chat fica disponível depois do pagamento. WIP por enquanto."""
-        return self.status in ('pago', 'em_preparacao', 'enviado', 'entregue')
-
+        # Envio normal: chat só depois do pagamento.
+        # Combinar: chat já libera no pendente, porque o cliente precisa.
+        if self.tipo_entrega == 'combinar':
+            return self.status in (
+                'pendente_pagamento', 'pago', 'em_preparacao', 'enviado'
+            )
+        return self.status in ('pago', 'em_preparacao', 'enviado')
+    @property
+    def chat_encerrado(self):
+        return self.status in ('entregue', 'cancelado', 'falha_pagamento')
     # ── Transições de estado ──
-    # Sempre via método, nunca via .status = X. Isso evita estado
-    # inconsistente (ex: pedido 'entregue' que voltou pra 'pendente').
+    # Sempre via método, nunca via .status = X. Isso evita estado inconsistente (ex: pedido 'entregue' que voltou pra 'pendente').
     def marcar_como_pago(self, id_transacao=None, bandeira=None):
         """Chamado pelo gateway (futuro) ou pela view de simulação (dev).
 
@@ -455,33 +483,36 @@ class Pedido(models.Model):
             )
         self.status = 'em_preparacao'
         self.save(update_fields=['status', 'atualizado_em'])
-
+    def marcar_como_aguardando_confirmacao(self, comprovante):
+        if self.status != 'pendente_pagamento':
+            raise ValueError(
+                f"Só dá pra anexar comprovante em pedido pendente. "
+                f"Esse está em '{self.status}'."
+            )
+        if not comprovante:
+            raise ValueError("Comprovante é obrigatório.")
+        self.status = 'aguardando_confirmacao'
+        self.comprovante = comprovante
+        # Para o timer: o prazo de pagamento não vale mais.
+        self.expira_em = None
+        self.save(update_fields=[
+            'status', 'comprovante', 'expira_em', 'atualizado_em'
+        ])
     def marcar_como_enviado(self, transportadora=None, prazo_dias=None):
+        if self.tipo_entrega == 'combinar':
+            raise ValueError(
+                "Pedido de combinação não tem etapa de envio. Vá direto pra 'entregue'."
+            )
         if self.status != 'em_preparacao':
             raise ValueError(
                 f"Só dá pra enviar pedido em preparação. Esse está em '{self.status}'."
-            )
-        self.status = 'enviado'
-        self.enviado_em = timezone.now()
-        if transportadora:
-            self.frete_transportadora = transportadora
-        if prazo_dias is not None:
-            self.frete_prazo_dias = prazo_dias
-        self.save(update_fields=[
-            'status', 'enviado_em', 'frete_transportadora',
-            'frete_prazo_dias', 'atualizado_em'
-        ])
-    def marcar_como_entregue(self):
-        if self.status != 'enviado':
-            raise ValueError(
-                f"Só dá pra entregar pedido enviado. Esse está em '{self.status}'."
             )
         self.status = 'entregue'
         self.entregue_em = timezone.now()
         self.save(update_fields=['status', 'entregue_em', 'atualizado_em'])
     def cancelar(self, motivo_terminal='cancelado'):
         if self.status in ('cancelado', 'falha_pagamento'):
-            return  # já está num estado terminal, idempotente
+            return
         if self.status == 'entregue':
             raise ValueError("Pedido entregue não pode ser cancelado (só reembolsado).")
         # Devolve estoque de cada item. Ignora itens cujo produto foi deletado (não tem pra onde devolver).
@@ -504,6 +535,7 @@ class Pedido(models.Model):
         agora = timezone.now()
         expirados = cls.objects.filter(
             status='pendente_pagamento',
+            tipo_entrega='envio',      
             expira_em__lt=agora,
         )
         cancelados = []
@@ -511,8 +543,6 @@ class Pedido(models.Model):
             pedido.cancelar(motivo_terminal='cancelado')
             cancelados.append(pedido)
         return cancelados
-
-
 class ItemPedido(models.Model):
     # Item Snapshot basicamente
     pedido = models.ForeignKey(
@@ -542,3 +572,140 @@ class ItemPedido(models.Model):
         super().save(*args, **kwargs)
     def __str__(self):
         return f"{self.quantidade}x {self.nome_produto} (Pedido #{self.pedido_id})"
+
+# CHAT DO PEDIDO
+class Mensagem(models.Model):
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.CASCADE,
+        related_name='mensagens',
+    )
+    autor = models.ForeignKey(
+        'accounts.Usuario',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='mensagens_enviadas',
+    )
+    # Snapshot do nome, pra não depender do usuário existir pra sempre
+    autor_nome = models.CharField(max_length=120)
+    conteudo = models.TextField()
+    criado_em = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ['criado_em']
+        indexes = [
+            models.Index(fields=['pedido', 'criado_em']),
+        ]
+    def __str__(self):
+        return f"#{self.pedido_id} — {self.autor_nome}: {self.conteudo[:30]}"
+    
+# ============================================================
+# REVIEW
+# ============================================================
+class AvaliacaoBase(models.Model):
+    nota = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="De 1 a 5 estrelas",
+    )
+    texto = models.TextField(blank=True, default='')
+    criado_em = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        abstract = True
+    def clean(self):
+        super().clean()
+        if self.nota <= 4 and not (self.texto or '').strip():
+            raise ValidationError({'texto': 'Notas abaixo de 5 precisam de um comentário.'})
+
+class AvaliacaoLoja(AvaliacaoBase):
+    pedido = models.OneToOneField(
+        Pedido,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='avaliacao_loja',
+    )
+    usuario = models.ForeignKey(
+        'accounts.Usuario',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='avaliacoes_loja',
+    )
+    def clean(self):
+        super().clean()
+        if not self.pedido:
+            raise ValidationError('Avaliação sem pedido associado.')
+        if self.pedido.usuario_id != self.usuario_id:
+            raise ValidationError('Você só pode avaliar seus próprios pedidos.')
+        if self.pedido.status != 'entregue':
+            raise ValidationError('Só dá pra avaliar a loja depois que o pedido for entregue.')
+    def __str__(self):
+        return f"Loja: {self.nota}★ (Pedido #{self.pedido_id})"
+
+
+class AvaliacaoServico(AvaliacaoBase):
+    pedido = models.OneToOneField(
+        Pedido,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='avaliacao_servico',
+    )
+    usuario = models.ForeignKey(
+        'accounts.Usuario',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='avaliacoes_servico',
+    )
+    def clean(self):
+        super().clean()
+        if not self.pedido:
+            raise ValidationError('Avaliação sem pedido associado.')
+        if self.pedido.usuario_id != self.usuario_id:
+            raise ValidationError('Você só pode avaliar seus próprios pedidos.')
+        if self.pedido.status != 'entregue':
+            raise ValidationError('Só dá pra avaliar o serviço depois que o pedido for entregue.')
+    def __str__(self):
+        return f"Serviço: {self.nota}★ (Pedido #{self.pedido_id})"
+
+
+class AvaliacaoProduto(AvaliacaoBase):
+    produto = models.ForeignKey(
+        Produto,
+        on_delete=models.CASCADE,
+        related_name='avaliacoes',
+    )
+    usuario = models.ForeignKey(
+        'accounts.Usuario',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='avaliacoes_produto',
+    )
+    # Pedido de referência — prova que o usuário comprou.
+    # SET_NULL pra sobreviver à deleção do pedido.
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='avaliacoes_produto',
+    )
+    class Meta: # Só uma avaliação de usuário por produto
+        constraints = [
+            models.UniqueConstraint(
+                fields=['usuario', 'produto'],
+                name='unique_avaliacao_por_usuario_produto',
+            ),
+        ]
+        indexes = [
+            models.Index(fields=['produto', '-criado_em']),
+        ]
+    def clean(self):
+        super().clean()
+        if not self.pk:
+            comprou = ItemPedido.objects.filter(
+                pedido__usuario=self.usuario,
+                pedido__status='entregue',
+                produto=self.produto,
+            ).exists()
+            if not comprou:
+                raise ValidationError(
+                    'Você só pode avaliar produtos que comprou e recebeu.'
+                )
+    def __str__(self):
+        return f"{self.produto.nome}: {self.nota}★ — {self.usuario.display_name}"

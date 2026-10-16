@@ -917,3 +917,340 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+/* ================= CHAT DO PEDIDO (polling incremental) ================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const chatEl = document.getElementById('chat');
+  if (!chatEl) return;
+
+  const INTERVALO_POLLING_MS = 3000;
+  const pedidoId = chatEl.dataset.pedidoId;
+  const meuUserId = parseInt(chatEl.dataset.userId, 10);
+  const encerrado = chatEl.dataset.chatEncerrado === 'true';
+
+  const messagesEl = document.getElementById('chat-messages');
+  if (!messagesEl) return;
+
+  // Elementos do form só existem no modo ativo.
+  const formEl = document.getElementById('chat-form');
+  const inputEl = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('chat-send');
+
+  let ultimoIdVisto = 0;
+  let timerPolling = null;
+  let enviando = false;
+
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+  }
+
+  function escaparHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatarHora(isoString) {
+    try {
+      const d = new Date(isoString);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    } catch {
+      return '';
+    }
+  }
+
+  function scrollParaFim() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function renderMensagem(msg) {
+    const mine = (parseInt(msg.autor_id, 10) === meuUserId);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-msg ' + (mine ? 'chat-msg-mine' : 'chat-msg-theirs');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'chat-msg-avatar';
+
+    if (msg.autor_foto) {
+      const img = document.createElement('img');
+      img.src = msg.autor_foto;
+      img.alt = msg.autor_nome;
+      img.loading = 'lazy';
+      avatar.appendChild(img);
+    } else {
+      const letra = (msg.autor_nome || '?').trim().charAt(0).toUpperCase();
+      avatar.textContent = letra;
+    }
+
+    const corpo = document.createElement('div');
+    corpo.className = 'chat-msg-body';
+
+    const head = document.createElement('div');
+    head.className = 'chat-msg-head';
+    head.innerHTML = `
+      <span class="chat-msg-name">${escaparHtml(msg.autor_nome)}</span>
+      <span class="chat-msg-time">${formatarHora(msg.criado_em)}</span>
+    `;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-msg-bubble';
+    bubble.textContent = msg.conteudo;
+
+    corpo.appendChild(head);
+    corpo.appendChild(bubble);
+    wrap.appendChild(avatar);
+    wrap.appendChild(corpo);
+    messagesEl.appendChild(wrap);
+  }
+
+  function limparPlaceholders() {
+    const loading = messagesEl.querySelector('.chat-loading');
+    const empty = messagesEl.querySelector('.chat-empty');
+    if (loading) loading.remove();
+    if (empty) empty.remove();
+  }
+
+  async function buscarMensagens() {
+    const url = ultimoIdVisto > 0
+      ? `/pedido/${pedidoId}/chat/mensagens/?desde_id=${ultimoIdVisto}`
+      : `/pedido/${pedidoId}/chat/mensagens/`;
+
+    try {
+      const resp = await fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (!data.ok) return;
+
+      if (data.mensagens.length === 0 && ultimoIdVisto === 0) {
+        limparPlaceholders();
+        const emptyEl = document.createElement('div');
+        emptyEl.className = 'chat-empty';
+        emptyEl.textContent = 'Nenhuma mensagem nesta conversa.';
+        messagesEl.appendChild(emptyEl);
+        return;
+      }
+
+      if (data.mensagens.length === 0) return;
+
+      limparPlaceholders();
+      const estavaNoFim =
+        messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 40;
+
+      data.mensagens.forEach((m) => {
+        renderMensagem(m);
+        const idNum = parseInt(m.id, 10);
+        if (idNum > ultimoIdVisto) ultimoIdVisto = idNum;
+      });
+
+      if (estavaNoFim || ultimoIdVisto === 0) {
+        scrollParaFim();
+      }
+    } catch (err) {
+      console.error('Erro ao buscar mensagens:', err);
+    }
+  }
+
+  async function enviarMensagem(e) {
+    e.preventDefault();
+    if (enviando) return;
+    if (!inputEl || !sendBtn) return;
+
+    const conteudo = inputEl.value.trim();
+    if (!conteudo) return;
+
+    enviando = true;
+    sendBtn.disabled = true;
+
+    try {
+      const body = new URLSearchParams({ conteudo });
+      const resp = await fetch(`/pedido/${pedidoId}/chat/enviar/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body,
+      });
+      const data = await resp.json();
+      if (!data.ok) {
+        alert(data.erro || 'Não foi possível enviar a mensagem.');
+        return;
+      }
+
+      limparPlaceholders();
+      renderMensagem(data.mensagem);
+      const idNum = parseInt(data.mensagem.id, 10);
+      if (idNum > ultimoIdVisto) ultimoIdVisto = idNum;
+
+      inputEl.value = '';
+      inputEl.focus();
+      scrollParaFim();
+    } catch (err) {
+      console.error('Erro ao enviar:', err);
+      alert('Erro de conexão. Tente novamente.');
+    } finally {
+      enviando = false;
+      sendBtn.disabled = false;
+    }
+  }
+
+  function iniciarPolling() {
+    if (timerPolling) return;
+    timerPolling = setInterval(buscarMensagens, INTERVALO_POLLING_MS);
+  }
+  function pararPolling() {
+    if (timerPolling) {
+      clearInterval(timerPolling);
+      timerPolling = null;
+    }
+  }
+
+  // Listeners do form: só no modo ativo.
+  if (!encerrado && formEl && inputEl && sendBtn) {
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        formEl.requestSubmit();
+      }
+    });
+    formEl.addEventListener('submit', enviarMensagem);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        pararPolling();
+      } else {
+        buscarMensagens();
+        iniciarPolling();
+      }
+    });
+  }
+
+  // ── Inicialização ──
+  buscarMensagens().then(() => {
+    scrollParaFim();
+    if (!encerrado) {
+      iniciarPolling();
+    }
+  });
+});
+
+/* ================= CHECKOUT: RESUMO REATIVO (TIPO DE ENTREGA + ENDEREÇO) ================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const checkoutForm = document.getElementById('form-checkout');
+  if (!checkoutForm) return;
+
+  const radioEnvio = document.getElementById('entrega-envio');
+  const radioCombinar = document.getElementById('entrega-combinar');
+  if (!radioEnvio || !radioCombinar) return;
+
+  const metaEl = document.getElementById('resumo-meta');
+  const infoEl = document.getElementById('resumo-frete-info');
+  const valorEl = document.getElementById('resumo-frete-valor');
+  const totalEl = document.getElementById('resumo-total');
+  if (!metaEl || !infoEl || !valorEl || !totalEl) return;
+
+  // Subtotal nunca muda (vem do template)
+  const subtotal = parseFloat(metaEl.dataset.subtotal) || 0;
+
+  // Estado atual do frete (muda conforme endereço escolhido)
+  let freteAtual = {
+    valor: parseFloat(metaEl.dataset.frete) || 0,
+    prazo: metaEl.dataset.prazo || '',
+    transportadora: metaEl.dataset.transportadora || '',
+  };
+
+  // Cache simples por estado, pra não bater no backend toda vez
+  const cacheFrete = {};
+
+  function formatarMoedaBRL(valor) {
+    return 'R$ ' + valor.toFixed(2).replace('.', ',');
+  }
+
+  function getEnderecoSelecionado() {
+    return checkoutForm.querySelector('input[name="endereco_id"]:checked');
+  }
+
+  function renderResumo() {
+    if (radioCombinar.checked) {
+      infoEl.textContent = 'A combinar com o vendedor';
+      valorEl.textContent = 'R$ 0,00';
+      totalEl.textContent = formatarMoedaBRL(subtotal);
+      return;
+    }
+    infoEl.textContent = `${freteAtual.transportadora} · ~${freteAtual.prazo} dias úteis`;
+    valorEl.textContent = formatarMoedaBRL(freteAtual.valor);
+    totalEl.textContent = formatarMoedaBRL(subtotal + freteAtual.valor);
+  }
+
+  async function buscarFretePara(estado) {
+    if (!estado) return null;
+    if (cacheFrete[estado]) return cacheFrete[estado];
+
+    try {
+      const resp = await fetch(`/api/frete/?estado=${encodeURIComponent(estado)}`);
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      if (!data.ok) return null;
+      cacheFrete[estado] = {
+        valor: parseFloat(data.valor) || 0,
+        prazo: data.prazo,
+        transportadora: data.transportadora,
+      };
+      return cacheFrete[estado];
+    } catch (err) {
+      console.error('Erro ao buscar frete:', err);
+      return null;
+    }
+  }
+
+  async function atualizarFretePeloEndereco() {
+    // Se está em modo combinar, não busca frete
+    if (radioCombinar.checked) {
+      renderResumo();
+      return;
+    }
+
+    const radio = getEnderecoSelecionado();
+    if (!radio) return;
+
+    const estado = radio.dataset.estado || '';
+    if (!estado) {
+      // Sem estado no endereço: mantém o que já estava
+      renderResumo();
+      return;
+    }
+
+    // Feedback visual enquanto busca
+    infoEl.textContent = 'Calculando frete…';
+
+    const novoFrete = await buscarFretePara(estado);
+    if (novoFrete) {
+      freteAtual = novoFrete;
+    }
+    renderResumo();
+  }
+
+  // Escuta mudança de tipo de entrega
+  radioEnvio.addEventListener('change', () => {
+    atualizarFretePeloEndereco();
+  });
+  radioCombinar.addEventListener('change', () => {
+    renderResumo();
+  });
+
+  // Escuta mudança de endereço
+  checkoutForm.querySelectorAll('input[name="endereco_id"]').forEach((radio) => {
+    radio.addEventListener('change', atualizarFretePeloEndereco);
+  });
+
+  // Estado inicial
+  renderResumo();
+});

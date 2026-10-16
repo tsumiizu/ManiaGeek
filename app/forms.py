@@ -86,3 +86,58 @@ class ProdutoImagemForm(forms.ModelForm):
                 'placeholder': 'Texto alternativo da imagem',
             }),
         }
+
+# Form de avalição:
+from django import forms
+from .models import AvaliacaoLoja, AvaliacaoServico, AvaliacaoProduto
+
+
+class AvaliacaoLojaForm(forms.ModelForm):
+    class Meta:
+        model = AvaliacaoLoja
+        fields = ['nota', 'texto']
+        widgets = {
+            'nota': forms.NumberInput(attrs={
+                'min': 1, 'max': 5, 'step': 1,
+                'class': 'avaliacao-nota-input',
+            }),
+            'texto': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'avaliacao-texto-input',
+                'placeholder': 'Conte como foi sua experiência com a loja…',
+            }),
+        }
+
+
+class AvaliacaoServicoForm(forms.ModelForm):
+    class Meta:
+        model = AvaliacaoServico
+        fields = ['nota', 'texto']
+        widgets = {
+            'nota': forms.NumberInput(attrs={
+                'min': 1, 'max': 5, 'step': 1,
+                'class': 'avaliacao-nota-input',
+            }),
+            'texto': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'avaliacao-texto-input',
+                'placeholder': 'Conte como foi o atendimento e a entrega…',
+            }),
+        }
+
+
+class AvaliacaoProdutoForm(forms.ModelForm):
+    class Meta:
+        model = AvaliacaoProduto
+        fields = ['nota', 'texto']
+        widgets = {
+            'nota': forms.NumberInput(attrs={
+                'min': 1, 'max': 5, 'step': 1,
+                'class': 'avaliacao-nota-input',
+            }),
+            'texto': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'avaliacao-texto-input',
+                'placeholder': 'O que você achou deste produto?',
+            }),
+        }

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group  
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.db import transaction
 from django.conf import settings
 from decimal import Decimal
@@ -167,13 +167,35 @@ def remover_do_carrinho(request, item_id):
 # ============================================================
 # PEDIDOS
 # ============================================================
-# ── Constantes do checkout (fictícias por enquanto) ──
-FRETE_FIXO = Decimal('19.90')
-FRETE_TRANSPORTADORA = 'Correios PAC (fictício)'
-FRETE_PRAZO_DIAS = 7
+# ── Constantes do checkout (fictícias porque não me passaram informações para criar uma conta no melhor envio e usar a API) ──
+# ── Tabela de frete fixo por região (substitui API) ──
+REGIAO_POR_ESTADO = {
+    'SP': 'sudeste', 'RJ': 'sudeste', 'MG': 'sudeste', 'ES': 'sudeste',
+    'PR': 'sul', 'SC': 'sul', 'RS': 'sul',
+    'DF': 'centro_oeste', 'GO': 'centro_oeste', 'MT': 'centro_oeste', 'MS': 'centro_oeste',
+    'BA': 'nordeste', 'SE': 'nordeste', 'AL': 'nordeste', 'PE': 'nordeste',
+    'PB': 'nordeste', 'RN': 'nordeste', 'CE': 'nordeste', 'PI': 'nordeste', 'MA': 'nordeste',
+    'AC': 'norte', 'AM': 'norte', 'RO': 'norte', 'RR': 'norte',
+    'PA': 'norte', 'AP': 'norte', 'TO': 'norte',
+}
+TABELA_FRETE = {
+    'sudeste':       {'valor': Decimal('19.90'), 'prazo': 7,  'transportadora': 'Correios PAC'},
+    'sul':           {'valor': Decimal('24.90'), 'prazo': 10, 'transportadora': 'Correios PAC'},
+    'centro_oeste':  {'valor': Decimal('29.90'), 'prazo': 12, 'transportadora': 'Correios PAC'},
+    'nordeste':      {'valor': Decimal('34.90'), 'prazo': 15, 'transportadora': 'Correios PAC'},
+    'norte':         {'valor': Decimal('44.90'), 'prazo': 20, 'transportadora': 'Correios PAC'},
+}
+# Fallback: se o estado não estiver no mapa
+FRETE_PADRAO = {'valor': Decimal('39.90'), 'prazo': 15, 'transportadora': 'Correios PAC'}
 PRAZO_PAGAMENTO_MINUTOS = 30
-
-
+def calcular_frete(estado):
+    if not estado:
+        return FRETE_PADRAO
+    uf = estado.strip().upper()
+    regiao = REGIAO_POR_ESTADO.get(uf)
+    if not regiao:
+        return FRETE_PADRAO
+    return TABELA_FRETE.get(regiao, FRETE_PADRAO)
 def _pode_ver_pedido(request, pedido):
     return (
         request.user.is_authenticated
@@ -200,21 +222,36 @@ def checkout_view(request):
     if request.method == 'POST':
         endereco_id = request.POST.get('endereco_id')
         metodo = request.POST.get('metodo_pagamento')
+        tipo_entrega = request.POST.get('tipo_entrega', 'envio')
+        tipos_validos = {t[0] for t in Pedido.TIPOS_ENTREGA}
+        if tipo_entrega not in tipos_validos:
+            messages.error(request, "Escolha um tipo de entrega válido.")
+            return redirect('checkout')
         # ── Validações ──
         try:
             endereco = request.user.enderecos.get(id=endereco_id)
         except (Endereco.DoesNotExist, ValueError, TypeError):
             messages.error(request, "Escolha um endereço válido.")
             return render(request, 'checkout.html', {
-                'carrinho': carrinho, 'enderecos': enderecos,
+                'carrinho': carrinho,
+                'enderecos': enderecos,
+                'metodos_pagamento': Pedido.METODOS_PAGAMENTO,
+                'frete': FRETE_PADRAO['valor'],
+                'frete_transportadora': FRETE_PADRAO['transportadora'],
+                'frete_prazo_dias': FRETE_PADRAO['prazo'],
             })
         metodos_validos = {m[0] for m in Pedido.METODOS_PAGAMENTO}
         if metodo not in metodos_validos:
             messages.error(request, "Escolha um método de pagamento.")
             return render(request, 'checkout.html', {
-                'carrinho': carrinho, 'enderecos': enderecos,
+                'carrinho': carrinho,
+                'enderecos': enderecos,
+                'metodos_pagamento': Pedido.METODOS_PAGAMENTO,
+                'frete': FRETE_PADRAO['valor'],
+                'frete_transportadora': FRETE_PADRAO['transportadora'],
+                'frete_prazo_dias': FRETE_PADRAO['prazo'],
             })
-        # Reconfere estoque item a item (pode ter mudado desde o GET).
+        # Reconfere estoque item a item
         for item in carrinho.itens.select_related('produto'):
             if item.produto is None:
                 messages.error(request, f"'{item.nome_produto}' foi removido da loja.")
@@ -226,22 +263,29 @@ def checkout_view(request):
                     "Ajuste a quantidade no carrinho."
                 )
                 return redirect('carrinho')
-        # ── Criação do pedido (tudo ou nada) ──
+        # ── Criação do pedido ──
         with transaction.atomic():
+            if tipo_entrega == 'combinar':
+                # Sem frete, sem prazo, sem expiração.
+                frete_info = {'valor': Decimal('0.00'), 'prazo': None, 'transportadora': None}
+                expira_em = None
+            else:
+                frete_info = calcular_frete(endereco.estado)
+                expira_em = timezone.now() + timezone.timedelta(minutes=PRAZO_PAGAMENTO_MINUTOS)
             valor_produtos = carrinho.subtotal
-            valor_total = valor_produtos + FRETE_FIXO
+            valor_total = valor_produtos + frete_info['valor']
             pedido = Pedido.objects.create(
                 usuario=request.user,
                 carrinho_origem=carrinho,
                 status='pendente_pagamento',
                 metodo_pagamento=metodo,
                 valor_produtos=valor_produtos,
-                valor_frete=FRETE_FIXO,
+                valor_frete=frete_info['valor'],
+                tipo_entrega=tipo_entrega,
+                frete_transportadora=frete_info['transportadora'],
+                frete_prazo_dias=frete_info['prazo'],
+                expira_em=expira_em,
                 valor_total=valor_total,
-                frete_transportadora=FRETE_TRANSPORTADORA,
-                frete_prazo_dias=FRETE_PRAZO_DIAS,
-                # Endereço: CÓPIA dos campos. Se o usuário editar depois,
-                # esse pedido continua com o endereço original.
                 entrega_apelido=endereco.apelido,
                 entrega_cep=endereco.cep or '',
                 entrega_endereco=endereco.endereco or '',
@@ -250,9 +294,7 @@ def checkout_view(request):
                 entrega_bairro=endereco.bairro or '',
                 entrega_cidade=endereco.cidade or '',
                 entrega_estado=endereco.estado or '',
-                expira_em=timezone.now() + timezone.timedelta(minutes=PRAZO_PAGAMENTO_MINUTOS),
             )
-            # Congela os itens e decrementa o estoque no mesmo passo.
             for item in carrinho.itens.select_related('produto'):
                 ItemPedido.objects.create(
                     pedido=pedido,
@@ -263,23 +305,38 @@ def checkout_view(request):
                     quantidade=item.quantidade,
                     subtotal=item.subtotal,
                 )
-                # Decrementa estoque. É o "reserva" mais simples que existe. Se o pedido for cancelado depois, o estoque volta no Pedido.cancelar().
                 item.produto.quantidade -= item.quantidade
                 item.produto.save(update_fields=['quantidade'])
-            # Marca o carrinho como convertido. NÃO deleta — histórico.
             carrinho.status = 'convertido'
             carrinho.save(update_fields=['status'])
         messages.success(request, f"Pedido #{pedido.id} criado! Falta pagar.")
         return redirect('pedido_detalhe', pk=pedido.id)
+    # ── mostra o checkout com frete do primeiro endereço ──
+    primeiro = enderecos.first()
+    frete_info = calcular_frete(primeiro.estado if primeiro else None)
     return render(request, 'checkout.html', {
         'carrinho': carrinho,
         'enderecos': enderecos,
         'metodos_pagamento': Pedido.METODOS_PAGAMENTO,
-        'frete': FRETE_FIXO,
-        'frete_transportadora': FRETE_TRANSPORTADORA,
-        'frete_prazo_dias': FRETE_PRAZO_DIAS,
+        'frete': frete_info['valor'],
+        'frete_transportadora': frete_info['transportadora'],
+        'frete_prazo_dias': frete_info['prazo'],
     })
-
+@require_GET
+def calcular_frete_api(request):
+    """
+    Devolve o frete pra um estado (UF).
+    GET /api/frete/?estado=SP
+    Resposta: {"ok": true, "valor": "19.90", "prazo": 7, "transportadora": "Correios PAC"}
+    """
+    estado = request.GET.get('estado', '').strip().upper()
+    frete = calcular_frete(estado)
+    return JsonResponse({
+        'ok': True,
+        'valor': str(frete['valor']),
+        'prazo': frete['prazo'],
+        'transportadora': frete['transportadora'],
+    })
 @login_required
 def pedido_detalhe_view(request, pk):
     Pedido.cancelar_pedidos_expirados()  # limpa pendentes vencidos
@@ -292,7 +349,77 @@ def pedido_detalhe_view(request, pk):
         'pedido': pedido,
         'itens': pedido.itens.select_related('produto').all(),
         # DEBUG=True habilita os botões dev no template.
-        'modo_dev': settings.DEBUG,
+        'modo_dev': False,
+    })
+@login_required
+def chat_listar_mensagens(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
+    if not _pode_ver_pedido(request, pedido):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
+
+    desde_id = request.GET.get('desde_id')
+    qs = pedido.mensagens.select_related('autor').all()
+    if desde_id:
+        try:
+            qs = qs.filter(id__gt=int(desde_id))
+        except (TypeError, ValueError):
+            pass
+
+    mensagens = []
+    for m in qs:
+        foto_url = None
+        if m.autor and m.autor.foto:
+            try:
+                foto_url = m.autor.foto.url
+            except (ValueError, AttributeError):
+                foto_url = None
+        mensagens.append({
+            'id': m.id,
+            'autor_id': m.autor_id,
+            'autor_nome': m.autor_nome,
+            'autor_foto': foto_url,
+            'conteudo': m.conteudo,
+            'criado_em': m.criado_em.isoformat(),
+        })
+    return JsonResponse({'ok': True, 'mensagens': mensagens})
+@login_required
+@require_POST
+def chat_enviar_mensagem(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
+    if pedido.chat_encerrado:
+        return JsonResponse(
+            {'ok': False, 'erro': 'Este chat foi encerrado.'},
+            status=400,
+        )
+    if not _pode_ver_pedido(request, pedido):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
+    conteudo = request.POST.get('conteudo', '').strip()
+    if not conteudo:
+        return JsonResponse({'ok': False, 'erro': 'Mensagem vazia.'}, status=400)
+    if len(conteudo) > 2000:
+        return JsonResponse({'ok': False, 'erro': 'Mensagem muito longa.'}, status=400)
+    msg = Mensagem.objects.create(
+        pedido=pedido,
+        autor=request.user,
+        autor_nome=request.user.display_name or request.user.username,
+        conteudo=conteudo,
+    )
+    foto_url = None
+    if request.user.foto:
+        try:
+            foto_url = request.user.foto.url
+        except (ValueError, AttributeError):
+            foto_url = None
+    return JsonResponse({
+        'ok': True,
+        'mensagem': {
+            'id': msg.id,
+            'autor_id': msg.autor_id,
+            'autor_nome': msg.autor_nome,
+            'autor_foto': foto_url,
+            'conteudo': msg.conteudo,
+            'criado_em': msg.criado_em.isoformat(),
+        },
     })
 
 @login_required
@@ -328,24 +455,57 @@ def pedido_simular_pagamento_view(request, pk):
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('pedido_detalhe', pk=pedido.id)
+@login_required
+@require_POST
+def pedido_enviar_comprovante_view(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
+    if not _pode_ver_pedido(request, pedido):
+        from django.http import Http404
+        raise Http404
+    if pedido.usuario_id != request.user.id:
+        messages.error(request, "Só o dono do pedido pode enviar comprovante.")
+        return redirect('pedido_detalhe', pk=pedido.pk)
 
+    comprovante = request.FILES.get('comprovante')
+    if not comprovante:
+        messages.error(request, "Anexe o comprovante do Pix.")
+        return redirect('pedido_detalhe', pk=pedido.pk)
+
+    try:
+        pedido.marcar_como_aguardando_confirmacao(comprovante)
+        messages.success(
+            request,
+            "Comprovante enviado! Aguarde a confirmação do vendedor."
+        )
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect('pedido_detalhe', pk=pedido.pk)
+@login_required
+@require_POST
+def pedido_aprovar_pix_view(request, pk):
+    if not _gerencia_pedidos(request.user):
+        from django.http import Http404
+        raise Http404
+    pedido = get_object_or_404(Pedido, pk=pk)
+    try:
+        pedido.marcar_como_pago(
+            id_transacao=f"PIX-MANUAL-{pedido.id}",
+            bandeira='PIX',
+        )
+        messages.success(request, "Pagamento aprovado! Pedido marcado como pago.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect('pedido_detalhe', pk=pedido.pk)
 @login_required
 @require_POST
 def pedido_avancar_view(request, pk):
     """Botão DEV: avança o pedido pro próximo estado lógico.
-
-    Mapeamento:
-      pago           → em_preparacao
-      em_preparacao  → enviado
-      enviado        → entregue
-      pendente       → não avança (precisa simular pagamento antes)
-
-    Em produção, essas transições vêm do painel do vendedor. Aqui é
-    só pra testar o fluxo. Protegido por settings.DEBUG.
+    Em produção, essas transições vêm do painel do vendedor.
     """
     if not settings.DEBUG:
         from django.http import Http404
         raise Http404
+
     pedido = get_object_or_404(Pedido, pk=pk)
     if not _pode_ver_pedido(request, pedido):
         from django.http import Http404
@@ -356,8 +516,8 @@ def pedido_avancar_view(request, pk):
             messages.success(request, "Pedido em preparação.")
         elif pedido.status == 'em_preparacao':
             pedido.marcar_como_enviado(
-                transportadora=pedido.frete_transportadora or FRETE_TRANSPORTADORA,
-                prazo_dias=pedido.frete_prazo_dias or FRETE_PRAZO_DIAS,
+                transportadora=pedido.frete_transportadora or FRETE_PADRAO['transportadora'],
+                prazo_dias=pedido.frete_prazo_dias or FRETE_PADRAO['prazo'],
             )
             messages.success(request, "Pedido enviado.")
         elif pedido.status == 'enviado':
@@ -373,7 +533,49 @@ def pedido_avancar_view(request, pk):
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('pedido_detalhe', pk=pedido.id)
+@login_required
+@require_POST
+def pedido_enviar_comprovante_view(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
+    if not _pode_ver_pedido(request, pedido):
+        from django.http import Http404
+        raise Http404
+    if pedido.usuario_id != request.user.id:
+        messages.error(request, "Só o dono do pedido pode enviar comprovante.")
+        return redirect('pedido_detalhe', pk=pedido.pk)
 
+    comprovante = request.FILES.get('comprovante')
+    if not comprovante:
+        messages.error(request, "Anexe o comprovante do Pix.")
+        return redirect('pedido_detalhe', pk=pedido.pk)
+
+    try:
+        pedido.marcar_como_aguardando_confirmacao(comprovante)
+        messages.success(
+            request,
+            "Comprovante enviado! Aguarde a confirmação do vendedor."
+        )
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect('pedido_detalhe', pk=pedido.pk)
+
+
+@login_required
+@require_POST
+def pedido_aprovar_pix_view(request, pk):
+    if not _gerencia_pedidos(request.user):
+        from django.http import Http404
+        raise Http404
+    pedido = get_object_or_404(Pedido, pk=pk)
+    try:
+        pedido.marcar_como_pago(
+            id_transacao=f"PIX-MANUAL-{pedido.id}",
+            bandeira='PIX',
+        )
+        messages.success(request, "Pagamento aprovado! Pedido marcado como pago.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect('pedido_detalhe', pk=pedido.pk)
 # ============================================================
 # PERFIL
 # ============================================================

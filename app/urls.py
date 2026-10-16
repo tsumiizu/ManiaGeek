@@ -13,8 +13,16 @@ urlpatterns = [
     path('carrinho/item/<int:item_id>/remover/', views.remover_do_carrinho, name='remover_do_carrinho'),
     # Rotas de pedido — Misturadas com as de dev depois apague as de dev
     path('checkout/', views.checkout_view, name='checkout'),
+    path('api/frete/', views.calcular_frete_api, name='calcular_frete_api'),
     path('pedidos/', views.pedido_lista_view, name='pedido_lista'),
     path('pedido/<int:pk>/', views.pedido_detalhe_view, name='pedido_detalhe'),
+    path('pedido/<int:pk>/chat/mensagens/', views.chat_listar_mensagens, name='chat_mensagens'),
+    path('pedido/<int:pk>/chat/enviar/', views.chat_enviar_mensagem, name='chat_enviar'),
+    path('pedido/<int:pk>/comprovante/', views.pedido_enviar_comprovante_view, name='pedido_enviar_comprovante'),
+    path('pedido/<int:pk>/aprovar-pix/', views.pedido_aprovar_pix_view, name='pedido_aprovar_pix'),
+    path('pedido/<int:pk>/comprovante/', views.pedido_enviar_comprovante_view, name='pedido_enviar_comprovante'),
+    path('pedido/<int:pk>/aprovar-pix/', views.pedido_aprovar_pix_view, name='pedido_aprovar_pix'),
+    #  modo dev:
     path('pedido/<int:pk>/simular-pagamento/', views.pedido_simular_pagamento_view, name='pedido_simular_pagamento'),
     path('pedido/<int:pk>/avancar/', views.pedido_avancar_view, name='pedido_avancar'),
     # Usuario:

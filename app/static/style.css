@@ -2554,39 +2554,337 @@ button[aria-busy="true"]::after {
   padding: 4px 0;
 }
 
-/* ── CHAT WIP ── */
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: CHAT (por pedido)
+   ════════════════════════════════════════════════════════════════ */
 
-.pedido-chat-wip {
+.chat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Área rolável de mensagens */
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 12px 4px 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.chat-messages::-webkit-scrollbar { width: 6px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Placeholder de "carregando" e "vazio" */
+.chat-loading,
+.chat-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Cada mensagem é um bloco com autor, hora e conteúdo */
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 80%;
+}
+
+/* Mensagem do PRÓPRIO usuário: alinhada à direita */
+.chat-msg-mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+/* Mensagem do OUTRO: alinhada à esquerda */
+.chat-msg-theirs {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+/* Cabeçalho com nome e horário */
+.chat-msg-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+.chat-msg-name {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* Balão da mensagem */
+.chat-msg-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Bolha "minha": amarela (marca) — combina com o resto do site */
+.chat-msg-mine .chat-msg-bubble {
+  background: var(--yellow);
+  color: var(--text-on-yellow);
+  border-bottom-right-radius: 4px;
+}
+
+/* Bolha "deles": roxo do card — discreta, mas legível */
+.chat-msg-theirs .chat-msg-bubble {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+/* Formulário de envio */
+.chat-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin: 0;
+}
+
+.chat-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  resize: vertical;
+  min-height: 44px;
+  max-height: 140px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-input::placeholder {
+  color: var(--text-muted);
+}
+
+.chat-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Botão de enviar */
+.chat-send {
+  background: var(--yellow);
+  color: var(--text-on-yellow);
+  border: 1px solid var(--yellow);
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chat-send:hover:not(:disabled) {
+  background: var(--yellow-hover);
+  border-color: var(--yellow-hover);
+}
+
+.chat-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Cada mensagem é um bloco com avatar + corpo (cabeçalho + bolha) */
+.chat-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 80%;
+  align-items: flex-start;
+}
+
+/* Mensagem do PRÓPRIO usuário: alinhada à direita, avatar à direita */
+.chat-msg-mine {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+/* Mensagem do OUTRO: alinhada à esquerda, avatar à esquerda */
+.chat-msg-theirs {
+  align-self: flex-start;
+  flex-direction: row;
+}
+
+/* Avatar (foto ou inicial) */
+.chat-msg-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--purple);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: 2px solid var(--border-color);
+}
+
+.chat-msg-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Coluna com nome/hora + bolha */
+.chat-msg-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.chat-msg-mine .chat-msg-body {
+  align-items: flex-end;
+}
+
+.chat-msg-theirs .chat-msg-body {
+  align-items: flex-start;
+}
+
+/* Cabeçalho com nome e horário */
+.chat-msg-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+.chat-msg-name {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* Balão da mensagem */
+.chat-msg-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Bolha "minha": amarela (marca) */
+.chat-msg-mine .chat-msg-bubble {
+  background: var(--yellow);
+  color: var(--text-on-yellow);
+  border-bottom-right-radius: 4px;
+}
+
+/* Bolha "deles": fundo escuro com borda */
+.chat-msg-theirs .chat-msg-bubble {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+/* Aviso de chat encerrado (pedido entregue/cancelado) */
+.chat-encerrado {
   background: rgba(0, 0, 0, 0.3);
   border: 1px dashed rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 32px 24px;
   text-align: center;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
-.pedido-chat-wip-icon {
-  font-size: 36px;
+.chat-encerrado-icon {
+  font-size: 32px;
   margin-bottom: 8px;
   filter: grayscale(0.4);
 }
 
-.pedido-chat-wip-title {
-  margin: 0 0 8px 0;
+.chat-encerrado-title {
+  margin: 0 0 6px 0;
   color: var(--white);
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
-.pedido-chat-wip-desc {
-  margin: 0;
+.chat-encerrado-aviso {
+  background: rgba(244, 67, 54, 0.08);
+  border: 1px solid rgba(244, 67, 54, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: #ff8a95;
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+  margin-bottom: 12px;
+}
+
+.chat-encerrado-desc {
+  margin: 12px 0 0 0;
+  font-size: 12.5px;
   color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.6;
-  max-width: 380px;
-  margin: 0 auto;
+  font-style: italic;
+  text-align: center;
+}
+/* Responsivo: em telas pequenas, o botão vira largura total */
+@media (max-width: 600px) {
+  .chat-msg {
+    max-width: 90%;
+  }
+  .chat-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .chat-send {
+    width: 100%;
+  }
 }
 
 /* ── PAINEL DEV (botões de simulação) ── */
@@ -2630,7 +2928,147 @@ button[aria-busy="true"]::after {
   background: rgba(18, 206, 170, 0.2);
   border-color: rgba(18, 206, 170, 0.7);
 }
+/* ════════════════════════════════════════════════════════════════
+   BLOCO: PIX NO DETALHE DO PEDIDO
+   ════════════════════════════════════════════════════════════════ */
 
+/* Disclaimer no hero */
+.pedido-hero-disclaimer {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 229, 0, 0.08);
+  border: 1px solid rgba(255, 229, 0, 0.3);
+  border-radius: 10px;
+  font-size: 13px;
+  color: rgba(255, 229, 0, 0.95);
+  line-height: 1.5;
+  max-width: 640px;
+}
+
+.pedido-hero-disclaimer strong {
+  color: var(--yellow);
+  font-weight: 700;
+}
+
+/* Bloco Pix no resumo */
+.pix-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pix-block-aguardando {
+  background: rgba(255, 229, 0, 0.04);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 229, 0, 0.2);
+  border-top: 1px solid rgba(255, 229, 0, 0.2);
+}
+
+.pix-block-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.pix-block-aguardando .pix-block-title {
+  color: var(--yellow);
+}
+
+.pix-block-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.pix-qr-wrap {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.pix-qr-img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+.pix-warning {
+  background: rgba(18, 206, 170, 0.08);
+  border: 1px solid rgba(18, 206, 170, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--cyan);
+  text-align: center;
+}
+
+.pix-warning strong {
+  color: var(--white);
+  font-weight: 700;
+}
+
+.pix-comprovante-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.pix-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.pix-input-file {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pix-input-file:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(18, 206, 170, 0.15);
+}
+
+.pix-submit-btn {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 13px;
+}
+
+.pix-comprovante-link {
+  font-size: 13px;
+  color: var(--cyan);
+  text-decoration: underline;
+  font-weight: 600;
+  align-self: flex-start;
+}
+
+.pix-comprovante-link:hover {
+  color: var(--white);
+}
 /* ════════════════════════════════════════════════════════════════
    BLOCO: LISTA DE PEDIDOS (/pedidos/)
    ════════════════════════════════════════════════════════════════ */
