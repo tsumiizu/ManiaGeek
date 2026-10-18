@@ -103,6 +103,7 @@
           </p>
         </div>
       </div>
+      
       <!-- Bloco: Chat com o vendedor -->
       {% if pedido.chat_disponivel %}
       <div class="checkout-block chat-block"
@@ -134,7 +135,7 @@
           </button>
         </form>
       </div>
-    {% elif pedido.chat_encerrado %}
+      {% elif pedido.chat_encerrado %}
       <div class="checkout-block chat-block"
           id="chat"
           data-pedido-id="{{ pedido.id }}"
@@ -162,7 +163,7 @@
           {% endif %}
         </p>
       </div>
-    {% endif %}
+      {% endif %}
 
     </div>
 
@@ -193,56 +194,58 @@
           <span>Total</span>
           <span class="total-price">R$ {{ pedido.valor_total }}</span>
         </div>
+        
         {# ============ BLOCO PIX ============ #}
-{% if pedido.status == 'pendente_pagamento' %}
-  <div class="pix-block">
-    <h5 class="pix-block-title">Pague com Pix</h5>
+        {% if pedido.status == 'pendente_pagamento' %}
+          <div class="pix-block">
+            <h5 class="pix-block-title">Pague com Pix</h5>
 
-    <p class="pix-block-desc">
-      Aponte a câmera do seu banco para o QR Code abaixo. Depois de pagar, anexe o comprovante.
-    </p>
+            <p class="pix-block-desc">
+              Aponte a câmera do seu banco para o QR Code abaixo. Depois de pagar, anexe o comprovante.
+            </p>
 
-    <div class="pix-qr-wrap">
-      <img src="{% static 'media/pix_qr.png' %}" alt="QR Code Pix" class="pix-qr-img">
-    </div>
+            <div class="pix-qr-wrap">
+              <img src="{% static 'media/pix_qr.png' %}" alt="QR Code Pix" class="pix-qr-img">
+            </div>
 
-    <div class="pix-warning">
-      <strong>Valor a pagar:</strong> R$ {{ pedido.valor_total }}
-    </div>
+            <div class="pix-warning">
+              <strong>Valor a pagar:</strong> R$ {{ pedido.valor_total }}
+            </div>
 
-    <form method="POST"
-          action="{% url 'pedido_enviar_comprovante' pedido.id %}"
-          enctype="multipart/form-data"
-          class="pix-comprovante-form">
-      {% csrf_token %}
-      <label for="comprovante-input" class="pix-label">Anexar comprovante</label>
-      <input type="file"
-             name="comprovante"
-             id="comprovante-input"
-             accept="image/*"
-             required
-             class="pix-input-file">
-      <button type="submit" class="btn-primary pix-submit-btn">
-        Enviar comprovante
-      </button>
-    </form>
-  </div>
+            <form method="POST"
+                  action="{% url 'pedido_enviar_comprovante' pedido.id %}"
+                  enctype="multipart/form-data"
+                  class="pix-comprovante-form">
+              {% csrf_token %}
+              <label for="comprovante-input" class="pix-label">Anexar comprovante</label>
+              <input type="file"
+                     name="comprovante"
+                     id="comprovante-input"
+                     accept="image/*"
+                     required
+                     class="pix-input-file">
+              <button type="submit" class="btn-primary pix-submit-btn">
+                Enviar comprovante
+              </button>
+            </form>
+          </div>
 
-{% elif pedido.status == 'aguardando_confirmacao' %}
-  <div class="pix-block pix-block-aguardando">
-    <h5 class="pix-block-title">⏳ Aguardando confirmação</h5>
+        {% elif pedido.status == 'aguardando_confirmacao' %}
+          <div class="pix-block pix-block-aguardando">
+            <h5 class="pix-block-title">⏳ Aguardando confirmação</h5>
 
-    <p class="pix-block-desc">
-      Recebemos seu comprovante. O vendedor vai conferir o pagamento em breve.
-    </p>
+            <p class="pix-block-desc">
+              Recebemos seu comprovante. O vendedor vai conferir o pagamento em breve.
+            </p>
 
-    {% if pedido.comprovante %}
-      <a href="{{ pedido.comprovante.url }}" target="_blank" class="pix-comprovante-link">
-        Ver comprovante enviado
-      </a>
-    {% endif %}
-  </div>
-{% endif %}
+            {% if pedido.comprovante %}
+              <a href="{{ pedido.comprovante.url }}" target="_blank" class="pix-comprovante-link">
+                Ver comprovante enviado
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+
         <!-- Info de pagamento -->
         {% if pedido.metodo_pagamento %}
           <div class="summary-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border-color);">
@@ -258,7 +261,7 @@
           </div>
         {% endif %}
 
-        <!-- Botões DEV: só aparecem em DEBUG. Em produção somem. -->
+        <!-- Botões DEV -->
         {% if modo_dev %}
           <div class="pedido-dev-panel">
             <p class="pedido-dev-title">🛠 Modo desenvolvedor</p>
@@ -271,17 +274,7 @@
                 </button>
               </form>
             {% endif %}
-              {% if pedido.status == 'aguardando_confirmacao' and user.is_staff %}
-                <form method="POST"
-                      action="{% url 'pedido_aprovar_pix' pedido.id %}"
-                      style="margin-top: 12px;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-primary"
-                          style="width: 100%; padding: 12px; font-size: 13px;">
-                    ✓ Aprovar pagamento Pix
-                  </button>
-                </form>
-              {% endif %}
+
             {% if pedido.status == 'pago' %}
               <form method="POST" action="{% url 'pedido_avancar' pedido.id %}" style="margin: 0;">
                 {% csrf_token %}
@@ -307,6 +300,61 @@
           </div>
         {% endif %}
 
+        {# ============ BOTÕES REAIS (FORA DO MODO DEV) ============ #}
+        {# A lógica abaixo checa se o usuário pertence aos grupos de gestão #}
+        {% if user.is_superuser or user.groups.all|dictsortreversed:"name"|join:"," == "Dono,Gestor de Pedidos,Suporte" or "Dono" in user.groups.all|join:"," or "Gestor de Pedidos" in user.groups.all|join:"," or "Suporte" in user.groups.all|join:"," %}
+          
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+            
+            {% if pedido.status == 'aguardando_confirmacao' %}
+              <div style="padding: 12px; border: 1px dashed var(--cyan); border-radius: 10px;">
+                <p style="font-size: 12px; color: var(--cyan); margin-bottom: 8px;">Admin: Verifique o comprovante antes de aprovar.</p>
+                
+                {% if pedido.comprovante %}
+                  <a href="{{ pedido.comprovante.url }}" target="_blank" class="btn-outline" style="display: block; text-align: center; margin-bottom: 8px; padding: 8px;">Ver Comprovante</a>
+                {% endif %}
+
+                <form method="POST" action="{% url 'pedido_aprovar_pix' pedido.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-primary" style="width: 100%; padding: 10px;">✓ Aprovar Pagamento</button>
+                </form>
+              </div>
+            
+            {% elif pedido.status == 'pago' %}
+              <form method="POST" action="{% url 'pedido_avancar_fr' pedido.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 10px;">Avançar: Em Preparação</button>
+              </form>
+
+            {% elif pedido.status == 'em_preparacao' %}
+              <form method="POST" action="{% url 'pedido_avancar_fr' pedido.id %}" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
+                {% csrf_token %}
+                <div style="margin-bottom: 10px;">
+                  <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Transportadora:</label>
+                  <input type="text" name="transportadora" required placeholder="Ex: Correios" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: white;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                  <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Código de Rastreio:</label>
+                  <input type="text" name="codigo_rastreio" required placeholder="Ex: BR123456789" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: white;">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 10px;">Avançar: Enviado</button>
+              </form>
+
+            {% elif pedido.status == 'enviado' %}
+              <form method="POST" action="{% url 'pedido_avancar_fr' pedido.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 10px;">Avançar: Entregue</button>
+              </form>
+            {% endif %}
+
+          </div>
+        {% endif %}
+        <div class="summary-row">
+        {% if pedido.codigo_rastreio %}
+          <span>Transportadora: {{ pedido.transportadora }}</span>
+          <span>Rastreio: {{ pedido.codigo_rastreio }}</span>
+        {% endif %}
+        </div>
         <a href="{% url 'pedido_lista' %}"
            class="btn-outline"
            style="display: block; text-align: center; margin-top: 12px;

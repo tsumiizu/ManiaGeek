@@ -463,7 +463,7 @@ class Pedido(models.Model):
         pra 'pago'. Se já estiver pago, levanta erro — sinaliza que
         o webhook chegou duplicado.
         """
-        if self.status != 'pendente_pagamento':
+        if self.status not in ('pendente_pagamento', 'aguardando_confirmacao'):
             raise ValueError(
                 f"Não dá pra marcar como pago um pedido em '{self.status}'."
             )
@@ -498,7 +498,7 @@ class Pedido(models.Model):
         self.save(update_fields=[
             'status', 'comprovante', 'expira_em', 'atualizado_em'
         ])
-    def marcar_como_enviado(self, transportadora=None, prazo_dias=None):
+    def marcar_como_enviado(self, transportadora=None, codigo_rastreio=None):
         if self.tipo_entrega == 'combinar':
             raise ValueError(
                 "Pedido de combinação não tem etapa de envio. Vá direto pra 'entregue'."
@@ -506,6 +506,24 @@ class Pedido(models.Model):
         if self.status != 'em_preparacao':
             raise ValueError(
                 f"Só dá pra enviar pedido em preparação. Esse está em '{self.status}'."
+            )
+        self.status = 'enviado'
+        self.enviado_em = timezone.now()
+        if transportadora:
+            self.transportadora = transportadora
+        if codigo_rastreio:
+            self.codigo_rastreio = codigo_rastreio
+        self.save(update_fields=[
+            'status', 'enviado_em', 'transportadora', 'codigo_rastreio', 'atualizado_em'
+        ])
+
+    def marcar_como_entregue(self):
+        permitido = self.status == 'enviado' or (
+            self.tipo_entrega == 'combinar' and self.status == 'em_preparacao'
+        )
+        if not permitido:
+            raise ValueError(
+                f"Não dá pra marcar como entregue um pedido em '{self.status}'."
             )
         self.status = 'entregue'
         self.entregue_em = timezone.now()
@@ -709,3 +727,6 @@ class AvaliacaoProduto(AvaliacaoBase):
                 )
     def __str__(self):
         return f"{self.produto.nome}: {self.nota}★ — {self.usuario.display_name}"
+
+
+

@@ -21,6 +21,7 @@
     <ul>
       <a href="{% url 'home' %}" class="nav-active">Início</a>
       <a href="{% url 'produtos' %}">Produtos</a>
+      <a href="{% url 'eventos' %}" class="nav-eventos" data-eventos-link data-token-url="{% url 'eventos_token' %}">Eventos</a>
       {% if user.is_authenticated %}
         {% if user.is_staff or user.is_superuser or user.groups.exists %}
           <a href="{% url 'dashboard' %}" style="color: var(--yellow);">Dashboard</a>
@@ -47,7 +48,10 @@
 
       <!-- === ÍCONE DE PERFIL MOVIDO PARA A DIREITA === -->
       {% if user.is_authenticated %}
+        {% now "U" as agora %}
         <a href="{% url 'perfil' %}" title="Meu Perfil" class="nav-profile-link" style="margin-left: 16px;">
+          {# Bolinha vermelha: pedido entregue nos últimos 7 dias (some quando o usuário abre "Pedidos concluídos") #}
+          <span class="conta-dots nav-dots">{% for p in user.pedidos.all %}{% if p.status == 'entregue' and p.entregue_em and p.entregue_em|date:"U"|add:"604800" > agora|add:"0" %}<span class="conta-dot" data-entregue="{{ p.id }}" data-uid="{{ user.pk }}"></span>{% endif %}{% endfor %}</span>
           <div class="nav-avatar logged-in">
             <!-- Verifica se existe um perfil e uma foto. Se não, mostra a letra. -->
             {% if user.foto %}
@@ -78,11 +82,20 @@
       <div class="footer-info">
         <p>&copy; 2026 ManiaGeek. Todos os direitos reservados.</p>
       </div>
-      <div class="social-links">
-        <a href="https://www.instagram.com/maniageek.br/" target="_blank">
-          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-          <span>@maniageek.br</span>
-        </a>
+      <div class="footer-direita">
+        <div class="social-links">
+          <a href="https://www.instagram.com/maniageek.br/" target="_blank">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            <span>@maniageek.br</span>
+          </a>
+        </div>
+
+        <div class="social-links">
+          <a href="{% url 'faq' %}">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>Perguntas frequentes</span>
+          </a>
+        </div>
       </div>
     </div>
   </footer>

@@ -68,6 +68,30 @@
       </div>
     </div>
     {% endif %}
+
+    <!-- Eventos: mesma permissão do catálogo (a view usa a mesma regra) -->
+    {% if perms.app.add_produto or perms.app.change_produto or perms.app.add_categoria %}
+    <div class="dash-block">
+      <h3 class="dash-block-title">Eventos</h3>
+      <div class="dash-shortcuts">
+        <a href="{% url 'evento_criar' %}" class="dash-shortcut">
+          <span class="dash-shortcut-icon">+</span>
+          <span class="dash-shortcut-text">
+            <strong>Novo Evento</strong>
+            <small>Publicar um evento do Instagram</small>
+          </span>
+        </a>
+        <a href="{% url 'eventos' %}" class="dash-shortcut">
+          <span class="dash-shortcut-icon">◇</span>
+          <span class="dash-shortcut-text">
+            <strong>Ver eventos</strong>
+            <small>Ache um evento para editar ou remover</small>
+          </span>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
     {% if perms.auth.change_user or perms.app.change_pedido %}
     <div class="dash-block">
       <h3 class="dash-block-title">Gestão</h3>

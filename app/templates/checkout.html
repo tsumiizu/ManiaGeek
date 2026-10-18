@@ -20,9 +20,9 @@
   <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
     {% for msg in messages %}
     <div style="padding: 12px 20px; border-radius: 10px;
-                    background: rgba(255,255,255,0.05);
-                    border: 1px solid rgba(255,255,255,0.15);
-                    color: {% if msg.tags == 'error' %}#e63946{% else %}var(--white){% endif %};">
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.15);
+                color: {% if msg.tags == 'error' %}#e63946{% else %}var(--white){% endif %};">
       {{ msg }}
     </div>
     {% endfor %}
@@ -106,25 +106,15 @@
           </h3>
 
           <div class="checkout-payment-list">
-            {% for valor, label in metodos_pagamento %}
-            <label class="checkout-option" for="pag-{{ valor }}">
-              <input type="radio" name="metodo_pagamento" id="pag-{{ valor }}" value="{{ valor }}" {% if forloop.first %}checked{% endif %}>
+            <label class="checkout-option" for="pag-pix">
+              <input type="radio" name="metodo_pagamento" id="pag-pix" value="pix" checked>
               <div class="checkout-option-body">
-                <strong class="checkout-option-title">{{ label }}</strong>
+                <strong class="checkout-option-title">Pix</strong>
                 <p class="checkout-option-line" style="font-size: 12px; color: var(--text-muted);">
-                  {% if valor == 'pix' %}
                   Aprovação imediata. QR Code gerado após confirmação.
-                  {% elif valor == 'boleto' %}
-                  Vencimento em 2 dias úteis. Aprovação em até 3 dias após pagamento.
-                  {% elif valor == 'cartao_credito' %}
-                  Parcelamento disponível.
-                  {% elif valor == 'cartao_debito' %}
-                  Débito à vista.
-                  {% endif %}
                 </p>
               </div>
             </label>
-            {% endfor %}
           </div>
         </div>
 

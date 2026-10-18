@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="avp-page">
+
+  <!-- ═══════ TOPO ═══════ -->
+  <header class="avp-topo">
+    <span class="avp-sobretitulo">Quem comprou conta</span>
+    <h1>Avaliações dos clientes</h1>
+    <p>O que os clientes acharam dos produtos, da loja e do serviço. Todas as avaliações são de compras reais.</p>
+  </header>
+
+  <!-- ═══════ ESCOLHA O TIPO ═══════ -->
+  <div class="avp-abas" role="group" aria-label="Tipo de avaliação">
+    <a href="?tipo=todas" class="{% if tipo == 'todas' %}is-ativo{% endif %}">Todas <span>{{ contagens.todas }}</span></a>
+    <a href="?tipo=produto" class="{% if tipo == 'produto' %}is-ativo{% endif %}">Produtos <span>{{ contagens.produto }}</span></a>
+    <a href="?tipo=loja" class="{% if tipo == 'loja' %}is-ativo{% endif %}">Loja <span>{{ contagens.loja }}</span></a>
+    <a href="?tipo=servico" class="{% if tipo == 'servico' %}is-ativo{% endif %}">Serviço <span>{{ contagens.servico }}</span></a>
+  </div>
+
+  {% if produto_filtro %}
+    <div class="avp-filtro">
+      <span>Mostrando só as avaliações de <a href="{% url 'detalhe_produto' produto_filtro.id %}">{{ produto_filtro.nome }}</a></span>
+      <a href="?tipo=produto" class="avp-filtro-limpar">Ver de todos os produtos ✕</a>
+    </div>
+  {% endif %}
+
+  <!-- ═══════ LISTA ═══════ -->
+  {% if pagina %}
+    <div class="avp-lista">
+      {% for item in pagina %}
+        {% with av=item.av %}
+        <article class="avaliacao-card avp-card" id="av-{{ item.tipo }}-{{ av.id }}">
+
+          <div class="avaliacao-topo">
+            <div class="avaliacao-avatar">{% if av.usuario.foto %}<img src="{{ av.usuario.foto.url }}" alt="">{% else %}{{ av.usuario.display_name|default:"C"|make_list|first }}{% endif %}</div>
+            <div class="avaliacao-quem">
+              <span class="avaliacao-autor">{{ av.usuario.display_name|default:"Cliente" }}</span>
+              <span class="avaliacao-data">{{ av.criado_em|date:"d/m/Y" }}</span>
+            </div>
+            <div class="avaliacao-estrelas" aria-label="Nota {{ av.nota }} de 5">
+              {% for i in "12345" %}<span class="{% if forloop.counter <= av.nota %}cheia{% endif %}">★</span>{% endfor %}
+            </div>
+          </div>
+
+          <div class="avp-selos">
+            <span class="avp-tipo avp-tipo-{{ item.tipo }}">{{ item.rotulo }}</span>
+            <span class="avaliacao-selo">✓ Compra verificada</span>
+          </div>
+
+          {% if av.texto %}<p class="avaliacao-texto">{{ av.texto }}</p>{% endif %}
+
+          {% if item.produtos %}
+            <div class="avp-produtos">
+              <span class="avp-produtos-rotulo">{% if item.tipo == 'produto' %}Produto avaliado{% else %}Produtos desta compra{% endif %}</span>
+              <div class="avp-produtos-lista">
+                {% for p in item.produtos %}
+                  {% if p.id %}
+                    <a href="{% url 'detalhe_produto' p.id %}" class="avp-produto">
+                      {% if p.imagem %}<img src="{{ p.imagem }}" alt="" loading="lazy">{% else %}<span class="avp-produto-sem-img"></span>{% endif %}
+                      <span>{{ p.nome }}</span>
+                    </a>
+                  {% else %}
+                    <span class="avp-produto">
+                      {% if p.imagem %}<img src="{{ p.imagem }}" alt="" loading="lazy">{% else %}<span class="avp-produto-sem-img"></span>{% endif %}
+                      <span>{{ p.nome }}</span>
+                    </span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+        </article>
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+    <!-- ═══════ PÁGINAS ═══════ -->
+    {% if pagina.has_other_pages %}
+      <div class="avp-paginas">
+        {% if pagina.has_previous %}
+          <a href="?tipo={{ tipo }}{% if produto_filtro %}&amp;produto={{ produto_filtro.id }}{% endif %}&amp;page={{ pagina.previous_page_number }}">‹ Anterior</a>
+        {% else %}
+          <span class="avp-pagina-off">‹ Anterior</span>
+        {% endif %}
+        <span class="avp-pagina-atual">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+        {% if pagina.has_next %}
+          <a href="?tipo={{ tipo }}{% if produto_filtro %}&amp;produto={{ produto_filtro.id }}{% endif %}&amp;page={{ pagina.next_page_number }}">Próxima ›</a>
+        {% else %}
+          <span class="avp-pagina-off">Próxima ›</span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="avp-vazio">
+      <p>Ainda não há avaliações {% if tipo == 'produto' %}de produtos{% elif tipo == 'loja' %}da loja{% elif tipo == 'servico' %}do serviço{% endif %} por aqui.</p>
+      <a href="{% url 'produtos' %}" class="btn-primary avp-btn">Ver produtos</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

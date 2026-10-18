@@ -141,3 +141,25 @@ class AvaliacaoProdutoForm(forms.ModelForm):
                 'placeholder': 'O que você achou deste produto?',
             }),
         }
+
+# Form de Anuncio (da pagina anuncio ne duhh):
+ 
+class AnuncioForm(forms.ModelForm):
+    class Meta:
+        model = Anuncio
+        fields = ['titulo', 'descricao', 'imagem']
+        labels = {
+            'titulo': 'Título do evento',
+            'descricao': 'Descrição',
+            'imagem': 'Imagem (a do post do Instagram)',
+        }
+        widgets = {
+            'imagem': forms.FileInput(attrs={'accept': 'image/*'}),
+            'titulo': forms.TextInput(attrs={
+                'placeholder': 'Ex: Feira Geek — 25/10 às 14h',
+            }),
+            'descricao': forms.Textarea(attrs={
+                'rows': 5,
+                'placeholder': 'Conte o que vai rolar, local, horários, novidades...',
+            }),
+        }

@@ -74,6 +74,11 @@
 
         <h1 class="product-title-detail">{{ produto.nome }}</h1>
         <span class="product-author" style="font-size: 14px; margin-top: 4px;">Vendido e entregue por Mania Geek Store</span>
+        {% with total_avaliacoes=produto.avaliacoes.count %}
+          {% if total_avaliacoes %}
+            <a href="#avaliacoes" class="rating-link">★ {{ total_avaliacoes }} avaliaç{{ total_avaliacoes|pluralize:"ão,ões" }}</a>
+          {% endif %}
+        {% endwith %}
         
         <div class="product-price-detail" style="margin-top: 16px;">R$ {{ produto.preco }}</div>
 
@@ -106,6 +111,36 @@
 
     </div>
   </div>
+
+  <!-- SEÇÃO: Avaliações dos clientes (mais recentes primeiro; rola quando são muitas) -->
+  <section class="avaliacoes-secao" id="avaliacoes">
+    {% with avaliacoes=produto.avaliacoes.all|dictsortreversed:"criado_em" %}
+      <h2>Avaliações dos clientes <small>{{ avaliacoes|length }}</small> <a href="{% url 'avaliacoes' %}" class="avaliacoes-ver-todas">Ver todas as avaliações do site ›</a></h2>
+
+      {% if avaliacoes %}
+        <div class="avaliacoes-lista">
+          {% for av in avaliacoes %}
+            <a href="{% url 'avaliacoes' %}?tipo=produto&amp;produto={{ produto.id }}#av-produto-{{ av.id }}" class="avaliacao-card">
+              <div class="avaliacao-topo">
+                <div class="avaliacao-avatar">{% if av.usuario.foto %}<img src="{{ av.usuario.foto.url }}" alt="">{% else %}{{ av.usuario.display_name|default:"C"|make_list|first }}{% endif %}</div>
+                <div class="avaliacao-quem">
+                  <span class="avaliacao-autor">{{ av.usuario.display_name|default:"Cliente" }}</span>
+                  <span class="avaliacao-data">{{ av.criado_em|date:"d/m/Y" }}</span>
+                </div>
+                <div class="avaliacao-estrelas" aria-label="Nota {{ av.nota }} de 5">
+                  {% for i in "12345" %}<span class="{% if forloop.counter <= av.nota %}cheia{% endif %}">★</span>{% endfor %}
+                </div>
+              </div>
+              {% if av.texto %}<p class="avaliacao-texto">{{ av.texto }}</p>{% endif %}
+              <span class="avaliacao-selo">✓ Compra verificada</span>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="avaliacao-vazia">Este produto ainda não tem avaliações.</p>
+      {% endif %}
+    {% endwith %}
+  </section>
 
   <!-- SEÇÃO: Produtos Relacionados (Cards agora menores no CSS) -->
   {% if produtos_relacionados %}

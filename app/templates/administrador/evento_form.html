@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="ev-form-page">
+
+  <a href="{% url 'eventos' %}" class="ev-voltar">‹ Voltar para eventos</a>
+  <h1>{{ titulo }}</h1>
+
+  {% if form.non_field_errors %}
+    <div class="ev-form-erro-geral">{% for erro in form.non_field_errors %}{{ erro }}<br>{% endfor %}</div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" class="ev-form">
+    {% csrf_token %}
+
+    <div class="ev-campo">
+      <label for="{{ form.titulo.id_for_label }}">{{ form.titulo.label }}</label>
+      {{ form.titulo }}
+      {% for erro in form.titulo.errors %}<div class="ev-erro">{{ erro }}</div>{% endfor %}
+      <small>Dica: coloque a data no título (ex.: Feira Geek — 25/10 às 14h), assim ela aparece para quem visitar.</small>
+    </div>
+
+    <div class="ev-campo">
+      <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
+      {{ form.descricao }}
+      {% for erro in form.descricao.errors %}<div class="ev-erro">{{ erro }}</div>{% endfor %}
+    </div>
+
+    <div class="ev-campo">
+      <label for="{{ form.imagem.id_for_label }}">{{ form.imagem.label }}</label>
+      {% if anuncio.imagem %}
+        <div class="ev-imagem-atual">
+          <img src="{{ anuncio.imagem.url }}" alt="Imagem atual do evento">
+          <span>Imagem atual. Envie outra para trocar.</span>
+        </div>
+      {% endif %}
+      {{ form.imagem }}
+      {% for erro in form.imagem.errors %}<div class="ev-erro">{{ erro }}</div>{% endfor %}
+    </div>
+
+    <div class="ev-form-botoes">
+      <a href="{% url 'eventos' %}" class="btn-outline ev-btn">Cancelar</a>
+      <button type="submit" class="btn-primary ev-btn">Salvar evento</button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

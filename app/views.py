@@ -14,6 +14,9 @@ from .forms import ProdutoForm, CategoriaForm, EnderecoForm
 from accounts.forms import EditarPerfilForm, UserRegisterForm, FotoPerfilForm, CodigoVerificacaoForm
 from accounts.models import CodigoVerificacao, Usuario
 from accounts.utils import (enviar_codigo_email, gerar_token_dispositivo, token_dispositivo_valido, ultimo_codigo_recente)
+from .forms import (ProdutoForm, CategoriaForm, EnderecoForm, AvaliacaoProdutoForm, AvaliacaoLojaForm, AvaliacaoServicoForm, AnuncioForm)
+from django.core.paginator import Paginator
+import hashlib
 
 
 def quatro_view(request):  # Apenas para testes
@@ -492,47 +495,54 @@ def pedido_aprovar_pix_view(request, pk):
             id_transacao=f"PIX-MANUAL-{pedido.id}",
             bandeira='PIX',
         )
-        messages.success(request, "Pagamento aprovado! Pedido marcado como pago.")
+        messages.success(request, "Pagamento Pix aprovado manualmente!")
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('pedido_detalhe', pk=pedido.pk)
 @login_required
 @require_POST
 def pedido_avancar_view(request, pk):
-    """Botão DEV: avança o pedido pro próximo estado lógico.
-    Em produção, essas transições vêm do painel do vendedor.
-    """
-    if not settings.DEBUG:
+    if not _gerencia_pedidos(request.user):
         from django.http import Http404
         raise Http404
-
+        
     pedido = get_object_or_404(Pedido, pk=pk)
-    if not _pode_ver_pedido(request, pedido):
-        from django.http import Http404
-        raise Http404
     try:
         if pedido.status == 'pago':
             pedido.marcar_como_em_preparacao()
             messages.success(request, "Pedido em preparação.")
+            
         elif pedido.status == 'em_preparacao':
-            pedido.marcar_como_enviado(
-                transportadora=pedido.frete_transportadora or FRETE_PADRAO['transportadora'],
-                prazo_dias=pedido.frete_prazo_dias or FRETE_PADRAO['prazo'],
-            )
-            messages.success(request, "Pedido enviado.")
+            if pedido.tipo_entrega == 'combinar':
+                pedido.marcar_como_entregue()
+                messages.success(request, "Pedido marcado como entregue.")
+            else:
+                transportadora = request.POST.get('transportadora', '').strip()
+                rastreio = request.POST.get('codigo_rastreio', '').strip()
+
+                if not transportadora or not rastreio:
+                    messages.error(request, "Transportadora e código de rastreio são obrigatórios.")
+                    return redirect('pedido_detalhe', pk=pedido.pk)
+
+                pedido.marcar_como_enviado(
+                    transportadora=transportadora,
+                    codigo_rastreio=rastreio
+                )
+                messages.success(request, "Pedido enviado e rastreio registrado.")
+            
         elif pedido.status == 'enviado':
             pedido.marcar_como_entregue()
-            messages.success(request, "Pedido entregue!")
-        elif pedido.status == 'pendente_pagamento':
-            messages.error(
-                request,
-                "Pedido ainda pendente. Use 'Simular pagamento' primeiro."
-            )
+            messages.success(request, "Pedido marcado como entregue.")
+            
         else:
-            messages.error(request, "Pedido já está num estado terminal.")
+            messages.error(request, "Não é possível avançar a partir deste status.")
+            
     except ValueError as e:
         messages.error(request, str(e))
-    return redirect('pedido_detalhe', pk=pedido.id)
+        
+    return redirect('pedido_detalhe', pk=pedido.pk)
+
+
 @login_required
 @require_POST
 def pedido_enviar_comprovante_view(request, pk):
@@ -579,7 +589,7 @@ def pedido_aprovar_pix_view(request, pk):
 # ============================================================
 # PERFIL
 # ============================================================
-
+STATUS_CONCLUIDOS = ('entregue', 'cancelado', 'falha_pagamento')
 @login_required
 def perfil_view(request):
     perfil_form = EditarPerfilForm(instance=request.user)
@@ -603,7 +613,6 @@ def perfil_view(request):
         'form': perfil_form,
         'foto_form': foto_form,
     })
-
 # ENDEREÇOS
 
 @login_required
@@ -1072,3 +1081,290 @@ def categoria_editar(request, pk):
         'categoria': categoria,
         'todas_categorias': Categoria.objects.all().order_by('nome'),
     })
+
+
+
+
+def marcar_como_enviado(self, transportadora=None, prazo_dias=None, codigo_rastreio=None):
+    if self.tipo_entrega == 'combinar':
+        raise ValueError("Pedido de combinação não tem envio.")
+    if self.status != 'em_preparacao':
+        raise ValueError(f"Status atual é '{self.status}', precisa estar em preparação.")
+
+    self.status = 'enviado'
+    self.enviado_em = timezone.now()
+    
+    if transportadora:
+        self.transportadora = transportadora 
+    if prazo_dias is not None:
+        self.frete_prazo_dias = prazo_dias
+    if codigo_rastreio:
+        self.codigo_rastreio = codigo_rastreio
+
+    self.save(update_fields=[
+        'status', 'enviado_em', 'transportadora', 
+        'frete_prazo_dias', 'codigo_rastreio', 'atualizado_em'
+    ])
+
+
+
+@login_required
+@require_POST
+def avaliar_compra_view(request, pedido_id):
+    """
+    Recebe o pop-up "Avaliar compra" de um pedido entregue.
+ 
+    Até três partes, todas opcionais (a pessoa pode avaliar só uma e voltar depois):
+      - produtos: a mesma nota/comentário vira uma avaliação para CADA produto da
+        compra que o usuário ainda não avaliou (produto já avaliado em compra
+        anterior é pulado: a regra do model é uma avaliação por usuário/produto);
+      - loja;
+      - serviço.
+    Tudo é validado antes de salvar: se uma parte der erro, nada é gravado.
+    """
+    pedido = get_object_or_404(
+        Pedido.objects.prefetch_related('itens__produto'),
+        id=pedido_id,
+        usuario=request.user,
+        status='entregue',
+    )
+ 
+    def nota_enviada(prefixo):
+        # A nota vem de radios, mas o POST pode ser montado à mão: confere 1–5
+        # antes de montar o form (o clean() do model não aceita nota vazia).
+        try:
+            nota = int(request.POST.get(f'{prefixo}-nota', ''))
+        except ValueError:
+            return False
+        return 1 <= nota <= 5
+ 
+    formularios = []   # (rótulo, form)
+ 
+    # ── Produtos: espalha a mesma avaliação por todos os itens ainda não avaliados ──
+    if nota_enviada('produto'):
+        ja_avaliados = set(
+            AvaliacaoProduto.objects
+            .filter(usuario=request.user)
+            .values_list('produto_id', flat=True)
+        )
+        pendentes = {
+            item.produto for item in pedido.itens.all()
+            if item.produto is not None and item.produto_id not in ja_avaliados
+        }
+        for produto in pendentes:
+            formularios.append((
+                'Produtos',
+                AvaliacaoProdutoForm(
+                    request.POST, prefix='produto',
+                    instance=AvaliacaoProduto(
+                        usuario=request.user, produto=produto, pedido=pedido
+                    ),
+                ),
+            ))
+ 
+    # ── Loja ──
+    if nota_enviada('loja') and not AvaliacaoLoja.objects.filter(pedido=pedido).exists():
+        formularios.append((
+            'Loja',
+            AvaliacaoLojaForm(
+                request.POST, prefix='loja',
+                instance=AvaliacaoLoja(pedido=pedido, usuario=request.user),
+            ),
+        ))
+ 
+    # ── Serviço ──
+    if nota_enviada('servico') and not AvaliacaoServico.objects.filter(pedido=pedido).exists():
+        formularios.append((
+            'Serviço',
+            AvaliacaoServicoForm(
+                request.POST, prefix='servico',
+                instance=AvaliacaoServico(pedido=pedido, usuario=request.user),
+            ),
+        ))
+ 
+    if not formularios:
+        messages.error(request, "Avaliação: escolha pelo menos uma nota de 1 a 5 estrelas.")
+        return redirect('perfil')
+ 
+    # Valida tudo antes de salvar qualquer coisa
+    for rotulo, form in formularios:
+        if not form.is_valid():
+            erros = ' '.join(e for lista in form.errors.values() for e in lista)
+            messages.error(request, f"Avaliação ({rotulo}): {erros}")
+            return redirect('perfil')
+ 
+    with transaction.atomic():
+        for _, form in formularios:
+            form.save()
+ 
+    messages.success(request, "Avaliação enviada! Obrigado por contar como foi.")
+    return redirect('perfil')
+
+
+# ANUNCIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+def _token_eventos():
+    """
+    "Impressão digital" do conteúdo dos eventos: muda quando entra um post novo
+    ou quando algum post é editado (o Anuncio não tem data de atualização, então
+    comparamos o conteúdo). Vazio quando não há nenhum evento.
+    """
+    partes = [
+        f"{a.id}|{a.titulo}|{a.descricao}|{a.imagem}"
+        for a in Anuncio.objects.order_by('id')
+    ]
+    if not partes:
+        return ''
+    return hashlib.md5('\n'.join(partes).encode('utf-8')).hexdigest()[:12]
+ 
+ 
+def eventos_view(request):
+    anuncios = list(Anuncio.objects.order_by('-id'))   # mais recente primeiro
+    return render(request, 'eventos.html', {
+        'destaque': anuncios[0] if anuncios else None,
+        'outros': anuncios[1:],
+        'pode_gerenciar': _gerencia_produtos(request.user),
+        'token': _token_eventos(),
+    })
+ 
+ 
+@require_GET
+def eventos_token_view(request):
+    """Usada pelo script da navbar para saber se há novidade (bolinha vermelha)."""
+    return JsonResponse({'token': _token_eventos()})
+ 
+ 
+@user_passes_test(_gerencia_produtos, login_url='login')
+def evento_criar(request):
+    if request.method == 'POST':
+        form = AnuncioForm(request.POST, request.FILES)
+        if form.is_valid():
+            anuncio = form.save()
+            messages.success(request, f"Evento '{anuncio.titulo}' publicado!")
+            return redirect('eventos')
+        messages.error(request, "Corrija os erros abaixo.")
+    else:
+        form = AnuncioForm()
+    return render(request, 'administrador/evento_form.html', {
+        'form': form,
+        'titulo': 'Novo evento',
+    })
+ 
+ 
+@user_passes_test(_gerencia_produtos, login_url='login')
+def evento_editar(request, pk):
+    anuncio = get_object_or_404(Anuncio, pk=pk)
+    if request.method == 'POST':
+        form = AnuncioForm(request.POST, request.FILES, instance=anuncio)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Evento atualizado!")
+            return redirect('eventos')
+        messages.error(request, "Corrija os erros abaixo.")
+    else:
+        form = AnuncioForm(instance=anuncio)
+    return render(request, 'administrador/evento_form.html', {
+        'form': form,
+        'titulo': 'Editar evento',
+        'anuncio': anuncio,
+    })
+ 
+ 
+@user_passes_test(_gerencia_produtos, login_url='login')
+@require_POST
+def evento_remover(request, pk):
+    anuncio = get_object_or_404(Anuncio, pk=pk)
+    anuncio.delete()
+    messages.success(request, "Evento removido.")
+    return redirect('eventos')
+
+
+def faq_view(request):
+    return render(request, 'faq.html')
+
+
+
+
+
+
+
+
+def _produtos_do_pedido(pedido):
+    """Produtos de uma compra (para mostrar nas avaliações de loja e serviço)."""
+    if pedido is None:
+        return []
+    return [
+        {'id': item.produto_id, 'nome': item.nome_produto, 'imagem': item.imagem_url}
+        for item in pedido.itens.all()
+    ]
+ 
+ 
+def avaliacoes_view(request):
+    """
+    Todas as avaliações do site, com filtro por tipo:
+      ?tipo=todas | produto | loja | servico
+      ?produto=<id>   (só vale para tipo=produto: avaliações de um produto)
+    """
+    tipo = request.GET.get('tipo', 'todas')
+    if tipo not in ('todas', 'produto', 'loja', 'servico'):
+        tipo = 'todas'
+ 
+    produto_filtro = None
+    pid = request.GET.get('produto', '')
+    if tipo == 'produto' and pid.isdigit():
+        produto_filtro = Produto.objects.filter(id=int(pid)).first()
+ 
+    contagens = {
+        'produto': AvaliacaoProduto.objects.count(),
+        'loja': AvaliacaoLoja.objects.count(),
+        'servico': AvaliacaoServico.objects.count(),
+    }
+    contagens['todas'] = contagens['produto'] + contagens['loja'] + contagens['servico']
+ 
+    itens = []
+ 
+    if tipo in ('todas', 'produto'):
+        qs = AvaliacaoProduto.objects.select_related('usuario', 'produto')
+        if produto_filtro:
+            qs = qs.filter(produto=produto_filtro)
+        for av in qs:
+            itens.append({
+                'tipo': 'produto',
+                'rotulo': 'Produto',
+                'av': av,
+                'produtos': [{
+                    'id': av.produto_id,
+                    'nome': av.produto.nome,
+                    'imagem': av.produto.imagem_capa,
+                }],
+            })
+ 
+    if tipo in ('todas', 'loja'):
+        qs = AvaliacaoLoja.objects.select_related('usuario', 'pedido').prefetch_related('pedido__itens')
+        for av in qs:
+            itens.append({
+                'tipo': 'loja',
+                'rotulo': 'Loja',
+                'av': av,
+                'produtos': _produtos_do_pedido(av.pedido),
+            })
+ 
+    if tipo in ('todas', 'servico'):
+        qs = AvaliacaoServico.objects.select_related('usuario', 'pedido').prefetch_related('pedido__itens')
+        for av in qs:
+            itens.append({
+                'tipo': 'servico',
+                'rotulo': 'Serviço',
+                'av': av,
+                'produtos': _produtos_do_pedido(av.pedido),
+            })
+ 
+    itens.sort(key=lambda i: i['av'].criado_em, reverse=True)   # mais recentes primeiro
+    pagina = Paginator(itens, 12).get_page(request.GET.get('page'))
+ 
+    return render(request, 'avaliacoes.html', {
+        'pagina': pagina,
+        'tipo': tipo,
+        'contagens': contagens,
+        'produto_filtro': produto_filtro,
+    })
+ 
