@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="ev-page" data-token="{{ token }}">
+
+  <!-- ═══════ TOPO ═══════ -->
+  <header class="ev-topo">
+    <div>
+      <span class="ev-sobretitulo">Agenda ManiaGeek</span>
+      <h1>Eventos</h1>
+      <p>Feiras, lançamentos e encontros da loja. Tudo o que a gente divulga no Instagram aparece aqui.</p>
+    </div>
+    <div class="ev-topo-acoes">
+      <a href="https://www.instagram.com/maniageek.br/" target="_blank" rel="noopener" class="btn-outline ev-btn">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+        @maniageek.br
+      </a>
+      {% if pode_gerenciar %}
+        <a href="{% url 'evento_criar' %}" class="btn-primary ev-btn">+ Novo evento</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- ═══════ DESTAQUE (post mais recente) ═══════ -->
+  {% if destaque %}
+    <section class="ev-destaque">
+      <div class="ev-destaque-img">
+        {% if destaque.imagem %}
+          <img src="{{ destaque.imagem.url }}" alt="{{ destaque.titulo }}">
+        {% else %}
+          <div class="ev-sem-img">
+            <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="ev-destaque-info">
+        <span class="ev-selo">★ Em destaque</span>
+        <h2>{{ destaque.titulo }}</h2>
+        <p class="ev-descricao">{{ destaque.descricao|linebreaksbr }}</p>
+
+        <div class="ev-acoes">
+          <a href="https://www.instagram.com/maniageek.br/" target="_blank" rel="noopener" class="btn-primary ev-btn">Ver no Instagram ↗</a>
+          {% if pode_gerenciar %}
+            <a href="{% url 'evento_editar' destaque.id %}" class="btn-outline ev-btn">Editar</a>
+            <form method="POST" action="{% url 'evento_remover' destaque.id %}" onsubmit="return confirm('Remover este evento?');">
+              {% csrf_token %}
+              <button type="submit" class="ev-btn ev-btn-remover">Remover</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  {% else %}
+    <section class="ev-vazio">
+      <h2>Nenhum evento por enquanto</h2>
+      <p>Assim que a gente divulgar o próximo, ele aparece aqui. Enquanto isso, acompanhe pelo Instagram!</p>
+      <a href="https://www.instagram.com/maniageek.br/" target="_blank" rel="noopener" class="btn-primary ev-btn">Seguir @maniageek.br</a>
+    </section>
+  {% endif %}
+
+  <!-- ═══════ OUTROS POSTS ═══════ -->
+  {% if outros %}
+    <section class="ev-secao">
+      <h2 class="ev-secao-titulo">Mais eventos e novidades</h2>
+      <div class="ev-grid">
+        {% for ev in outros %}
+          <article class="ev-card">
+            <div class="ev-card-img">
+              {% if ev.imagem %}
+                <img src="{{ ev.imagem.url }}" alt="{{ ev.titulo }}" loading="lazy">
+              {% else %}
+                <div class="ev-sem-img">
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+              {% endif %}
+              {% if pode_gerenciar %}
+                <div class="ev-admin">
+                  <a href="{% url 'evento_editar' ev.id %}">Editar</a>
+                  <form method="POST" action="{% url 'evento_remover' ev.id %}" onsubmit="return confirm('Remover este evento?');">
+                    {% csrf_token %}
+                    <button type="submit">Remover</button>
+                  </form>
+                </div>
+              {% endif %}
+            </div>
+            <div class="ev-card-corpo">
+              <h3>{{ ev.titulo }}</h3>
+              <p class="ev-card-desc">{{ ev.descricao }}</p>
+              <a href="https://www.instagram.com/maniageek.br/" target="_blank" rel="noopener" class="ev-link-insta">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                Ver no Instagram ↗
+              </a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+</div>
+{% endblock %}

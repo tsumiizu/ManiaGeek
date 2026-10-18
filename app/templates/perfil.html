@@ -3,9 +3,12 @@
 
 {% block content %}
 
-<div class="profile-container" style="max-width: 1280px;">
+<div class="conta-page">
 
   {% if user.is_authenticated %}
+    {# Hora atual em timestamp, usada pra saber se o pedido foi entregue há pouco #}
+    {% now "U" as agora %}
+
     <!-- Mensagens de sucesso/erro -->
     {% if messages %}
       <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
@@ -17,6 +20,8 @@
                         color: #ff6b78;">
               {{ msg }}
             </div>
+          {% elif msg.tags == 'success' and 'valia' in msg.message %}
+            <div class="conta-aviso-ok">{{ msg }}</div>
           {% endif %}
         {% endfor %}
       </div>
@@ -137,139 +142,297 @@
       <img src="{% static 'media/gato_geek.webp' %}" alt="Mascote" class="corner-cat cat-bottom-right" style="position: absolute; bottom: -20px; right: -20px; width: 75px; height: 75px; pointer-events: none;">
     </div>
 
-    <!-- PAINEL INFERIOR: ENDEREÇOS E COMPRAS -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-bottom: 40px;">
+    <!-- ═══════ ABAS (radio escondido controla qual painel aparece) ═══════ -->
+    <input type="radio" name="conta-aba" id="r-andamento" class="conta-radio" checked>
+    <input type="radio" name="conta-aba" id="r-concluidos" class="conta-radio" {% for msg in messages %}{% if 'valia' in msg.message %}checked{% endif %}{% endfor %}>
+    {# Depois de adicionar/editar/remover endereço (mensagem cita "endereço"), abre direto nessa aba #}
+    <input type="radio" name="conta-aba" id="r-enderecos" class="conta-radio" {% for msg in messages %}{% if 'ndereço' in msg.message %}checked{% endif %}{% endfor %}>
 
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;">
+    <div class="conta-layout">
 
-  <!-- Cabeçalho da coluna com botão de adicionar -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-    <h2 class="section-title" style="margin: 0; border: none; padding: 0;">
-      Meus Endereços
-      <span style="font-size: 14px; color: var(--text-secondary); font-weight: 400; margin-left: 8px;">
-        {{ user.enderecos.count }}/5
-      </span>
-    </h2>
-    {% if user.enderecos.count < 5 %}
-      <a href="{% url 'endereco_adicionar' %}"
-         class="btn-primary"
-         style="padding: 7px 16px; font-size: 13px; text-decoration: none;">
-        + Novo
-      </a>
-    {% else %}
-      <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
-        Limite atingido
-      </span>
-    {% endif %}
-  </div>
+      <aside class="conta-menu">
+        <h2>Minha Conta</h2>
+        <div class="conta-menu-lista">
+          <label for="r-andamento" class="conta-menu-item"><span class="t">Pedidos em andamento</span></label>
 
-  <!-- Lista scrollável. Altura fixa em ~340px, dá pra ver 2 endereços
-       confortavelmente e rolar até o 5º. -->
-  <div class="enderecos-scroll">
-    {% for endereco in user.enderecos.all %}
-      <div class="endereco-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px;">
-          <h3 class="endereco-titulo">
-            {{ endereco.apelido|default:"Endereço" }}
-          </h3>
-          <div style="display: flex; gap: 8px; flex-shrink: 0;">
-            <a href="{% url 'endereco_editar' endereco.id %}"
-               class="endereco-acao">Editar</a>
-            <form method="POST"
-                  action="{% url 'endereco_remover' endereco.id %}"
-                  style="display: inline; margin: 0;"
-                  onsubmit="return confirm('Remover este endereço?');">
-              {% csrf_token %}
-              <button type="submit" class="endereco-acao endereco-acao-remover">Remover</button>
-            </form>
+          <label for="r-concluidos" class="conta-menu-item">
+            <span class="t">Pedidos concluídos</span>
+            <span class="conta-dots">{% for p in user.pedidos.all %}{% if p.status == 'entregue' and p.entregue_em and p.entregue_em|date:"U"|add:"604800" > agora|add:"0" %}<span class="conta-dot" data-entregue="{{ p.id }}" data-uid="{{ user.pk }}"></span>{% endif %}{% endfor %}</span>
+          </label>
+
+          <label for="r-enderecos" class="conta-menu-item">
+            <span class="t">Endereços de entrega</span>
+            <small>{{ user.enderecos.count }}/5</small>
+          </label>
+        </div>
+      </aside>
+
+      <div class="conta-conteudo">
+
+        <!-- ── EM ANDAMENTO ── -->
+        <section id="aba-andamento" class="conta-painel">
+          <div class="conta-topo">
+            <h2>Pedidos em andamento</h2>
+            <a href="{% url 'pedido_lista' %}" class="ver">Ver todos ›</a>
           </div>
-        </div>
-        <p class="endereco-linha">
-          {{ endereco.endereco|default:"-" }}, Nº {{ endereco.numero|default:"S/N" }}
-          {% if endereco.complemento %} — {{ endereco.complemento }}{% endif %}
-        </p>
-        <p class="endereco-linha">{{ endereco.bairro|default:"-" }}</p>
-        <p class="endereco-linha">
-          {{ endereco.cidade|default:"-" }}{% if endereco.estado %} - {{ endereco.estado }}{% endif %}
-          {% if endereco.cep %} · CEP {{ endereco.cep }}{% endif %}
-        </p>
+          <div class="conta-lista">
+            {% for pedido in user.pedidos.all %}
+              {% if pedido.status != 'entregue' and pedido.status != 'cancelado' and pedido.status != 'falha_pagamento' %}
+                {% with itens=pedido.itens.all %}
+                <a href="{% url 'pedido_detalhe' pedido.id %}" class="conta-pedido">
+                  <div class="conta-pedido-head">
+                    <div>
+                      <strong>Pedido #{{ pedido.id }}</strong>
+                      <span class="data">{{ pedido.criado_em|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <span class="pedido-status pedido-status-{{ pedido.status }}">{{ pedido.get_status_display }}</span>
+                  </div>
+                  <div class="conta-itens">
+                    {% for item in itens %}
+                      <div class="conta-item">
+                        {% if item.imagem_url %}<img src="{{ item.imagem_url }}" alt="{{ item.nome_produto }}" loading="lazy">{% else %}<span class="conta-item-sem-img"></span>{% endif %}
+                        <div class="conta-item-info">
+                          <span class="conta-item-nome">{{ item.nome_produto }}</span>
+                          <span class="conta-item-qtd">{{ item.quantidade }}x R$ {{ item.preco_unitario }}</span>
+                        </div>
+                        <strong class="conta-item-sub">R$ {{ item.subtotal }}</strong>
+                      </div>
+                    {% endfor %}
+                  </div>
+                  <div class="conta-rodape">
+                    <div>
+                      <span>{{ itens|length }} ite{{ itens|length|pluralize:"m,ns" }}</span>
+                      {% if pedido.pendente and pedido.expira_em %}<p class="conta-expira">⏱ Expira em {{ pedido.expira_em|timeuntil }}</p>{% endif %}
+                    </div>
+                    <strong>R$ {{ pedido.valor_total }}</strong>
+                  </div>
+                </a>
+                {% endwith %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="conta-vazio">
+            <p>Nenhum pedido em andamento.</p>
+            <a href="{% url 'produtos' %}" class="btn-primary" style="padding: 8px 18px; font-size: 13px; text-decoration: none;">Explorar produtos</a>
+          </div>
+        </section>
+
+        <!-- ── CONCLUÍDOS ── -->
+        <section id="aba-concluidos" class="conta-painel">
+          <div class="conta-topo">
+            <h2>Pedidos concluídos</h2>
+            <a href="{% url 'pedido_lista' %}" class="ver">Ver todos ›</a>
+          </div>
+          {% with avaliacoes_user=user.avaliacoes_produto.all %}
+          <div class="conta-lista">
+            {% for pedido in user.pedidos.all %}
+              {% if pedido.status == 'entregue' or pedido.status == 'cancelado' or pedido.status == 'falha_pagamento' %}
+                {% with itens=pedido.itens.all %}
+                <div class="conta-pedido">
+                  <a href="{% url 'pedido_detalhe' pedido.id %}" class="conta-pedido-head">
+                    <div>
+                      <strong>Pedido #{{ pedido.id }}{% if pedido.status == 'entregue' and pedido.entregue_em and pedido.entregue_em|date:"U"|add:"604800" > agora|add:"0" %}<span class="conta-novo" data-entregue="{{ pedido.id }}" data-uid="{{ user.pk }}">Novo</span>{% endif %}</strong>
+                      <span class="data">{{ pedido.criado_em|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <span class="pedido-status pedido-status-{{ pedido.status }}">{{ pedido.get_status_display }}</span>
+                  </a>
+                  <div class="conta-itens">
+                    {% for item in itens %}
+                      <div class="conta-item">
+                        {% if item.imagem_url %}<img src="{{ item.imagem_url }}" alt="{{ item.nome_produto }}" loading="lazy">{% else %}<span class="conta-item-sem-img"></span>{% endif %}
+                        <div class="conta-item-info">
+                          <span class="conta-item-nome">{{ item.nome_produto }}</span>
+                          <span class="conta-item-qtd">{{ item.quantidade }}x R$ {{ item.preco_unitario }}</span>
+                        </div>
+                        <strong class="conta-item-sub">R$ {{ item.subtotal }}</strong>
+                      </div>
+                    {% endfor %}
+                  </div>
+                  <div class="conta-rodape">
+                    <div class="conta-rodape-esq">
+                      <span>{{ itens|length }} ite{{ itens|length|pluralize:"m,ns" }}</span>
+                      {% if pedido.status == 'entregue' %}
+                        <div class="conta-compra-acao">
+                          <a href="#avaliar-{{ pedido.id }}" class="conta-btn-avaliar">★ Avaliar compra</a>
+                          <span class="conta-avaliado">✓ Compra avaliada</span>
+                          {# marcas lidas só pelo CSS (:has) para saber se ainda falta avaliar algo #}
+                          <span class="av-marcas" aria-hidden="true">
+                            {% if not pedido.avaliacao_loja %}<i class="av-falta"></i>{% endif %}
+                            {% if not pedido.avaliacao_servico %}<i class="av-falta"></i>{% endif %}
+                            {% for item in itens %}{% if item.produto_id %}<i class="av-item" data-ok="{% for a in avaliacoes_user %}{% if a.produto_id == item.produto_id %}1{% endif %}{% endfor %}"></i>{% endif %}{% endfor %}
+                          </span>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <strong>R$ {{ pedido.valor_total }}</strong>
+                  </div>
+                </div>
+                {% endwith %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endwith %}
+          <div class="conta-vazio">
+            <p>Você ainda não tem pedidos concluídos.</p>
+          </div>
+        </section>
+
+        <!-- ── ENDEREÇOS ── -->
+        <section id="aba-enderecos" class="conta-painel">
+          <div class="conta-topo">
+            <h2>Endereços de entrega <small>{{ user.enderecos.count }}/5</small></h2>
+            {% if user.enderecos.count < 5 %}
+              <a href="{% url 'endereco_adicionar' %}" class="btn-primary" style="padding: 7px 16px; font-size: 13px; text-decoration: none;">+ Novo</a>
+            {% else %}
+              <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">Limite atingido</span>
+            {% endif %}
+          </div>
+          <div class="conta-lista">
+            {% for endereco in user.enderecos.all %}
+              <article class="conta-pedido conta-endereco">
+                <div class="conta-pedido-head">
+                  <div>
+                    <strong>{{ endereco.apelido|default:"Endereço" }}</strong>
+                    <span class="data">Endereço {{ forloop.counter }}</span>
+                  </div>
+                </div>
+
+                <div class="conta-itens conta-end-dados">
+                  <div class="conta-end-linha">
+                    <span>Endereço</span>
+                    <p>{{ endereco.endereco|default:"-" }}, Nº {{ endereco.numero|default:"S/N" }}{% if endereco.complemento %} — {{ endereco.complemento }}{% endif %}</p>
+                  </div>
+                  <div class="conta-end-linha">
+                    <span>Bairro</span>
+                    <p>{{ endereco.bairro|default:"-" }}</p>
+                  </div>
+                  <div class="conta-end-linha">
+                    <span>Cidade / UF</span>
+                    <p>{{ endereco.cidade|default:"-" }}{% if endereco.estado %} - {{ endereco.estado }}{% endif %}</p>
+                  </div>
+                  <div class="conta-end-linha">
+                    <span>CEP</span>
+                    <p>{{ endereco.cep|default:"-" }}</p>
+                  </div>
+                </div>
+
+                <div class="conta-rodape conta-end-acoes">
+                  <a href="{% url 'endereco_editar' endereco.id %}" class="btn-outline conta-end-btn">Editar</a>
+                  <form method="POST" action="{% url 'endereco_remover' endereco.id %}" onsubmit="return confirm('Remover este endereço?');">
+                    {% csrf_token %}
+                    <button type="submit" class="conta-end-btn conta-end-remover">Remover</button>
+                  </form>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+          <div class="conta-vazio">
+            <p>Você ainda não possui nenhum endereço cadastrado.</p>
+            <a href="{% url 'endereco_adicionar' %}" class="btn-primary" style="padding: 8px 18px; font-size: 13px; text-decoration: none;">Adicionar o primeiro</a>
+          </div>
+        </section>
+
       </div>
-    {% empty %}
-      <p style="color: #aaa; font-size: 14px;">
-        Você ainda não possui nenhum endereço cadastrado.
-        <a href="{% url 'endereco_adicionar' %}" style="color: var(--cyan);">
-          Adicionar o primeiro
-        </a>.
-      </p>
-    {% endfor %}
-  </div>
-
-</div>
-
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 32px;">
-
-  <!-- Cabeçalho com link "ver todos" (a página /pedidos/ mostra mais se um dia precisar) -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-    <h2 class="section-title" style="margin: 0; border: none; padding: 0;">
-      Minhas Compras
-      <span style="font-size: 14px; color: var(--text-secondary); font-weight: 400; margin-left: 8px;">
-        {{ user.pedidos.count }}
-      </span>
-    </h2>
-    {% if user.pedidos.count > 0 %}
-      <a href="{% url 'pedido_lista' %}"
-         class="btn-outline"
-         style="padding: 7px 16px; font-size: 13px; text-decoration: none;">
-        Ver todos
-      </a>
-    {% endif %}
-  </div>
-
-  <!-- Lista scrollável, mesmo padrão dos endereços.
-       Reaproveita a classe .enderecos-scroll (nome genérico, dá pra
-       usar aqui também). Se quiser separar, é só duplicar a regra
-       com outro nome no CSS. -->
-  <div class="enderecos-scroll">
-    {% for pedido in user.pedidos.all|slice:":5" %}
-      <a href="{% url 'pedido_detalhe' pedido.id %}"
-         class="pedido-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px;">
-          <h3 class="endereco-titulo" style="color: var(--white);">
-            Pedido #{{ pedido.id }}
-          </h3>
-          <span class="pedido-status pedido-status-{{ pedido.status }}">
-            {{ pedido.get_status_display }}
-          </span>
-        </div>
-        <p class="endereco-linha">
-          <strong>Data:</strong> {{ pedido.criado_em|date:"d/m/Y H:i" }}
-        </p>
-        <p class="endereco-linha">
-          <strong>Itens:</strong> {{ pedido.itens.count }}
-          · <strong>Total:</strong> R$ {{ pedido.valor_total }}
-        </p>
-        {% if pedido.pendente and pedido.expira_em %}
-          <p class="endereco-linha" style="color: var(--yellow); font-size: 12px; margin-top: 6px;">
-            ⏱ Expira em {{ pedido.expira_em|timeuntil }}
-          </p>
-        {% endif %}
-      </a>
-    {% empty %}
-      <p style="color: #aaa; font-size: 14px;">
-        Você ainda não realizou nenhuma compra.
-        <a href="{% url 'produtos' %}" style="color: var(--cyan);">
-          Explorar produtos
-        </a>.
-      </p>
-    {% endfor %}
-  </div>
-
-</div>
-
     </div>
 
+    <!-- ═══════ POP-UPS DE AVALIAÇÃO (um por compra entregue) ═══════ -->
+    {% with avaliacoes_user=user.avaliacoes_produto.all %}
+    {% for pedido in user.pedidos.all %}{% if pedido.status == 'entregue' %}
+      {% with itens=pedido.itens.all %}
+      <div class="conta-modal" id="avaliar-{{ pedido.id }}" role="dialog" aria-modal="true" aria-labelledby="av-titulo-{{ pedido.id }}">
+        <a href="#fechar" class="conta-modal-fundo" aria-label="Fechar"></a>
+        <form method="POST" action="{% url 'avaliar_compra' pedido.id %}" class="conta-modal-caixa">
+          {% csrf_token %}
+          <a href="#fechar" class="conta-modal-x" aria-label="Fechar">×</a>
+
+          <header class="av-cabecalho">
+            <span class="av-etiqueta">Pedido #{{ pedido.id }}</span>
+            <h3 id="av-titulo-{{ pedido.id }}">Avaliar compra</h3>
+            <div class="av-thumbs">
+              {% for item in itens|slice:":6" %}{% if item.imagem_url %}<img src="{{ item.imagem_url }}" alt="{{ item.nome_produto }}" title="{{ item.nome_produto }}">{% endif %}{% endfor %}
+            </div>
+          </header>
+
+          {# marcas lidas só pelo CSS: o bloco "produtos" só aparece se algum item ainda não foi avaliado por você #}
+          <span class="av-marcas" aria-hidden="true">{% for item in itens %}{% if item.produto_id %}<i class="av-item" data-ok="{% for a in avaliacoes_user %}{% if a.produto_id == item.produto_id %}1{% endif %}{% endfor %}"></i>{% endif %}{% endfor %}</span>
+
+            <section class="av-bloco av-bloco-produto">
+              <div class="av-bloco-topo">
+                <div class="av-bloco-titulo">
+                  <span class="av-icone"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"></path><path d="M3 8l9 5 9-5"></path><path d="M12 13v8"></path></svg></span>
+                  <div><strong>Os produtos</strong><small>A nota vale para todos os itens desta compra</small></div>
+                </div>
+                <div class="av-nota">
+                  <div class="conta-estrelas" role="radiogroup" aria-label="Nota de 1 a 5 — Os produtos">
+                  <input type="radio" name="produto-nota" id="n-{{ pedido.id }}-produto-5" value="5"><label for="n-{{ pedido.id }}-produto-5" title="5 estrelas">★</label>
+                  <input type="radio" name="produto-nota" id="n-{{ pedido.id }}-produto-4" value="4"><label for="n-{{ pedido.id }}-produto-4" title="4 estrelas">★</label>
+                  <input type="radio" name="produto-nota" id="n-{{ pedido.id }}-produto-3" value="3"><label for="n-{{ pedido.id }}-produto-3" title="3 estrelas">★</label>
+                  <input type="radio" name="produto-nota" id="n-{{ pedido.id }}-produto-2" value="2"><label for="n-{{ pedido.id }}-produto-2" title="2 estrelas">★</label>
+                  <input type="radio" name="produto-nota" id="n-{{ pedido.id }}-produto-1" value="1"><label for="n-{{ pedido.id }}-produto-1" title="1 estrela">★</label>
+                  </div>
+                  <p class="av-dica"><b class="d0">Toque nas estrelas</b><b class="d1">Ruim</b><b class="d2">Poderia ser melhor</b><b class="d3">Ok</b><b class="d4">Bom</b><b class="d5">Excelente</b></p>
+                </div>
+              </div>
+              <textarea name="produto-texto" rows="2" maxlength="1000" placeholder="O que você achou dos produtos?"></textarea>
+            </section>
+            {% if not pedido.avaliacao_loja %}
+            <section class="av-bloco av-bloco-loja">
+              <div class="av-bloco-topo">
+                <div class="av-bloco-titulo">
+                  <span class="av-icone"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"></path><path d="M4 9v11h16V9"></path><path d="M9 20v-6h6v6"></path><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"></path></svg></span>
+                  <div><strong>A loja</strong><small>Atendimento e experiência geral</small></div>
+                </div>
+                <div class="av-nota">
+                  <div class="conta-estrelas" role="radiogroup" aria-label="Nota de 1 a 5 — A loja">
+                  <input type="radio" name="loja-nota" id="n-{{ pedido.id }}-loja-5" value="5"><label for="n-{{ pedido.id }}-loja-5" title="5 estrelas">★</label>
+                  <input type="radio" name="loja-nota" id="n-{{ pedido.id }}-loja-4" value="4"><label for="n-{{ pedido.id }}-loja-4" title="4 estrelas">★</label>
+                  <input type="radio" name="loja-nota" id="n-{{ pedido.id }}-loja-3" value="3"><label for="n-{{ pedido.id }}-loja-3" title="3 estrelas">★</label>
+                  <input type="radio" name="loja-nota" id="n-{{ pedido.id }}-loja-2" value="2"><label for="n-{{ pedido.id }}-loja-2" title="2 estrelas">★</label>
+                  <input type="radio" name="loja-nota" id="n-{{ pedido.id }}-loja-1" value="1"><label for="n-{{ pedido.id }}-loja-1" title="1 estrela">★</label>
+                  </div>
+                  <p class="av-dica"><b class="d0">Toque nas estrelas</b><b class="d1">Ruim</b><b class="d2">Poderia ser melhor</b><b class="d3">Ok</b><b class="d4">Bom</b><b class="d5">Excelente</b></p>
+                </div>
+              </div>
+              <textarea name="loja-texto" rows="2" maxlength="1000" placeholder="Como foi sua experiência com a loja?"></textarea>
+            </section>
+            {% endif %}
+            {% if not pedido.avaliacao_servico %}
+            <section class="av-bloco av-bloco-servico">
+              <div class="av-bloco-topo">
+                <div class="av-bloco-titulo">
+                  <span class="av-icone"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="11" rx="1"></rect><path d="M15 9h4l3 3v5h-7"></path><circle cx="6" cy="18.5" r="1.8"></circle><circle cx="18" cy="18.5" r="1.8"></circle></svg></span>
+                  <div><strong>O serviço</strong><small>Atendimento, prazo e entrega</small></div>
+                </div>
+                <div class="av-nota">
+                  <div class="conta-estrelas" role="radiogroup" aria-label="Nota de 1 a 5 — O serviço">
+                  <input type="radio" name="servico-nota" id="n-{{ pedido.id }}-servico-5" value="5"><label for="n-{{ pedido.id }}-servico-5" title="5 estrelas">★</label>
+                  <input type="radio" name="servico-nota" id="n-{{ pedido.id }}-servico-4" value="4"><label for="n-{{ pedido.id }}-servico-4" title="4 estrelas">★</label>
+                  <input type="radio" name="servico-nota" id="n-{{ pedido.id }}-servico-3" value="3"><label for="n-{{ pedido.id }}-servico-3" title="3 estrelas">★</label>
+                  <input type="radio" name="servico-nota" id="n-{{ pedido.id }}-servico-2" value="2"><label for="n-{{ pedido.id }}-servico-2" title="2 estrelas">★</label>
+                  <input type="radio" name="servico-nota" id="n-{{ pedido.id }}-servico-1" value="1"><label for="n-{{ pedido.id }}-servico-1" title="1 estrela">★</label>
+                  </div>
+                  <p class="av-dica"><b class="d0">Toque nas estrelas</b><b class="d1">Ruim</b><b class="d2">Poderia ser melhor</b><b class="d3">Ok</b><b class="d4">Bom</b><b class="d5">Excelente</b></p>
+                </div>
+              </div>
+              <textarea name="servico-texto" rows="2" maxlength="1000" placeholder="Como foram o atendimento e a entrega?"></textarea>
+            </section>
+            {% endif %}
+
+          <footer class="av-rodape">
+            <p class="conta-modal-dica">Você pode avaliar só uma parte e voltar depois. Notas abaixo de 5 precisam de um comentário.</p>
+            <div class="conta-modal-botoes">
+              <a href="#fechar" class="btn-outline conta-btn-modal">Cancelar</a>
+              <button type="submit" class="btn-primary conta-btn-modal">Enviar avaliação</button>
+            </div>
+          </footer>
+        </form>
+      </div>
+      {% endwith %}
+    {% endif %}{% endfor %}
+    {% endwith %}
+
     <!-- LOGOUT -->
-    <div style="display: flex; justify-content: center; margin-bottom: 40px;">
+    <div style="display: flex; justify-content: center; margin: 40px 0;">
       <form method="POST" action="{% url 'logout' %}" data-no-lock="true">
         {% csrf_token %}
         <button type="submit" class="btn-primary" style="background: #e63946; color: #fff; padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer;">Sair da Conta</button>

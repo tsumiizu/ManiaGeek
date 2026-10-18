@@ -284,6 +284,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+/* ════════════════════════════════════════════════════════════════
+   Bolinha vermelha de "pedido entregue" (perfil + navbar)
+   Cole no FIM do script.js.
+   - Some quando o usuário clica em "Pedidos concluídos" pela 1ª vez.
+   - Fica salvo no navegador (localStorage), então não volta ao recarregar.
+   - Um pedido entregue novo (outro id) acende a bolinha de novo.
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  var marcadores = document.querySelectorAll('[data-entregue]');
+  if (!marcadores.length) return;
+
+  var chave = 'mg_entregues_vistos_' + (marcadores[0].dataset.uid || 'anon');
+
+  function ler() {
+    try { return JSON.parse(localStorage.getItem(chave)) || []; } catch (e) { return []; }
+  }
+  function gravar(lista) {
+    try { localStorage.setItem(chave, JSON.stringify(lista)); } catch (e) {}
+  }
+
+  // Já visto antes: remove a bolinha (e a etiqueta "Novo") logo ao carregar
+  var vistos = ler();
+  marcadores.forEach(function (el) {
+    if (vistos.indexOf(el.dataset.entregue) !== -1) el.remove();
+  });
+
+  // Terminou de conferir: agora as bolinhas que sobraram podem aparecer
+  // (o CSS as mantém invisíveis até aqui, para não piscar ao recarregar)
+  document.documentElement.classList.add('bolinha-pronta');
+
+  // Primeiro clique na aba "Pedidos concluídos": grava como visto e some com as bolinhas
+  function marcarVistos() {
+    var atuais = ler();
+    document.querySelectorAll('[data-entregue]').forEach(function (el) {
+      if (atuais.indexOf(el.dataset.entregue) === -1) atuais.push(el.dataset.entregue);
+    });
+    gravar(atuais);
+    document.querySelectorAll('.conta-dot').forEach(function (el) { el.remove(); });
+  }
+
+  var radio = document.getElementById('r-concluidos');
+  if (radio) radio.addEventListener('change', function () { if (radio.checked) marcarVistos(); });
+})();
 
 
 
@@ -291,7 +334,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
+(function () {
+  var link = document.querySelector('a[data-eventos-link]');
+  if (!link) return;
+ 
+  var CHAVE = 'mg_eventos_visto';
+  var tokenAtual = '';
+ 
+  function lerVisto() {
+    try { return localStorage.getItem(CHAVE) || ''; } catch (e) { return ''; }
+  }
+  function gravarVisto(token) {
+    try { localStorage.setItem(CHAVE, token); } catch (e) {}
+  }
+  function mostrarBolinha() {
+    if (link.querySelector('.nav-evento-dot')) return;
+    var dot = document.createElement('span');
+    dot.className = 'nav-evento-dot';
+    dot.setAttribute('aria-label', 'Novidade nos eventos');
+    link.appendChild(dot);
+  }
+  function esconderBolinha() {
+    var dot = link.querySelector('.nav-evento-dot');
+    if (dot) dot.remove();
+  }
+ 
+  // Na própria página de eventos: abrir a página já conta como "visto".
+  var pagina = document.querySelector('.ev-page[data-token]');
+  if (pagina) {
+    gravarVisto(pagina.dataset.token || '');
+    return;
+  }
+ 
+  // Nas outras páginas: pergunta ao servidor se algo mudou desde a última visita.
+  fetch(link.dataset.tokenUrl, { credentials: 'same-origin', cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (dados) {
+      tokenAtual = dados.token || '';
+      if (tokenAtual && tokenAtual !== lerVisto()) mostrarBolinha();
+    })
+    .catch(function () {});
+ 
+  // Clicou em "Eventos": some na hora e grava como visto.
+  link.addEventListener('click', function () {
+    if (tokenAtual) gravarVisto(tokenAtual);
+    esconderBolinha();
+  });
+})();
 
 
 

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Erro no servidor — ManiaGeek</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="/static/media/logo.png" type="image/png">
+
+  <style>
+    /* Página 500: a tela inteira é da personagem, sem scroll */
+    body {
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .error-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Personagem cortada na cintura, centralizada e colada no rodapé da tela */
+    .character-crop-container {
+      --w: clamp(500px, 70vw, 1000px);   /* tudo (imagem, placa, texto) escala a partir daqui */
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--w);
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .character-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* "500" preso à placa: a posição vertical é uma % da LARGURA da imagem,
+       então acompanha a personagem em qualquer tamanho de tela.
+       Para descer o texto, aumente o margin-top; para subir, diminua. */
+    .sign-text {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      margin-top: 44.8%;
+      width: 40%;
+      transform: translate(-50%, -50%) rotate(2deg);   /* a placa é levemente inclinada */
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: calc(var(--w) * 0.068);
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: 2px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    /* Mensagem num painel escuro, para ler bem por cima do vestido */
+    .error-footer-msg {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: min(600px, calc(100vw - 32px));
+      box-sizing: border-box;
+      padding: 22px 28px;
+      text-align: center;
+      background: rgba(20, 8, 44, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .error-footer-msg p {
+      margin: 0 0 16px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgb(230, 131, 85);
+    }
+
+    .error-botoes {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .error-botoes a {
+      text-decoration: none;
+    }
+
+    .error-footer-msg p.error-ajuda {
+      margin: 16px 0 0;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .error-ajuda a {
+      color: var(--yellow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra simples: a 500 não depende de sessão, carrinho nem banco de dados -->
+  <nav>
+    <a href="/" class="nav-brand">
+      <img src="/static/media/logo.png" alt="ManiaGeek Logo" class="logo" onerror="this.style.display='none'">
+    </a>
+  </nav>
+
+  <!-- Container do Erro 500 -->
+  <main class="error-wrapper">
+
+    <!-- Personagem com a placa -->
+    <div class="character-crop-container">
+      <img src="/static/media/sylviechan.webp" alt="Sylvie-chan com placa de erro" class="character-img">
+      <div class="sign-text">500</div>
+    </div>
+
+    <!-- Mensagem e botões -->
+    <div class="error-footer-msg">
+      <p>Ops! Algo deu errado aqui do nosso lado. Tente de novo em alguns instantes.</p>
+      <div class="error-botoes">
+        <a href="/" class="btn-primary">Voltar para o Início</a>
+        <a href="" class="btn-outline">Tentar de novo</a>
+      </div>
+      <p class="error-ajuda">Se o erro continuar, fale com a gente no Instagram <a href="https://www.instagram.com/maniageek.br/" target="_blank" rel="noopener">@maniageek.br</a></p>
+    </div>
+
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{# ⚠ TROQUE pelo e-mail de suporte da loja (é o único lugar que precisa mudar) #}
+{% with suporte_email="COLOQUE-O-EMAIL-DA-LOJA@exemplo.com" %}
+<div class="faq-page">
+
+  <!-- ═══════ TOPO ═══════ -->
+  <header class="faq-topo">
+    <span class="faq-sobretitulo">Central de ajuda</span>
+    <h1>Perguntas frequentes</h1>
+    <p>Dúvidas sobre pedidos, pagamento, entrega e sua conta. Se não achar a resposta, é só falar com a gente.</p>
+
+    <nav class="faq-atalhos" aria-label="Assuntos">
+      <a href="#faq-pedidos">Pedidos e pagamento</a>
+      <a href="#faq-conta">Minha conta</a>
+      <a href="#faq-avaliacoes">Avaliações</a>
+      <a href="#faq-loja">Loja e eventos</a>
+    </nav>
+  </header>
+
+  <!-- ═══════ PEDIDOS E PAGAMENTO ═══════ -->
+  <section class="faq-grupo" id="faq-pedidos">
+    <h2>Pedidos e pagamento</h2>
+
+    <details class="faq-item">
+      <summary>Como pago meu pedido?</summary>
+      <div class="faq-resposta">
+        <p>Depois de finalizar a compra, o pedido é criado com o status <strong>Aguardando pagamento</strong>. Abra o pedido em <em>Minha conta &rsaquo; Pedidos em andamento</em>, faça o Pix seguindo as instruções da página e <strong>envie o comprovante</strong> ali mesmo.</p>
+        <p>Assim que o comprovante é enviado, o status muda para <strong>Aguardando confirmação do Pix</strong>. A loja confere o pagamento e o pedido passa para <strong>Pago</strong>.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Quanto tempo tenho para pagar?</summary>
+      <div class="faq-resposta">
+        <p>Pedidos com envio têm <strong>30 minutos</strong> para o pagamento. Enquanto isso o pedido mostra "Expira em…". Se o prazo acabar sem pagamento, o pedido é <strong>cancelado automaticamente</strong> e os produtos voltam para o estoque.</p>
+        <p>Ao enviar o comprovante do Pix, o prazo deixa de contar e o pedido fica aguardando a confirmação da loja. Pedidos de "combinar entrega" não têm esse prazo automático.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>O que significa cada status do pedido?</summary>
+      <div class="faq-resposta">
+        <ul>
+          <li><strong>Aguardando pagamento:</strong> o pedido foi criado e falta pagar.</li>
+          <li><strong>Aguardando confirmação do Pix:</strong> você enviou o comprovante e a loja está conferindo.</li>
+          <li><strong>Pago:</strong> pagamento confirmado.</li>
+          <li><strong>Aguardando envio:</strong> o pedido está sendo preparado.</li>
+          <li><strong>Enviado:</strong> saiu para entrega; a transportadora e o código de rastreio aparecem na página do pedido.</li>
+          <li><strong>Entregue:</strong> pedido concluído. A partir daqui você pode avaliar a compra.</li>
+          <li><strong>Cancelado / Falha no pagamento:</strong> o pedido não seguiu adiante e fica em "Pedidos concluídos".</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Como é calculado o frete?</summary>
+      <div class="faq-resposta">
+        <p>O frete depende do <strong>estado do endereço de entrega</strong>. Ao escolher o endereço no checkout, o valor e o prazo estimado aparecem antes de você confirmar a compra, e o total já inclui o frete.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>O que é "combinar entrega com o vendedor"?</summary>
+      <div class="faq-resposta">
+        <p>É uma opção do checkout para quem prefere acertar a entrega direto com a loja (por exemplo, retirada ou entrega em mãos) ou combinar um valor de frete com o proprio vendedor. Nessa opção <strong>não há frete caso for retirar em loja</strong> e o pedido não expira sozinho. O chat do pedido já fica liberado desde o começo para vocês combinarem os detalhes.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Como acompanho o envio?</summary>
+      <div class="faq-resposta">
+        <p>Quando o pedido vira <strong>Enviado</strong>, a página dele mostra a transportadora e o <strong>código de rastreio</strong>. Você encontra o pedido em <em>Minha conta &rsaquo; Pedidos em andamento</em>. Quando a entrega é confirmada, ele passa para "Pedidos concluídos" e aparece uma bolinha vermelha avisando.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Posso conversar com a loja sobre o meu pedido?</summary>
+      <div class="faq-resposta">
+        <p>Sim, pelo <strong>chat do pedido</strong>, na página do pedido. Em pedidos com envio, o chat abre depois que o pagamento é confirmado; em pedidos de combinar entrega, ele abre logo no início. O chat é encerrado quando o pedido é entregue ou cancelado.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Mudei o endereço no meu perfil. O pedido já feito muda também?</summary>
+      <div class="faq-resposta">
+        <p>Não. Cada pedido guarda uma <strong>cópia do endereço</strong> usada no momento da compra, para que a entrega não seja alterada por engano. Se precisar corrigir o endereço de um pedido que já foi feito, fale com a loja pelo chat do pedido ou por e-mail.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ═══════ MINHA CONTA ═══════ -->
+  <section class="faq-grupo" id="faq-conta">
+    <h2>Minha conta</h2>
+
+    <details class="faq-item" id="troca-email">
+      <summary>Como troco o e-mail da minha conta?</summary>
+      <div class="faq-resposta">
+        <p>Por segurança, o e-mail da conta <strong>não é trocado automaticamente</strong>. Antes de qualquer alteração, é preciso <strong>confirmar que a conta é realmente sua</strong>.</p>
+        <p>Para prosseguir, entre em contato com o nosso suporte por e-mail, em <a href="mailto:{{ suporte_email }}?subject=Troca%20de%20e-mail%20da%20conta">idk o email da loja</a>. Informe seu <strong>@usuário</strong> e o <strong>novo e-mail</strong> que deseja usar, e a equipe vai te orientar nos próximos passos para a confirmação e a troca.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Por que recebo um código por e-mail quando entro?</summary>
+      <div class="faq-resposta">
+        <p>É uma verificação em duas etapas, para proteger a sua conta. Ao fazer login, enviamos um código para o e-mail cadastrado. Você tem <strong>5 tentativas</strong> e, se precisar de outro código, pode pedir um novo depois de <strong>1 minuto</strong>.</p>
+        <p>Se marcar a opção de lembrar o dispositivo, você não precisa digitar o código nesse aparelho por <strong>30 dias</strong>.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Como troco minha foto de perfil?</summary>
+      <div class="faq-resposta">
+        <p>Em <em>Minha conta</em>, clique em <strong>Trocar foto</strong>, escolha a imagem e salve. Existe um limite de trocas por mês, e o perfil mostra quantas você já usou (por exemplo, "2/3 trocas neste mês").</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Quantos endereços posso cadastrar?</summary>
+      <div class="faq-resposta">
+        <p>Até <strong>5 endereços</strong>. Em <em>Minha conta &rsaquo; Endereços de entrega</em> você pode adicionar, editar ou remover. Para cadastrar mais um com o limite atingido, remova algum antes.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Coloquei itens no carrinho sem estar logado. Perco tudo ao entrar?</summary>
+      <div class="faq-resposta">
+        <p>Não. Ao fazer login ou criar sua conta, os itens do carrinho são <strong>levados para a sua conta</strong>. Se você já tinha itens guardados lá, os dois carrinhos são juntados.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ═══════ AVALIAÇÕES ═══════ -->
+  <section class="faq-grupo" id="faq-avaliacoes">
+    <h2>Avaliações</h2>
+
+    <details class="faq-item">
+      <summary>Como avalio minha compra?</summary>
+      <div class="faq-resposta">
+        <p>Quando o pedido está <strong>Entregue</strong>, aparece o botão <strong>"Avaliar compra"</strong> no card dele, em <em>Minha conta &rsaquo; Pedidos concluídos</em>. No pop-up você dá de 1 a 5 estrelas para os <strong>produtos</strong>, para a <strong>loja</strong> e para o <strong>serviço</strong> (atendimento e entrega). Pode avaliar só uma parte e voltar depois para o resto.</p>
+        <p>A nota dos produtos vale para todos os itens daquela compra e aparece na página de cada um. Notas abaixo de 5 precisam de um comentário.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Por que não aparece avaliar os produtos de novo na minha segunda compra?</summary>
+      <div class="faq-resposta">
+        <p>Cada pessoa avalia <strong>um produto uma única vez</strong>. Se você já avaliou aquele produto em uma compra anterior, o bloco dos produtos não aparece de novo e sobram só a avaliação da <strong>loja</strong> e a do <strong>serviço</strong> daquele pedido.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Quem pode avaliar um produto?</summary>
+      <div class="faq-resposta">
+        <p>Só quem comprou e <strong>recebeu</strong> o produto. Por isso as avaliações na página do produto aparecem com o selo "Compra verificada".</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ═══════ LOJA E EVENTOS ═══════ -->
+  <section class="faq-grupo" id="faq-loja">
+    <h2>Loja e eventos</h2>
+
+    <details class="faq-item">
+      <summary>Por que um produto aparece como indisponível ou esgotado?</summary>
+      <div class="faq-resposta">
+        <p>O produto está sem estoque no momento ou foi retirado da loja. Itens assim não podem ser comprados, e um carrinho com item indisponível não consegue finalizar a compra até você ajustar.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>O que tem na página de Eventos?</summary>
+      <div class="faq-resposta">
+        <p>Os eventos, lançamentos e novidades que a gente divulga no Instagram. Quando sai algo novo, uma <strong>bolinha vermelha</strong> aparece no link "Eventos" do menu até você abrir a página.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Como falo com a loja?</summary>
+      <div class="faq-resposta">
+        <p>Por e-mail, em <a href="mailto:{{ suporte_email }}">idk o email da loja</a>, ou pelo Instagram <a href="https://www.instagram.com/maniageek.br/" target="_blank" rel="noopener">@maniageek.br</a>. Para dúvidas sobre um pedido específico, o chat do pedido costuma ser o caminho mais rápido.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ═══════ CONTATO ═══════ -->
+  <section class="faq-contato">
+    <h2>Não encontrou o que procurava?</h2>
+    <p>Mande uma mensagem que a gente te ajuda.</p>
+    <div class="faq-contato-botoes">
+      <a href="mailto:{{ suporte_email }}" class="btn-primary faq-btn">Falar com o suporte</a>
+      <a href="https://www.instagram.com/maniageek.br/" target="_blank" rel="noopener" class="btn-outline faq-btn">Instagram ↗</a>
+    </div>
+  </section>
+
+</div>
+{% endwith %}
+{% endblock %}
