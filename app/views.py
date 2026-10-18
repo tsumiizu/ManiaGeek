@@ -1368,3 +1368,9 @@ def avaliacoes_view(request):
         'produto_filtro': produto_filtro,
     })
  
+
+# 404 e 500
+def p404_customizada(request, exception):
+    return render(request, '404.html', status=404)
+def p500_customizada(request, exception):
+    return render(request, '500.html', status=500)
