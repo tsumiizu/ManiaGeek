@@ -26,4 +26,4 @@ urlpatterns = [
 ]
 
 handler404 = 'app.views.p404_customizada' 
-handler500 = 'app.views.p500_customizada'
+#handler500 = 'app.views.p500_customizada'
