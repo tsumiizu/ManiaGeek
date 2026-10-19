@@ -149,6 +149,7 @@
     
     <div class="products-grid">
       {% for rel_produto in produtos_relacionados %}
+{% if not rel_produto.deletado %}
         <div class="product-card" onclick="window.location.href='{% url 'detalhe_produto' rel_produto.id %}'">
           <div class="product-thumb">
             <span class="product-badge">{{ rel_produto.categoria.first.nome|default:rel_produto.get_produto_tipo_display }}</span>
@@ -166,6 +167,7 @@
             </div>
           </div>
         </div>
+{% endif %}
       {% endfor %}
     </div>
   </div>
