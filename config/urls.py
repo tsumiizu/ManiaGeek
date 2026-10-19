@@ -21,7 +21,7 @@ from django.conf.urls.static import static #importações para imagens
 from django.conf import settings #importações para imagens
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('adminsecretosemzion/', admin.site.urls),
     path('', include ('app.urls')),
 ]
 
