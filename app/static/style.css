@@ -4871,3 +4871,35 @@ a.avp-produto:hover { border-color: var(--cyan); }
   .nav-cart { padding: 8px 12px; gap: 6px; }
   .nav-search-input { padding: 8px 14px; font-size: 12px; }
 }
+
+#toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--purple); /* Sobrescrito no JS para cyan/vermelho */
+  color: var(--white);
+  padding: 14px 24px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: var(--glow-cyan), var(--shadow-md);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2000;
+}
+
+#toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Garante que o toast não vaze a tela em celulares */
+@media (max-width: 480px) {
+  #toast {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    text-align: center;
+  }
+}

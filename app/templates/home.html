@@ -152,7 +152,11 @@
                 <span class="product-author">{{ produto.descricao|truncatewords:8 }}</span>
                 <div class="product-footer">
                   <span class="product-price">R$ {{ produto.preco }}</span>
+                  {% if user.is_authenticated %}
                   <button class="btn-add-cart" type="button" data-add-to-cart data-produto-id="{{ produto.id }}">Adicionar ao carrinho</button>
+              {% else %}
+                <a href="{% url 'login' %}" class="btn-add-cart" id="eu-sou-um-botão-porque-a-professora-tem-mal-gosto">   Faça login   </a>
+              {% endif %}
                 </div>
               </div>
             </div>

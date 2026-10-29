@@ -115,8 +115,9 @@
             <h3>Seu carrinho da ManiaGeek está vazio</h3>
             <p>O carrinho de compras é um local temporário para armazenar seus itens. Que tal dar uma olhada nas nossas novidades?</p>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              {% if user.is_authenticated %}
               <a href="{% url 'produtos' %}" class="btn-primary" style="padding: 10px 24px; font-size: 14px;">Explorar produtos</a>
-              {% if not user.is_authenticated %}
+              {% else %}
                 <a href="{% url 'login' %}" class="btn-outline" style="padding: 10px 24px; font-size: 14px;">Faça login na sua conta</a>
               {% endif %}
             </div>

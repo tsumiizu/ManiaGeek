@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
   <style>
-    /* Estilos específicos da página 404 */
+    /* ── ESTILOS GERAIS DA PÁGINA (MODO NORMAL) ── */
     body {
-      overflow: hidden; /* Impede qualquer tipo de scroll na página */
-      height: 100vh;
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden; 
     }
 
     .error-wrapper {
@@ -14,56 +16,39 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Container da imagem cortada na cintura */
-    .character-crop-container {
-      position: relative;
-      width: clamp(500px, 70vw, 1000px);   /* <-- Valores aumentados */
-      height: clamp(1000px, 55vh, 800px);  /* <-- Valores aumentados */
-      overflow: hidden;
-      display: flex;
       justify-content: center;
+      position: relative;
+      padding: 40px 20px 80px 20px; 
+      box-sizing: border-box;
+      transition: all 0.5s ease;
     }
 
-    .character-img {
-      width: 100%;
-      height: auto;
-      object-fit: cover;
-      object-position: top center; /* Foca e alinha o topo do corte na cabeça */
-      user-select: none;
-      pointer-events: none;
-    }
-
-    /* Coordenadas e formatação do texto 404 em cima da placa */
-    .sign-text {
-      position: absolute;
-      top: 60%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 58%;
-      text-align: center;
-      font-family: var(--font-display);
-      font-size: clamp(34px, 5vw, 68px);
-      font-weight: 700;
-      color: #1a1a1a; /* Cor escura estilo tinta/marcador sobre a placa */
-      letter-spacing: 2px;
-      line-height: 1;
-      pointer-events: none;
-    }
-
-    /* Mensagem auxiliar abaixo da personagem */
-    .error-footer-msg {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
+    /* ── LAYOUT DA PERSONAGEM NOVA (MODO NORMAL) ── */
+    .character-new-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       z-index: 10;
+      transition: opacity 0.5s ease;
+      cursor: pointer; 
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .character-new-img {
+      width: clamp(280px, 60vw, 500px);
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+      user-select: none;
+    }
+
+    .error-footer-msg {
+      margin-top: 20px;
       text-align: center;
-      width: 150%;
+      z-index: 10;
+      max-width: 90%;
     }
 
     .error-footer-msg p {
@@ -71,19 +56,158 @@
       color: var(--text-secondary);
       font-size: 14px;
       margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    /* ── MODO EASTER EGG 1 (Sylvie) ── */
+    body.easter-egg-active .error-wrapper {
+      justify-content: flex-end;
+      padding-bottom: 0 !important; 
+    }
+
+    body.easter-egg-active .character-new-container {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .character-sylvie-container {
+      display: none;
+      position: relative;
+      width: clamp(320px, 90vw, 900px);
+      height: 70vh; 
+      justify-content: center;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    body.easter-egg-active .character-sylvie-container {
+      display: flex;
+    }
+
+    .character-sylvie-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center; 
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .sign-text {
+      position: absolute;
+      top: 68%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: clamp(28px, 8vw, 68px); 
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: 2px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .secret-hint {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(34, 19, 67, 0.85); 
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(230, 131, 85, 0.4);
+      font-size: 13px;
+      color: #e68355; 
+      font-family: var(--font-mono);
+      user-select: none;
+      pointer-events: none;
+      white-space: nowrap; 
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      top: 5%; 
+    }
+
+    body.easter-egg-active .error-footer-msg {
+      position: absolute;
+      bottom: 20px; 
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%; 
+      margin-top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 20;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── MODO EASTER EGG 2 (Inatividade) ── */
+    .walking-plushie {
+      position: fixed;
+      left: -200px; 
+      z-index: 9999;
+      pointer-events: none;
+      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.6));
+      animation: walkBob 0.8s ease-in-out infinite alternate;
+      will-change: transform, left;
+    }
+
+    @keyframes walkBob {
+      from { margin-top: 0; }
+      to { margin-top: -15px; }
+    }
+
+    @media (max-width: 600px) {
+      .error-wrapper {
+        padding: 20px 16px 60px 16px;
+      }
+
+      body.easter-egg-active .error-wrapper {
+        padding-bottom: 0 !important;
+      }
+
+      .character-sylvie-container {
+        height: 60vh; 
+      }
+      
+      .sign-text {
+        top: 62%; 
+        font-size: clamp(32px, 10vw, 48px);
+      }
+      
+      .secret-hint {
+        font-size: 11px;
+        padding: 5px 12px;
+        top: 2%;
+      }
+
+      body.easter-egg-active .error-footer-msg {
+        bottom: 15px; 
+      }
+
+      .error-footer-msg p {
+        font-size: 12px;
+        padding: 0 10px;
+      }
     }
   </style>
-<body>
-  <!-- Container do Erro 404 -->
-  <main class="error-wrapper">
 
-    <!-- Container com o corte da cintura para cima e placa -->
-    <div class="character-crop-container">
-      <img src="/static/media/sylviechan.webp" alt="Sylvie-chan com placa de erro" class="character-img">
-      <div class="sign-text">404</div>
+  <main class="error-wrapper" id="error-wrapper">
+
+    <div class="character-new-container" id="click-target">
+      <img src="{% static 'media/versãopng.png' %}" alt="Personagem 404" class="character-new-img">
     </div>
 
-    <!-- Mensagem de suporte e botão de retorno -->
+    <div class="character-sylvie-container">
+      <img src="{% static 'media/sylviechan.webp' %}" alt="Sylvie-chan com placa de erro" class="character-sylvie-img">
+      <div class="secret-hint">Bem melhor agora, né? ✨</div>
+    </div>
+
     <div class="error-footer-msg">
       <p style="color: rgb(230, 131, 85);">Ops! A página que você está procurando não existe ou foi movida.</p>
       <a href="/" class="btn-primary">Voltar para o Início</a>
@@ -91,5 +215,184 @@
 
   </main>
 
-</body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // ════════════════════════════════════════════════════════════════
+      // EASTER EGG 1
+      // ════════════════════════════════════════════════════════════════
+      const target = document.getElementById('click-target');
+      let clickCount = 0;
+      let clickTimer;
+
+      if (target) {
+        target.addEventListener('click', () => {
+          clickCount++;
+
+          if (clickCount === 1) {
+            clickTimer = setTimeout(() => { clickCount = 0; }, 1000); 
+          }
+
+          if (clickCount === 3) {
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            document.body.classList.add('easter-egg-active');
+          }
+        });
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // EASTER EGG 2
+      // ════════════════════════════════════════════════════════════════
+      const plushiesConfig = [
+        {
+          src: "{% static 'media/plushie1.png' %}",
+          sizeVW: [80, 95],   
+          speedS: [12, 15],   
+          fixedY: 45,         
+          isBoss: true        
+        },
+        {
+          src: "{% static 'media/plushie2.png' %}",
+          sizeVW: [40, 60],
+          speedS: [5, 8],
+          randomY: [20, 80]   
+        },
+        {
+          src: "{% static 'media/plushie3.png' %}",
+          sizeVW: [40, 60],
+          speedS: [5, 8],
+          randomY: [20, 80]
+        },
+        {
+          src: "{% static 'media/plushie4.webp' %}",
+          sizeVW: [40, 60],
+          speedS: [5, 8],
+          randomY: [20, 80]
+        },
+        {
+          src: "{% static 'media/plushie5.png' %}",
+          sizeVW: [40, 60],
+          speedS: [5, 8],
+          randomY: [20, 80]
+        },
+        {
+          src: "{% static 'media/plushie6.png' %}",
+          sizeVW: [40, 60],
+          speedS: [5, 8],
+          randomY: [20, 80]
+        }
+      ];
+
+      let inatividadeTimer;
+      let spawnTimer;
+      let isRaining = false;
+      const ativosNaTela = new Set();
+
+      const isMobile = window.innerWidth <= 600;
+      
+      // ⚠️ MUDANÇA AQUI: Multiplicador aumentado de 1.5 para 2.5
+      const sizeMultiplier = isMobile ? 2.5 : 1; 
+      
+      // Distância para a imagem sair completamente da tela (maior no mobile por causa do tamanho)
+      const distanceOffScreen = isMobile ? '250vw' : '150vw';
+
+      function randomRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function dropPlushie() {
+        if (!isRaining) return;
+
+        const disponiveis = plushiesConfig
+          .map((config, index) => ({ config, index }))
+          .filter(p => !ativosNaTela.has(p.index));
+        
+        if (disponiveis.length === 0) return;
+
+        const sorteado = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+        const randomIndex = sorteado.index;
+        const config = sorteado.config;
+        
+        const img = document.createElement('img');
+        img.src = config.src;
+        img.classList.add('walking-plushie');
+        
+        // 1. Tamanho (aplica o multiplicador)
+        const baseSize = randomRange(config.sizeVW[0], config.sizeVW[1]);
+        const size = baseSize * sizeMultiplier; 
+        img.style.width = `${size}vw`;
+        img.style.height = 'auto';
+
+        // 2. Altura
+        let yPos = config.fixedY !== undefined 
+          ? config.fixedY 
+          : randomRange(config.randomY[0], config.randomY[1]);
+        img.style.top = `${yPos}vh`;
+
+        // 3. Direção e Distância
+        const scaleX = Math.random() > 0.5 ? 1 : -1;
+        
+        const startLeft = scaleX === 1 ? `-${distanceOffScreen}` : distanceOffScreen; 
+        const endLeft = scaleX === 1 ? distanceOffScreen : `-${distanceOffScreen}`;
+
+        img.style.left = startLeft;
+        img.style.transform = `translateY(-50%) scaleX(${scaleX})`;
+
+        document.body.appendChild(img);
+        ativosNaTela.add(randomIndex);
+
+        void img.offsetWidth; 
+
+        // 4. Velocidade
+        const speed = randomRange(config.speedS[0], config.speedS[1]);
+        img.style.transition = `left ${speed}s linear`;
+
+        // Evento para remover APENAS quando sair da tela
+        img.addEventListener('transitionend', function handleEnd(e) {
+          if (e.propertyName === 'left') {
+            img.removeEventListener('transitionend', handleEnd);
+            img.remove();
+            ativosNaTela.delete(randomIndex);
+          }
+        });
+
+        img.style.left = endLeft;
+
+        if (config.isBoss) {
+           img.style.animationDuration = '1.5s';
+        }
+      }
+
+      function startRaining() {
+        if (isRaining) return;
+        isRaining = true;
+        spawnTimer = setInterval(dropPlushie, 1500);
+        dropPlushie();
+      }
+
+      function stopRaining() {
+        isRaining = false;
+        clearInterval(spawnTimer);
+        clearTimeout(inatividadeTimer);
+        
+        document.querySelectorAll('.walking-plushie').forEach(el => el.remove());
+        ativosNaTela.clear();
+      }
+
+      function resetIdleTimer() {
+        if (isRaining) {
+          stopRaining();
+        }
+        clearTimeout(inatividadeTimer);
+        inatividadeTimer = setTimeout(startRaining, 45000); 
+      }
+
+      window.addEventListener('click', resetIdleTimer);
+      window.addEventListener('touchstart', resetIdleTimer); 
+
+      resetIdleTimer();
+
+    });
+  </script>
 {% endblock %}

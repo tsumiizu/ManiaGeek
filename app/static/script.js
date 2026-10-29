@@ -757,175 +757,160 @@ document.addEventListener('DOMContentLoaded', () => {
 // e remover item. Fica num DOMContentLoaded separado pra não colidir
 // com o carrossel. Usa delegação de evento — funciona em qualquer
 // página que tenha os botões com [data-add-to-cart] ou [data-item-id].
-document.addEventListener('DOMContentLoaded', () => {
-
-  // ── Utilitários ──
-
+/* ================= CARRINHO ================= */
+(function () {
   function getCookie(name) {
-    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    var v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
     return v ? v.pop() : '';
   }
 
-  async function postForm(url, data) {
-    const body = new URLSearchParams(data);
-    const resp = await fetch(url, {
+  function postForm(url, data) {
+    var body = new URLSearchParams(data);
+    return fetch(url, {
       method: 'POST',
       headers: {
         'X-CSRFToken': getCookie('csrftoken'),
         'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body,
-    });
-    return resp.json();
+      body: body
+    }).then(function (r) { return r.json(); });
   }
 
   function formatBRL(valor) {
-    // Recebe "123.45" e devolve "R$ 123,45"
-    const num = parseFloat(String(valor).replace(',', '.'));
+    var num = parseFloat(String(valor).replace(',', '.'));
     if (isNaN(num)) return 'R$ 0,00';
     return 'R$ ' + num.toFixed(2).replace('.', ',');
   }
 
-  function atualizarBadgeCarrinho(quantidade) {
-    const badge = document.querySelector('.cart-badge');
+  function atualizarBadge(quantidade) {
+    var badge = document.querySelector('.cart-badge');
     if (!badge) return;
-    if (quantidade > 0) {
-      badge.textContent = quantidade;
-    } else {
-      badge.textContent = '0';
-    }
+    badge.textContent = quantidade > 0 ? quantidade : '0';
   }
 
-  // ── Adicionar ao carrinho ──
-  // Delegação: funciona em home, produtos, detalhe. Basta o botão ter
-  // [data-add-to-cart] e [data-produto-id]. Sem onclick inline.
+  function showToast(mensagem, corFundo) {
+    corFundo = corFundo || 'var(--cyan)';
+    var toastEl = document.getElementById('toast');
+    if (!toastEl) {
+      console.warn('Elemento #toast não encontrado no DOM');
+      return;
+    }
+    toastEl.textContent = mensagem;
+    toastEl.style.backgroundColor = corFundo;
+    toastEl.style.color = corFundo === 'var(--cyan)' ? 'var(--text-on-yellow)' : '#fff';
+    toastEl.classList.add('show');
+    setTimeout(function () { toastEl.classList.remove('show'); }, 3000);
+  }
 
-  document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-add-to-cart]');
+  // Adicionar ao carrinho — listener na FASE DE CAPTURA do document.
+  // Isso roda antes de qualquer onclick inline do card. Sempre.
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('[data-add-to-cart]') : null;
     if (!btn) return;
-    e.preventDefault();
-    e.stopPropagation();   // impede que o clique no card abra o detalhe
 
-    const produtoId = btn.dataset.produtoId;
-    const quantidade = parseInt(btn.dataset.quantidade || '1', 10);
+    // Mata o evento aqui. Não chega no onclick do .product-card.
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    if (btn.dataset.adding === '1') return;
+    if (btn.disabled) return;
+
+    var produtoId = btn.dataset.produtoId;
+    var quantidade = parseInt(btn.dataset.quantidade || '1', 10);
     if (!produtoId) return;
 
-    const textoOriginal = btn.textContent;
+    btn.dataset.adding = '1';
+    var textoOriginal = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'Adicionando...';
 
-    try {
-      const data = await postForm(`/carrinho/adicionar/${produtoId}/`, {
-        quantidade: quantidade,
+    postForm('/carrinho/adicionar/' + produtoId + '/', { quantidade: quantidade })
+      .then(function (data) {
+        if (!data.ok) {
+          showToast(data.erro || 'Não foi possível adicionar.', '#e63946');
+          btn.textContent = textoOriginal;
+          btn.disabled = false;
+          btn.dataset.adding = '';
+          return;
+        }
+        if (typeof data.quantidade_carrinho === 'number') {
+          atualizarBadge(data.quantidade_carrinho);
+        }
+        showToast('Produto adicionado ao carrinho!');
+        setTimeout(function () {
+          btn.textContent = textoOriginal;
+          btn.disabled = false;
+          btn.dataset.adding = '';
+        }, 600);
+      })
+      .catch(function (err) {
+        console.error('Erro ao adicionar:', err);
+        showToast('Erro de conexão. Tente novamente.', '#e63946');
+        btn.textContent = textoOriginal;
+        btn.disabled = false;
+        btn.dataset.adding = '';
       });
-      if (!data.ok) {
-        alert(data.erro || 'Não foi possível adicionar ao carrinho.');
-        btn.textContent = textoOriginal;
-        btn.disabled = false;
-        return;
-      }
-      atualizarBadgeCarrinho(data.quantidade_carrinho);
-      btn.textContent = 'Adicionado!';
-      setTimeout(() => {
-        btn.textContent = textoOriginal;
-        btn.disabled = false;
-      }, 1200);
-    } catch (err) {
-      console.error('Erro ao adicionar:', err);
-      alert('Erro de conexão. Tente novamente.');
-      btn.textContent = textoOriginal;
-      btn.disabled = false;
-    }
-  });
+  }, true);
 
   // ── Página do carrinho: quantidade e remover ──
-  // Só roda se a página atual for o carrinho (o wrapper .cart-items-column
-  // só existe lá).
+  document.addEventListener('click', function (e) {
+    var btnQty = e.target.closest ? e.target.closest('.qty-btn') : null;
+    var btnRemover = e.target.closest ? e.target.closest('.remover-item') : null;
 
-  const carrinhoPage = document.querySelector('.cart-items-column');
-  if (!carrinhoPage) return;
+    if (btnQty) {
+      var row = btnQty.closest('.cart-item-row');
+      var itemId = row.dataset.itemId;
+      var qtyEl = row.querySelector('.qty-value');
+      var subtotalEl = row.querySelector('.item-subtotal');
+      var qtyControl = row.querySelector('.qty-control');
+      var btnInc = row.querySelector('.qty-btn[data-action="increment"]');
+      var btnDec = row.querySelector('.qty-btn[data-action="decrement"]');
+      var estoque = qtyControl ? parseInt(qtyControl.dataset.estoque || '0', 10) : 0;
 
-  function atualizarResumo(subtotal, quantidadeCarrinho) {
-    const elSub = document.getElementById('subtotal-carrinho');
-    const elTotal = document.getElementById('total-carrinho');
-    const elLabel = document.getElementById('resumo-label-itens');
-    if (elSub) elSub.textContent = formatBRL(subtotal);
-    if (elTotal) elTotal.textContent = formatBRL(subtotal);
-    if (elLabel && quantidadeCarrinho !== undefined) {
-      const palavra = quantidadeCarrinho === 1 ? 'item' : 'itens';
-      elLabel.textContent = `Subtotal (${quantidadeCarrinho} ${palavra})`;
-    }
-    atualizarBadgeCarrinho(quantidadeCarrinho);
-  }
-
-  document.addEventListener('click', async (e) => {
-    const btnQty = e.target.closest('.qty-btn');
-    const btnRemover = e.target.closest('.remover-item');
-
-        if (btnQty) {
-      const row = btnQty.closest('.cart-item-row');
-      const itemId = row.dataset.itemId;
-      const qtyEl = row.querySelector('.qty-value');
-      const subtotalEl = row.querySelector('.item-subtotal');
-      const qtyControl = row.querySelector('.qty-control');
-      const btnInc = row.querySelector('.qty-btn[data-action="increment"]');
-      const btnDec = row.querySelector('.qty-btn[data-action="decrement"]');
-      const estoque = qtyControl ? parseInt(qtyControl.dataset.estoque || '0', 10) : 0;
-
-      let qtd = parseInt(qtyEl.textContent, 10);
+      var qtd = parseInt(qtyEl.textContent, 10);
       if (btnQty.dataset.action === 'increment') qtd += 1;
       else qtd = Math.max(1, qtd - 1);
-
-      // Trava local: não bate no servidor se já sabemos que vai passar.
       if (btnQty.dataset.action === 'increment' && qtd > estoque) return;
 
-      const data = await postForm(`/carrinho/item/${itemId}/quantidade/`, { quantidade: qtd });
-      if (!data.ok) {
-        alert(data.erro || 'Erro ao atualizar.');
-        return;
-      }
+      postForm('/carrinho/item/' + itemId + '/quantidade/', { quantidade: qtd })
+        .then(function (data) {
+          if (!data.ok) { alert(data.erro || 'Erro ao atualizar.'); return; }
+          qtyEl.textContent = data.quantidade;
+          if (btnInc) btnInc.disabled = data.quantidade >= estoque;
+          if (btnDec) btnDec.disabled = data.quantidade <= 1;
+          subtotalEl.textContent = formatBRL(data.subtotal_item);
 
-      qtyEl.textContent = data.quantidade;
-
-      // Atualiza estado dos botões: + desabilita no limite, - desabilita em 1.
-      if (btnInc) btnInc.disabled = data.quantidade >= estoque;
-      if (btnDec) btnDec.disabled = data.quantidade <= 1;
-
-      // Hint "Máximo disponível" aparece/some conforme o limite.
-      let hintEl = row.querySelector('.qty-limit-hint');
-      if (data.quantidade >= estoque) {
-        if (!hintEl && qtyControl) {
-          hintEl = document.createElement('span');
-          hintEl.className = 'qty-limit-hint';
-          hintEl.textContent = 'Máximo disponível';
-          qtyControl.parentNode.insertBefore(hintEl, qtyControl.nextSibling);
-        }
-      } else if (hintEl) {
-        hintEl.remove();
-      }
-
-      subtotalEl.textContent = formatBRL(data.subtotal_item);
-      atualizarResumo(data.subtotal_carrinho, data.quantidade_carrinho);
+          var elSub = document.getElementById('subtotal-carrinho');
+          var elTotal = document.getElementById('total-carrinho');
+          var elLabel = document.getElementById('resumo-label-itens');
+          if (elSub) elSub.textContent = formatBRL(data.subtotal_carrinho);
+          if (elTotal) elTotal.textContent = formatBRL(data.subtotal_carrinho);
+          if (elLabel && data.quantidade_carrinho !== undefined) {
+            elLabel.textContent = 'Subtotal (' + data.quantidade_carrinho + (data.quantidade_carrinho === 1 ? ' item' : ' itens') + ')';
+          }
+          atualizarBadge(data.quantidade_carrinho);
+        });
     }
 
     if (btnRemover) {
-      const row = btnRemover.closest('.cart-item-row');
-      const itemId = row.dataset.itemId;
-      const data = await postForm(`/carrinho/item/${itemId}/remover/`, {});
-      if (!data.ok) {
-        alert(data.erro || 'Erro ao remover.');
-        return;
-      }
-      row.remove();
-      atualizarResumo(data.subtotal_carrinho, data.quantidade_carrinho);
-      if (data.carrinho_vazio) {
-        window.location.reload();
-      }
+      var rowR = btnRemover.closest('.cart-item-row');
+      var itemIdR = rowR.dataset.itemId;
+      postForm('/carrinho/item/' + itemIdR + '/remover/', {})
+        .then(function (data) {
+          if (!data.ok) { alert(data.erro || 'Erro ao remover.'); return; }
+          rowR.remove();
+          var elSub = document.getElementById('subtotal-carrinho');
+          var elTotal = document.getElementById('total-carrinho');
+          if (elSub) elSub.textContent = formatBRL(data.subtotal_carrinho);
+          if (elTotal) elTotal.textContent = formatBRL(data.subtotal_carrinho);
+          atualizarBadge(data.quantidade_carrinho);
+          if (data.carrinho_vazio) window.location.reload();
+        });
     }
   });
-
-});
+})();
 
 /* ================= DASHBOARD: EDITOR DE CARGOS ================= */
 
